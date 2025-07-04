@@ -16,7 +16,7 @@ void ATestActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UE_LOG(LogTemp, Log, TEXT("Hello World!"));
+	UE_LOG(LogTemp, Log, TEXT("TEST"));
 	
 }
 
