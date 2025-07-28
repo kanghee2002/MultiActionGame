@@ -17,6 +17,7 @@ public:
 	ABaseCharacter();
 
 protected:
+	bool bIsMoving;
 	bool bIsSprinting;
 	bool bIsJumping;
 
@@ -34,9 +35,14 @@ protected:
 	virtual void StopJumping() override;
 
 	virtual void Move(const FInputActionValue& value);
+	virtual void StopMove();
 	virtual void Look(const FInputActionValue& value);
 	virtual void StartSprint();
 	virtual void StopSprint();
+	virtual void Attack();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
+	void OnAttack();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<class USpringArmComponent> SpringArm;
@@ -46,6 +52,8 @@ protected:
 
 private:
 	TObjectPtr<class UInputActionGroup> InputActionGroup;
+	float TargetSpeed;
+	FVector2D LastMovementVector;
 
 public:	
 	// Called every frame

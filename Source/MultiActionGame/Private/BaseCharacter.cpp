@@ -22,8 +22,8 @@ ABaseCharacter::ABaseCharacter() {
 
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
     SpringArm->SetupAttachment(RootComponent);
-    SpringArm->TargetArmLength = 400.f;
-    SpringArm->SocketOffset = FVector(0., 100., 80.);
+    SpringArm->TargetArmLength = 300.f;
+    SpringArm->SocketOffset = FVector(0., 0., 80.);
     SpringArm->bUsePawnControlRotation = true;
     SpringArm->bEnableCameraLag = true;
     SpringArm->bInheritYaw = false;
@@ -43,12 +43,33 @@ ABaseCharacter::ABaseCharacter() {
 void ABaseCharacter::BeginPlay() {
 	Super::BeginPlay();
 
-    GetCharacterMovement()->MaxWalkSpeed = GetMaxWalkSpeed();
+    GetCharacterMovement()->MaxWalkSpeed = 0;
+    SetActorRotation(Camera->GetComponentRotation());
+
+    bIsSprinting = false;
 }
 
 // Called every frame
 void ABaseCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+    float current = GetCharacterMovement()->MaxWalkSpeed;
+
+    if (current > 100) {
+        // 실제 카메라 회전 가져오기
+        FRotator cameraRotation = Camera->GetComponentRotation();
+
+        // 카메라 기준 방향 계산
+        const FRotator yawRotation(0, cameraRotation.Yaw, 0);
+        const FVector forwardDirection = FRotationMatrix(yawRotation).GetScaledAxis(EAxis::X);
+        const FVector rightDirection = FRotationMatrix(yawRotation).GetScaledAxis(EAxis::Y);
+
+        // 카메라 기준으로 이동 입력 적용
+        AddMovementInput(forwardDirection, LastMovementVector.X);
+        AddMovementInput(rightDirection, LastMovementVector.Y);
+    }
+
+    GetCharacterMovement()->MaxWalkSpeed = FMath::FInterpTo(current, TargetSpeed, DeltaTime, 5.f);
 }
 
 // Called to bind functionality to input
@@ -63,17 +84,28 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
     }
 
     component->BindAction(InputActionGroup->MoveAction, ETriggerEvent::Triggered, this, &ABaseCharacter::Move);
+    component->BindAction(InputActionGroup->MoveAction, ETriggerEvent::Completed, this, &ABaseCharacter::StopMove);
     component->BindAction(InputActionGroup->LookAction, ETriggerEvent::Triggered, this, &ABaseCharacter::Look);
-    component->BindAction(InputActionGroup->SprintAction, ETriggerEvent::Started, this, &ABaseCharacter::StartSprint);
+    component->BindAction(InputActionGroup->SprintAction, ETriggerEvent::Triggered, this, &ABaseCharacter::StartSprint);
     component->BindAction(InputActionGroup->SprintAction, ETriggerEvent::Completed, this, &ABaseCharacter::StopSprint);
     component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Started, this, &ABaseCharacter::Jump);
     component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Completed, this, &ABaseCharacter::StopJumping);
+    component->BindAction(InputActionGroup->AttackAction, ETriggerEvent::Triggered, this, &ABaseCharacter::Attack);
+}
+
+void ABaseCharacter::StopMove() {
+    TargetSpeed = 0.f;
+    bIsMoving = false;
 }
 
 void ABaseCharacter::Move(const FInputActionValue& value) {
     if (bIsJumping) return;
 
-    FVector2D movementVector = value.Get<FVector2D>();
+    if (!bIsSprinting) TargetSpeed = GetMaxWalkSpeed();
+
+    bIsMoving = true;
+
+    LastMovementVector = value.Get<FVector2D>();
 
     // 실제 카메라 회전 가져오기
     FRotator cameraRotation = Camera->GetComponentRotation();
@@ -83,14 +115,10 @@ void ABaseCharacter::Move(const FInputActionValue& value) {
     const FVector forwardDirection = FRotationMatrix(yawRotation).GetScaledAxis(EAxis::X);
     const FVector rightDirection = FRotationMatrix(yawRotation).GetScaledAxis(EAxis::Y);
 
-    // 카메라 기준으로 이동 입력 적용
-    AddMovementInput(forwardDirection, movementVector.X);
-    AddMovementInput(rightDirection, movementVector.Y);
-
     // 이동 입력이 있을 때만 캐릭터 회전
-    if (!movementVector.IsZero()) {
+    if (!LastMovementVector.IsZero()) {
         // 실제 이동 방향 계산 (카메라 기준)
-        FVector movementDirection = (forwardDirection * movementVector.X) + (rightDirection * movementVector.Y);
+        FVector movementDirection = (forwardDirection * LastMovementVector.X) + (rightDirection * LastMovementVector.Y);
         movementDirection.Normalize();
 
         // 캐릭터가 이동 방향을 바라보도록 회전
@@ -115,7 +143,7 @@ void ABaseCharacter::Look(const FInputActionValue& value) {
     newRotation.Pitch += lookAxisVector.Y;
 
     // Pitch 제한 (위아래 각도 제한)
-    newRotation.Pitch = FMath::Clamp(newRotation.Pitch, -70.0f, 70.0f);
+    newRotation.Pitch = FMath::Clamp(newRotation.Pitch, -40.0f, 40.0f);
 
     SpringArm->SetWorldRotation(newRotation);
 }
@@ -123,13 +151,17 @@ void ABaseCharacter::Look(const FInputActionValue& value) {
 void ABaseCharacter::StartSprint() {
     bIsSprinting = true;
 
-    GetCharacterMovement()->MaxWalkSpeed = GetMaxSprintSpeed();
+    if (bIsMoving)
+        TargetSpeed = GetMaxSprintSpeed();
 }
 
 void ABaseCharacter::StopSprint() {
     bIsSprinting = false;
 
-    GetCharacterMovement()->MaxWalkSpeed = GetMaxWalkSpeed();
+    if (bIsMoving)
+        TargetSpeed = GetMaxWalkSpeed();
+    else
+        TargetSpeed = 0.f;
 }
 
 void ABaseCharacter::Jump() {
@@ -151,4 +183,8 @@ void ABaseCharacter::Landed(const FHitResult& hit) {
     Super::Landed(hit);
 
     bIsJumping = false;
+}
+
+void ABaseCharacter::Attack() {
+    OnAttack();
 }
