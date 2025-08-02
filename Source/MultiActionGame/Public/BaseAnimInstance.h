@@ -32,7 +32,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Anim")
 	float Speed = 0.f;
 
-	UPROPERTY(BlueprintReadonly, Category = "Anim")
+	UPROPERTY(BlueprintReadOnly, Category = "Anim")
 	bool bIsInAir = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Anim")
