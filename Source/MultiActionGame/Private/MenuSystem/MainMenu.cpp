@@ -18,6 +18,7 @@ bool UMainMenu::Initialize()
 		return false;
 	}
 
+	// Initialize Buttons
 	if (!ensure(HostButton != nullptr)) return false;
 	HostButton->OnClicked.Clear();
 	HostButton->OnClicked.AddDynamic(this, &UMainMenu::HostServer);
@@ -29,11 +30,36 @@ bool UMainMenu::Initialize()
 	if (!ensure(QuitButton != nullptr)) return false;
 	QuitButton->OnClicked.AddDynamic(this, &UMainMenu::Quit);
 
-	if (!ensure(CancelJoinMenuButton != nullptr)) return false;
-	CancelJoinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
+	if (!ensure(CancelJoinButton != nullptr)) return false;
+	CancelJoinButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
 
-	if (!ensure(ConfirmJoinMenuButton != nullptr)) return false;
-	ConfirmJoinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::JoinServer);
+	if (!ensure(ConfirmJoinButton != nullptr)) return false;
+	ConfirmJoinButton->OnClicked.AddDynamic(this, &UMainMenu::JoinServer);
+
+	// Initialize Character Select CheckBoxes
+	CharacterCheckBoxes.Empty();
+
+	CharacterCheckBoxes.Add(KnightCheckBox);
+	CharacterCheckBoxes.Add(ArcherCheckBox);
+	CharacterCheckBoxes.Add(HealerCheckBox);
+	
+	for (URadioCheckBox* CheckBox : CharacterCheckBoxes)
+	{
+		if (CheckBox)
+		{
+			//CheckBox->OnCheckStateChanged.Clear();
+			//CheckBox->OnCheckStateChanged.AddDynamic(this, &UMainMenu::UncheckAll);
+			CheckBox->Initialize(CharacterCheckBoxes);
+			CheckBox->OnSelected.AddDynamic(this, &UMainMenu::SelectCharacter);
+		}
+	}
+
+	//KnightCheckBox->OnCheckStateChanged.AddDynamic(this, &UMainMenu::SelectKnight);
+	//ArcherCheckBox->OnCheckStateChanged.AddDynamic(this, &UMainMenu::SelectArcher);
+	//HealerCheckBox->OnCheckStateChanged.AddDynamic(this, &UMainMenu::SelectHealer);
+
+	KnightCheckBox->SetCheckedState(ECheckBoxState::Checked);
+	SelectedCharacterType = ECharacterType::Knight;
 
 	return true;
 }
@@ -54,8 +80,8 @@ void UMainMenu::JoinServer()
 		if (!ensure(IPAddressField != nullptr)) return;
 
 		const FString& Address = IPAddressField->GetText().ToString();
-		UE_LOG(LogTemp, Warning, TEXT("Join with %s"), *Address);
-		MenuInterface->Join(Address);
+		UE_LOG(LogTemp, Warning, TEXT("Join with %s, Index %d"), *Address, static_cast<int32>(SelectedCharacterType));
+		MenuInterface->Join(Address, SelectedCharacterType);
 	}
 }
 
@@ -85,4 +111,48 @@ void UMainMenu::Quit()
 	if (!ensure(PlayerController != nullptr)) return;
 
 	PlayerController->ConsoleCommand("Quit");
+}
+
+void UMainMenu::SelectKnight(bool bIsChecked)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Select Knight"));
+	//SelectedCharacterType = ECharacterType::Knight;
+	KnightCheckBox->SetCheckedState(ECheckBoxState::Checked);
+}
+
+void UMainMenu::SelectArcher(bool bIsChecked)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Select Archer"));
+	//SelectedCharacterType = ECharacterType::Archer;
+	//ArcherCheckBox->SetCheckedState(ECheckBoxState::Checked);
+}
+
+void UMainMenu::SelectHealer(bool bIsChecked)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Select Healer"));
+	//SelectedCharacterType = ECharacterType::Healer;
+	HealerCheckBox->SetCheckedState(ECheckBoxState::Checked);
+}
+
+void UMainMenu::UncheckAll(bool bIsChecked)
+{
+	for (UCheckBox* CheckBox : CharacterCheckBoxes)
+	{
+		CheckBox->SetCheckedState(ECheckBoxState::Unchecked);
+	}
+}
+
+void UMainMenu::SelectCharacter(int32 Index)
+{
+	if (Index >= 0 && Index < static_cast<int32>(ECharacterType::MAX))
+	{
+		ECharacterType CurrentCharacterType = static_cast<ECharacterType>(Index);
+
+		SelectedCharacterType = CurrentCharacterType;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid CharacterType: %d"), Index);
+	}
+
 }

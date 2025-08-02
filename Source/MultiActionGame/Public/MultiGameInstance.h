@@ -5,11 +5,13 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "MenuSystem/MenuInterface.h"
+#include "CharacterType.h"
 #include "MultiGameInstance.generated.h"
 
 /**
  * 
  */
+
 UCLASS()
 class MULTIACTIONGAME_API UMultiGameInstance : public UGameInstance, public IMenuInterface
 {
@@ -28,7 +30,7 @@ public:
 	virtual void Host() override;
 
 	UFUNCTION(Exec)
-	virtual void Join(const FString& Address) override;
+	virtual void Join(const FString& Address, ECharacterType CharacterType) override;
 
 	virtual void LoadMainMenu() override;
 

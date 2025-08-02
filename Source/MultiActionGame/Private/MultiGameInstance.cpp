@@ -25,8 +25,6 @@ UMultiGameInstance::UMultiGameInstance(const FObjectInitializer& ObjectInitializ
 
 void UMultiGameInstance::LoadMenu()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Load Menu"));
-
 	if (!ensure(MenuClass != nullptr)) return;
 
 	Menu = CreateWidget<UMainMenu>(this, MenuClass);
@@ -35,6 +33,8 @@ void UMultiGameInstance::LoadMenu()
 	Menu->Setup();
 
 	Menu->SetMenuInterface(this);
+
+	UE_LOG(LogTemp, Warning, TEXT("Load Menu"));
 }
 
 void UMultiGameInstance::LoadInGameMenu()
@@ -68,7 +68,7 @@ void UMultiGameInstance::Host()
 }
 
 
-void UMultiGameInstance::Join(const FString& Address)
+void UMultiGameInstance::Join(const FString& Address, ECharacterType CharacterType)
 {
 	/*if (Menu != nullptr)
 	{

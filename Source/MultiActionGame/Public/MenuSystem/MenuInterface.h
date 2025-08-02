@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "CharacterType.h"
 #include "MenuInterface.generated.h"
 
 // This class does not need to be modified.
@@ -24,7 +25,7 @@ class MULTIACTIONGAME_API IMenuInterface
 public:
 	virtual void Host() = 0;
 
-	virtual void Join(const FString& Address) = 0;
+	virtual void Join(const FString& Address, ECharacterType CharacterType) = 0;
 
 	virtual void LoadMainMenu() = 0;
 };

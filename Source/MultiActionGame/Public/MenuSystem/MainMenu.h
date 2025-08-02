@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "MenuWidget.h"
+#include "Components/CheckBox.h"
+#include "RadioCheckBox.h"
+#include "CharacterType.h"
 #include "MainMenu.generated.h"
 
 /**
@@ -18,6 +21,7 @@ protected:
 	virtual bool Initialize() override;
 
 private:
+	ECharacterType SelectedCharacterType;
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* HostButton;
@@ -29,10 +33,10 @@ private:
 	class UButton* QuitButton;
 
 	UPROPERTY(meta = (BindWidget))
-	class UButton* CancelJoinMenuButton;
+	class UButton* CancelJoinButton;
 
 	UPROPERTY(meta = (BindWidget))
-	class UButton* ConfirmJoinMenuButton;
+	class UButton* ConfirmJoinButton;
 
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* MenuSwitcher;
@@ -45,6 +49,18 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UEditableTextBox* IPAddressField;
+
+	UPROPERTY(meta = (BindWidget))
+	class URadioCheckBox* KnightCheckBox;
+
+	UPROPERTY(meta = (BindWidget))
+	class URadioCheckBox* ArcherCheckBox;
+
+	UPROPERTY(meta = (BindWidget))
+	class URadioCheckBox* HealerCheckBox;
+
+	UPROPERTY()
+	TArray<URadioCheckBox*> CharacterCheckBoxes;
 
 	UFUNCTION()
 	void HostServer();
@@ -59,5 +75,20 @@ private:
 	void OpenMainMenu();
 
 	UFUNCTION()
+	void SelectKnight(bool bIsChecked);
+
+	UFUNCTION()
+	void SelectArcher(bool bIsChecked);
+
+	UFUNCTION()
+	void SelectHealer(bool bIsChecked);
+
+	UFUNCTION()
+	void UncheckAll(bool bIsChecked);
+
+	UFUNCTION()
 	void Quit();
+
+	UFUNCTION()
+	void SelectCharacter(int32 Index);
 };
