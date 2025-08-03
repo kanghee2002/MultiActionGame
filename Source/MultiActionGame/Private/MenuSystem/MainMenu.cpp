@@ -7,6 +7,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "Components/EditableTextBox.h"
 #include "MenuSystem/MenuInterface.h"
+#include "MainPlayerController.h"
 
 
 bool UMainMenu::Initialize()
@@ -149,10 +150,19 @@ void UMainMenu::SelectCharacter(int32 Index)
 		ECharacterType CurrentCharacterType = static_cast<ECharacterType>(Index);
 
 		SelectedCharacterType = CurrentCharacterType;
+
+		APlayerController* PC = GetOwningPlayer();
+		AMainPlayerController* MainPC = Cast<AMainPlayerController>(PC);
+
+		if (MainPC)
+		{
+			MainPC->ServerSetCharacterType(CurrentCharacterType);
+
+			UE_LOG(LogTemp, Warning, TEXT("Set Character Type (Server): %d"), Index);
+		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Invalid CharacterType: %d"), Index);
 	}
-
 }

@@ -51,7 +51,7 @@ void UMultiGameInstance::LoadInGameMenu()
 
 void UMultiGameInstance::Host()
 {
-	/*if (Menu != nullptr)
+	if (Menu != nullptr)
 	{
 		Menu->Teardown();
 	}
@@ -64,13 +64,15 @@ void UMultiGameInstance::Host()
 
 	Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, TEXT("Hosting"));
 
-	World->ServerTravel("/Game/ThirdPerson/Lvl_ThirdPerson?listen");*/
+	//World->ServerTravel("/Game/ThirdPerson/Lvl_ThirdPerson?listen");
+
+	World->ServerTravel("/Game/TestMap?listen");
 }
 
 
 void UMultiGameInstance::Join(const FString& Address, ECharacterType CharacterType)
 {
-	/*if (Menu != nullptr)
+	if (Menu != nullptr)
 	{
 		Menu->Teardown();
 	}
@@ -78,12 +80,16 @@ void UMultiGameInstance::Join(const FString& Address, ECharacterType CharacterTy
 	UEngine* Engine = GetEngine();
 	if (!ensure(Engine != nullptr)) return;
 
-	Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("Joining %s"), *Address));
+	SelectedCharacterType = CharacterType;
 
 	APlayerController* PlayerController = GetFirstLocalPlayerController();
 	if (!ensure(PlayerController != nullptr)) return;
 
-	PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);*/
+	Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("Joining %s"), *Address));
+
+	FString TravelURL = FString::Printf(TEXT("%s?CharacterType=%d"), *Address, static_cast<int32>(CharacterType));
+
+	PlayerController->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
 }
 
 void UMultiGameInstance::LoadMainMenu()

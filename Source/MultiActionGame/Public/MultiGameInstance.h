@@ -18,6 +18,8 @@ class MULTIACTIONGAME_API UMultiGameInstance : public UGameInstance, public IMen
 	GENERATED_BODY()
 	
 public:
+	ECharacterType SelectedCharacterType;
+
 	UMultiGameInstance(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable)
