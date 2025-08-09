@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "Net/UnrealNetwork.h"
 #include "BaseCharacter.generated.h"
 
 UCLASS()
@@ -16,10 +17,13 @@ public:
 	// Sets default values for this character's properties
 	ABaseCharacter();
 
-protected:
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	bool bIsSprinting;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	bool bIsJumping;
 
+protected:
 	virtual const float GetMaxSprintSpeed() {
 		return 800.f;
 	}
@@ -38,6 +42,18 @@ protected:
 	virtual void StartSprint();
 	virtual void StopSprint();
 
+	UFUNCTION(Server, Reliable)
+	void ServerStartSprint();
+
+	UFUNCTION(Server, Reliable)
+	void ServerStopSprint();
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetRotation(FRotator NewRotation);
+
+	UPROPERTY(Replicated)
+	FRotator ReplicatedRotation;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<class USpringArmComponent> SpringArm;
 
@@ -53,4 +69,6 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

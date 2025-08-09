@@ -37,6 +37,9 @@ ABaseCharacter::ABaseCharacter() {
     bUseControllerRotationYaw = false;
     bUseControllerRotationPitch = false;
     bUseControllerRotationRoll = false;
+
+    NetUpdateFrequency = 30.0f;
+    MinNetUpdateFrequency = 15.0f;
 }
 
 // Called when the game starts or when spawned
@@ -49,6 +52,20 @@ void ABaseCharacter::BeginPlay() {
 // Called every frame
 void ABaseCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+    // 로컬이 아닌 경우에만 보간
+    if (!IsLocallyControlled())
+    {
+        FRotator currentRotation = GetActorRotation();
+
+        float angleDifference = FMath::Abs(FMath::FindDeltaAngleDegrees(currentRotation.Yaw, ReplicatedRotation.Yaw));
+        
+        if (angleDifference > 1.0f)
+        {
+            FRotator newRotation = FMath::RInterpTo(currentRotation, ReplicatedRotation, DeltaTime, 10.0f);
+            SetActorRotation(newRotation);
+        }
+    }
 }
 
 // Called to bind functionality to input
@@ -96,14 +113,19 @@ void ABaseCharacter::Move(const FInputActionValue& value) {
         // 캐릭터가 이동 방향을 바라보도록 회전
         if (!movementDirection.IsZero()) {
             FRotator targetRotation = movementDirection.Rotation();
-            FRotator currentRotation = GetActorRotation();
 
-            FRotator newRotation = FMath::RInterpTo(currentRotation, targetRotation, GetWorld()->GetDeltaSeconds(), 8.0f);
-            SetActorRotation(newRotation);
+            // 로컬일 때만 자체적으로 보간, 서버에 바라보는 방향 알림
+            if (IsLocallyControlled())
+            {
+                FRotator currentRotation = GetActorRotation();
+                FRotator newRotation = FMath::RInterpTo(currentRotation, targetRotation, GetWorld()->GetDeltaSeconds(), 8.0f);
+                SetActorRotation(newRotation);
+                ServerSetRotation(targetRotation);
+            }
         }
     }
 }
-
+    
 void ABaseCharacter::Look(const FInputActionValue& value) {
     FVector2D lookAxisVector = value.Get<FVector2D>();
 
@@ -122,14 +144,37 @@ void ABaseCharacter::Look(const FInputActionValue& value) {
 
 void ABaseCharacter::StartSprint() {
     bIsSprinting = true;
-
     GetCharacterMovement()->MaxWalkSpeed = GetMaxSprintSpeed();
+
+    if (!HasAuthority())
+    {
+        ServerStartSprint();
+    }
 }
 
 void ABaseCharacter::StopSprint() {
     bIsSprinting = false;
-
     GetCharacterMovement()->MaxWalkSpeed = GetMaxWalkSpeed();
+
+    if (!HasAuthority())
+    {
+        ServerStopSprint();
+    }
+}
+
+void ABaseCharacter::ServerSetRotation_Implementation(FRotator NewRotation)
+{
+    ReplicatedRotation = NewRotation;
+}
+
+void ABaseCharacter::ServerStartSprint_Implementation()
+{
+    StartSprint();
+}
+
+void ABaseCharacter::ServerStopSprint_Implementation()
+{
+    StopSprint();
 }
 
 void ABaseCharacter::Jump() {
@@ -151,4 +196,13 @@ void ABaseCharacter::Landed(const FHitResult& hit) {
     Super::Landed(hit);
 
     bIsJumping = false;
+}
+
+void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ABaseCharacter, bIsSprinting);
+    DOREPLIFETIME(ABaseCharacter, bIsJumping);
+    DOREPLIFETIME(ABaseCharacter, ReplicatedRotation);
 }

@@ -43,6 +43,8 @@ void AMainPlayerController::SetupInputComponent()
     {
         Subsystem->ClearAllMappings();
         Subsystem->AddMappingContext(MappingContext, 0);
+
+        UE_LOG(LogTemp, Warning, TEXT("InputComponent is Set"));
     }
     else
     {
