@@ -8,8 +8,11 @@
 #include "Net/UnrealNetwork.h"
 #include "MainPlayerController.generated.h"
 
+class UPlayerHealthBar;
+class UHealthComponent;
+
 /**
- * 
+ *
  */
 UCLASS(Blueprintable)
 class MULTIACTIONGAME_API AMainPlayerController : public APlayerController
@@ -17,13 +20,20 @@ class MULTIACTIONGAME_API AMainPlayerController : public APlayerController
 	GENERATED_BODY()
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<class UInputMappingContext> MappingContext;
+	
 	virtual void BeginPlay() override;
+	
 	virtual void SetupInputComponent() override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<class UInputMappingContext> MappingContext;
 
+	// WBP_HealthBar �Ҵ��� BP Ŭ����
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> HealthBarClass; 
 public:
 	UPROPERTY(Replicated)
 	ECharacterType SelectedCharacterType;
@@ -33,4 +43,12 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+private:
+	// ������ ���� �ν��Ͻ� 
+	UPROPERTY()
+	UPlayerHealthBar* HealthBarWidget;
+
+	// ĳ������ HealthComponent ���� 
+	UPROPERTY()
+	UHealthComponent* HealthCompRef;
 };
