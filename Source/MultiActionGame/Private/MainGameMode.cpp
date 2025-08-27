@@ -22,7 +22,7 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 	{
 		FString CharacterTypeName = EnumPtr->GetNameStringByValue(static_cast<int64>(PC->SelectedCharacterType));
 
-		UE_LOG(LogTemp, Warning, TEXT("Selected Character Type: %s"), *CharacterTypeName);
+		//UE_LOG(LogTemp, Warning, TEXT("Selected Character Type: %s"), *CharacterTypeName);
 	}
 	// ----------------------------------------------------------------------------------------------------------
 
@@ -56,13 +56,13 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 
 	if (NewPawn)
 	{
+		PC->Possess(NewPawn);
 		UE_LOG(LogTemp, Warning, TEXT("Done Setting Character : %s"), *NewPawn->GetName());
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to spawn pawn"));
 	}
-
 
 	return NewPawn;
 }
@@ -82,11 +82,11 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 		int32 ParsedIndex = FCString::Atoi(*CharacterTypeStr);
 		PC->SelectedCharacterType = static_cast<ECharacterType>(ParsedIndex);
 
-		UE_LOG(LogTemp, Warning, TEXT("InitNewPlayer - Parsed CharacterType from URL: %d"), ParsedIndex);
+		//UE_LOG(LogTemp, Warning, TEXT("InitNewPlayer - Parsed CharacterType from URL: %d"), ParsedIndex);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("InitNewPlayer - No CharacterType in URL"));
+		//UE_LOG(LogTemp, Warning, TEXT("InitNewPlayer - No CharacterType in URL"));
 	}
 
 	return OutError;

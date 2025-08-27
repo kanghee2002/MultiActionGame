@@ -27,13 +27,17 @@ protected:
 	
 	virtual void SetupInputComponent() override;
 
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<class UInputMappingContext> MappingContext;
+	virtual void OnPossess(APawn* InPawn) override;
 
-	// WBP_HealthBar �Ҵ��� BP Ŭ����
+	virtual void OnRep_Pawn() override;
+
+	void TryBindPawn();
+
+	APawn* MyPawn;
+
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> HealthBarClass; 
+
 public:
 	UPROPERTY(Replicated)
 	ECharacterType SelectedCharacterType;
@@ -43,12 +47,8 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-private:
-	// ������ ���� �ν��Ͻ� 
+	void CreateHealthBar();
+
 	UPROPERTY()
 	UPlayerHealthBar* HealthBarWidget;
-
-	// ĳ������ HealthComponent ���� 
-	UPROPERTY()
-	UHealthComponent* HealthCompRef;
 };

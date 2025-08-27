@@ -1,21 +1,13 @@
 
-/// <summary>
-/// ¸ÖÆ¼ÇÃ·¹ÀÌ »ı°¢ÇÏ¸é, ÇöÀç ÄÚµå´Â Å¬¶óÀÌ¾ğÆ®¿¡¼­¸¸ Ã³¸®ÇÏ´Â°Å¶ó ÀÌ·¸°Ô ÇÏ¸é ¾È µÉ ¼öµµ..
-/// 
-/// ¼­¹ö¿¡¼­ Ã³¸®ÇÏµµ·Ï Server RPC ½á¾ßÇÑ´Ù´Â ¸»ÀÌ ÀÖ³×¿ä.
-/// 
-/// ÀÏ´ÜÀº ÀÌ·¸°Ô ÇØ µÑ°Ô¿ä.
-/// </summary>
-
-
-
 #include "HealthComponent.h"
 UHealthComponent::UHealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
+	SetIsReplicatedByDefault(true);
 	DefaultMaxHealth = 100;
 	CurrentHealth = DefaultMaxHealth;
+
+	UE_LOG(LogTemp, Warning, TEXT("HealthComponent created with health: %f"), CurrentHealth);
 }
 
 
@@ -27,6 +19,7 @@ void UHealthComponent::BeginPlay()
 
 	AActor* Owner = GetOwner();
 	if (Owner) {
+		// OnTakeAnyDamage í˜¸ì¶œì€ ì„œë²„ì—ì„œ ì´ë£¨ì–´ì§
 		Owner->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::TakeDamage);
 	}
 
@@ -51,10 +44,26 @@ void UHealthComponent::ResetHealth()
 
 void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
+	// ì´ í•¨ìˆ˜ê°€ ì„œë²„ì—ì„œë§Œ ì‹¤í–‰ë˜ë„ë¡ ë³´ì¥
+	if (!GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
 	if (Damage <= 0)
 		return;
 
-	if (!ShouldApplyDamage(DamageCauser, InstigatedBy)) return; // ÆÀÅ³ ÇÊÅÍ¸µ
+	if (!ShouldApplyDamage(DamageCauser, InstigatedBy)) return; // íŒ€í‚¬ í•„í„°ë§
+
+	AActor* MyActor = GetOwner();
+	FString ActorName;
+	if (MyActor)
+	{
+		ActorName = MyActor->GetName();
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("TakeDamage: Damage=%.2f, Causer=%s, Object=%s, Obj Ptr=%p"), Damage,
+		DamageCauser ? *DamageCauser->GetName() : TEXT("None"), *ActorName, MyActor);
 
 	float OldHealth = CurrentHealth;
 	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.0f, DefaultMaxHealth);
@@ -70,9 +79,23 @@ void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDam
 
 bool UHealthComponent::ShouldApplyDamage(AActor* DamageCauser, AController* InstigatedBy) const
 {
-	// TOOD: °°Àº ÆÀÀÌ¸é ¸®ÅÏ 
+	// TOOD: ê°™ì€ íŒ€ì´ë©´ ë¦¬í„´ 
 
-	if (DamageCauser == GetOwner()) return false; // ½º½º·Î¿¡°Ô µ¥¹ÌÁö °¡ÇØÁöÁö ¾Ê°Ô ¸®ÅÏ
+	if (DamageCauser == GetOwner()) return false; // ìŠ¤ìŠ¤ë¡œì—ê²Œ ë°ë¯¸ì§€ ê°€í•´ì§€ì§€ ì•Šê²Œ ë¦¬í„´
 	return true;
 }
 
+void UHealthComponent::OnRep_CurrentHealth()
+{
+	OnHealthChanged.Broadcast(CurrentHealth, 0.f);
+
+	// ë¡œì»¬ í´ë¼ì´ì–¸íŠ¸ì—ì„œ ë¡œê·¸ë¥¼ ì°ì–´ ë™ê¸°í™” í™•ì¸
+	UE_LOG(LogTemp, Log, TEXT("Client Health Synced: %f"), CurrentHealth);
+}
+
+void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UHealthComponent, CurrentHealth);
+}

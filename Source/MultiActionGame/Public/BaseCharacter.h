@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "HealthComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "BaseCharacter.generated.h"
 
@@ -42,6 +43,14 @@ protected:
 	virtual void StartSprint();
 	virtual void StopSprint();
 
+	// Movement
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<class USpringArmComponent> SpringArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<class UCameraComponent> Camera;
+
+	// Server
 	UFUNCTION(Server, Reliable)
 	void ServerStartSprint();
 
@@ -54,14 +63,11 @@ protected:
 	UPROPERTY(Replicated)
 	FRotator ReplicatedRotation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	TObjectPtr<class USpringArmComponent> SpringArm;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	TObjectPtr<class UCameraComponent> Camera;
-
 private:
 	TObjectPtr<class UInputActionGroup> InputActionGroup;
+
+	UPROPERTY()
+	UHealthComponent* HealthCompRef;
 
 public:	
 	// Called every frame

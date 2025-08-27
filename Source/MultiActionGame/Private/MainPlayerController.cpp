@@ -1,14 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "MainPlayerController.h"
 
-#include "PlayerHealthBar.h"        // UPlayerHealthBar Å¬·¡½º Çì´õ
-#include "HealthComponent.h"        // UHealthComponent Å¬·¡½º Çì´õ
-#include "Blueprint/UserWidget.h"   // CreateWidget ÇÔ¼ö »ç¿ëÀ» À§ÇÑ Çì´õ
+#include "BaseCharacter.h"
+#include "PlayerHealthBar.h"        // UPlayerHealthBar í´ë˜ìŠ¤ í—¤ë”
+#include "HealthComponent.h"        // UHealthComponent í´ë˜ìŠ¤ í—¤ë”
+#include "Blueprint/UserWidget.h"   // CreateWidget í•¨ìˆ˜ ì‚¬ìš©ì„ ìœ„í•œ í—¤ë”
 
 #include <EnhancedInputSubsystems.h>
 #include "MultiGameInstance.h"
 #include "Net/UnrealNetwork.h"
-
 
 void AMainPlayerController::BeginPlay() {
     Super::BeginPlay();
@@ -34,23 +34,109 @@ void AMainPlayerController::BeginPlay() {
             ServerSetCharacterType(GI->SelectedCharacterType);
         }
     }
-
-    // ¾Æ·¡ ÄÚµå: PlayerHealth °ü·Ã ·ÎÁ÷ (UI ÀÎ½ºÅÏ½º »ı¼º & Viewport¿¡ Add)
-    if (APawn* P = GetPawn())
-    {
-        HealthCompRef = P->FindComponentByClass<UHealthComponent>();
-    }
-
-    if (HealthBarClass && HealthCompRef)
-    {
-        HealthBarWidget = CreateWidget<UPlayerHealthBar>(GetWorld(), HealthBarClass);
-        if (HealthBarWidget)
-        {
-            HealthBarWidget->AddToViewport();
-            HealthBarWidget->InitializeWithHealthComponent(HealthCompRef);
-        }
-    }
 }
+
+void AMainPlayerController::CreateHealthBar()
+{
+	if (HealthBarClass)
+	{
+		if (!HealthBarWidget)
+		{
+			HealthBarWidget = CreateWidget<UPlayerHealthBar>(this, HealthBarClass);
+			if (HealthBarWidget)
+			{
+				HealthBarWidget->AddToViewport();
+				UE_LOG(LogTemp, Warning, TEXT("HealthBar Created in OnPossess"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Failed to create HealthBarWidget in BeginPlay"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("HealthBarWidget is already Created"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HealthBarClass is not valid! Check packaging settings."));
+	}
+
+	if (ABaseCharacter* MyChar = Cast<ABaseCharacter>(GetPawn()))
+	{
+		if (UHealthComponent* HealthComp = MyChar->FindComponentByClass<UHealthComponent>())
+		{
+			HealthBarWidget->InitializeWithHealthComponent(HealthComp);
+			UE_LOG(LogTemp, Warning, TEXT("HealthBar bound to replicated Pawn: %s"), *MyChar->GetName());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to Find Health Component"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to Character Cast"));
+	}
+}
+void AMainPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	UE_LOG(LogTemp, Warning, TEXT("OnPossess: %s"), *InPawn->GetName());
+
+	if (IsLocalPlayerController())
+	{
+		CreateHealthBar();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Not Local Controller on OnPossess"));
+	}
+}
+
+void AMainPlayerController::OnRep_Pawn()
+{
+	Super::OnRep_Pawn();
+
+	if (IsLocalController())
+	{
+		if (HealthBarClass && !HealthBarWidget)
+		{
+			CreateHealthBar();
+		}
+		UE_LOG(LogTemp, Warning, TEXT("No HealthBarClass"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Not Local Controller on OnRep_Pawn"));
+	}
+}
+
+
+void AMainPlayerController::TryBindPawn()
+{
+	if (!HealthBarWidget) // âœ… ìœ„ì ¯ ìƒì„± ì•ˆëìœ¼ë©´ ë¦¬í„´
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TryBindPawn called but HealthBarWidget is nullptr"));
+		return;
+	}
+
+	if (ABaseCharacter* MyChar = Cast<ABaseCharacter>(GetPawn()))
+	{
+		if (UHealthComponent* HealthComp = MyChar->FindComponentByClass<UHealthComponent>())
+		{
+			HealthBarWidget->InitializeWithHealthComponent(HealthComp);
+			UE_LOG(LogTemp, Warning, TEXT("HealthBar bound in TryBindPawn: %s"), *MyChar->GetName());
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TryBindPawn: Pawn is nullptr"));
+	}
+}
+
 
 // Called After InputComponent is created
 void AMainPlayerController::SetupInputComponent()

@@ -69,7 +69,7 @@ void UMainMenu::HostServer()
 {
 	if (MenuInterface != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Host"));
+		//UE_LOG(LogTemp, Warning, TEXT("Host"));
 		MenuInterface->Host();
 	}
 }
@@ -81,7 +81,7 @@ void UMainMenu::JoinServer()
 		if (!ensure(IPAddressField != nullptr)) return;
 
 		const FString& Address = IPAddressField->GetText().ToString();
-		UE_LOG(LogTemp, Warning, TEXT("Join with %s, Index %d"), *Address, static_cast<int32>(SelectedCharacterType));
+		//UE_LOG(LogTemp, Warning, TEXT("Join with %s, Index %d"), *Address, static_cast<int32>(SelectedCharacterType));
 		MenuInterface->Join(Address, SelectedCharacterType);
 	}
 }
@@ -158,11 +158,11 @@ void UMainMenu::SelectCharacter(int32 Index)
 		{
 			MainPC->ServerSetCharacterType(CurrentCharacterType);
 
-			UE_LOG(LogTemp, Warning, TEXT("Set Character Type (Server): %d"), Index);
+			//UE_LOG(LogTemp, Warning, TEXT("Set Character Type (Server): %d"), Index);
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid CharacterType: %d"), Index);
+		//UE_LOG(LogTemp, Warning, TEXT("Invalid CharacterType: %d"), Index);
 	}
 }

@@ -13,22 +13,25 @@ class MULTIACTIONGAME_API UPlayerHealthBar : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	// HealthComponent ¹ÙÀÎµù
+	// HealthComponent ë°”ì¸ë”©
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void InitializeWithHealthComponent(UHealthComponent* HealthComp);
 
 protected:
 	virtual void NativeConstruct() override;
 
-	// ÀÌº¥Æ® Äİ¹é 
-	UFUNCTION()
+	// ì´ë²¤íŠ¸ ì½œë°± 
+	UFUNCTION(BlueprintCallable)
 	void UpdateHealthBarUI(float NewHealth, float Delta);
 
-	// À§Á¬ ±×·¡ÇÁ¿¡¼­ BindWidget ÇØ¾ß ÇÔ 
+	// ìœ„ì ¯ ê·¸ë˜í”„ì—ì„œ BindWidget í•´ì•¼ í•¨ 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UProgressBar* HealthProgressBar;
 
+	UPROPERTY()
+	TObjectPtr<UHealthComponent> BoundHealthComponent;
+
 private:
-	// ÃÖ´ë Ã¼·Â °ª 
+	// ìµœëŒ€ ì²´ë ¥ ê°’ 
 	float MaxHealth;
 };

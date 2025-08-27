@@ -34,7 +34,7 @@ void UMultiGameInstance::LoadMenu()
 
 	Menu->SetMenuInterface(this);
 
-	UE_LOG(LogTemp, Warning, TEXT("Load Menu"));
+	//UE_LOG(LogTemp, Warning, TEXT("Load Menu"));
 }
 
 void UMultiGameInstance::LoadInGameMenu()
@@ -66,7 +66,7 @@ void UMultiGameInstance::Host()
 
 	//World->ServerTravel("/Game/ThirdPerson/Lvl_ThirdPerson?listen");
 
-	World->ServerTravel("/Game/TestMap?listen");
+	World->ServerTravel("/Game/TestMap?listen?game=/Game/General/MainGameModeBP.MainGameModeBP_C");
 }
 
 

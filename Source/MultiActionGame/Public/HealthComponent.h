@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "HealthComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, NewHealth, float, Delta);
@@ -18,26 +19,6 @@ public:
 	// Sets default values for this component's properties
 	UHealthComponent();
 
-	// Heal «‘ºˆ
-	UFUNCTION(BlueprintCallable, Category = "Health")
-	void Heal(float Amount);
-
-	// √º∑¬ √ ±‚»≠ «‘ºˆ
-	UFUNCTION(BlueprintCallable, Category = "Health")
-	void ResetHealth();
-
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-	UFUNCTION()
-	void TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
-
-	/** ∆¿≈≥ π◊ µ•πÃ¡ˆ « ≈Õ∏µ */
-	bool ShouldApplyDamage(AActor* DamageCauser, AController* InstigatedBy) const;
-
-
-public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHealthChanged OnHealthChanged;
 
@@ -47,6 +28,29 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float DefaultMaxHealth;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth;
+
+	// Heal Ìï®Ïàò
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void Heal(float Amount);
+
+	// Ï≤¥Î†• Ï¥àÍ∏∞Ìôî Ìï®Ïàò
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void ResetHealth();
+
+	UFUNCTION()
+	void OnRep_CurrentHealth();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
+
+	/** ÌåÄÌÇ¨ Î∞è Îç∞ÎØ∏ÏßÄ ÌïÑÌÑ∞ÎßÅ */
+	bool ShouldApplyDamage(AActor* DamageCauser, AController* InstigatedBy) const;
 };

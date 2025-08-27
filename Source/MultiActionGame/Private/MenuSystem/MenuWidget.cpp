@@ -19,7 +19,7 @@ void UMenuWidget::Setup()
 	if (!ensure(PlayerController != nullptr)) return;
 
 	FInputModeUIOnly InputModeData;
-	UE_LOG(LogTemp, Warning, TEXT("Setup"));
+	//UE_LOG(LogTemp, Warning, TEXT("Setup"));
 	InputModeData.SetWidgetToFocus(this->TakeWidget());
 	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 
@@ -37,7 +37,7 @@ void UMenuWidget::Teardown()
 	APlayerController* PlayerController = World->GetFirstPlayerController();
 	if (!ensure(PlayerController != nullptr)) return;
 
-	UE_LOG(LogTemp, Warning, TEXT("Teardown"));
+	//UE_LOG(LogTemp, Warning, TEXT("Teardown"));
 
 	FInputModeGameOnly InputModeData;
 

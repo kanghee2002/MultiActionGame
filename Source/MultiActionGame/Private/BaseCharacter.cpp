@@ -7,6 +7,7 @@
 #include <GameFramework/CharacterMovementComponent.h>
 #include "InputActionGroup.h"
 #include "MainPlayerController.h"
+#include "PlayerHealthBar.h"
 #include "BaseAnimInstance.h"
 #include <EnhancedInputComponent.h>
 
@@ -38,8 +39,10 @@ ABaseCharacter::ABaseCharacter() {
     bUseControllerRotationPitch = false;
     bUseControllerRotationRoll = false;
 
-    NetUpdateFrequency = 30.0f;
-    MinNetUpdateFrequency = 15.0f;
+	bReplicates = true;
+	bAlwaysRelevant = true;
+
+	HealthCompRef = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -47,13 +50,15 @@ void ABaseCharacter::BeginPlay() {
 	Super::BeginPlay();
 
     GetCharacterMovement()->MaxWalkSpeed = GetMaxWalkSpeed();
+
+	UE_LOG(LogTemp, Warning, TEXT("BeginPlay Character: %s"), *this->GetName());
 }
 
 // Called every frame
 void ABaseCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-    // ∑Œƒ√¿Ã æ∆¥— ∞ÊøÏø°∏∏ ∫∏∞£
+    // Î°úÏª¨Ïù¥ ÏïÑÎãå Í≤ΩÏö∞ÏóêÎßå Î≥¥Í∞Ñ
     if (!IsLocallyControlled())
     {
         FRotator currentRotation = GetActorRotation();
@@ -92,29 +97,29 @@ void ABaseCharacter::Move(const FInputActionValue& value) {
 
     FVector2D movementVector = value.Get<FVector2D>();
 
-    // Ω«¡¶ ƒ´∏ﬁ∂Û »∏¿¸ ∞°¡Æø¿±‚
+    // Ïã§Ï†ú Ïπ¥Î©îÎùº ÌöåÏ†Ñ Í∞ÄÏ†∏Ïò§Í∏∞
     FRotator cameraRotation = Camera->GetComponentRotation();
 
-    // ƒ´∏ﬁ∂Û ±‚¡ÿ πÊ«‚ ∞ËªÍ
+    // Ïπ¥Î©îÎùº Í∏∞Ï§Ä Î∞©Ìñ• Í≥ÑÏÇ∞
     const FRotator yawRotation(0, cameraRotation.Yaw, 0);
     const FVector forwardDirection = FRotationMatrix(yawRotation).GetScaledAxis(EAxis::X);
     const FVector rightDirection = FRotationMatrix(yawRotation).GetScaledAxis(EAxis::Y);
 
-    // ƒ´∏ﬁ∂Û ±‚¡ÿ¿∏∑Œ ¿Ãµø ¿‘∑¬ ¿˚øÎ
+    // Ïπ¥Î©îÎùº Í∏∞Ï§ÄÏúºÎ°ú Ïù¥Îèô ÏûÖÎ†• Ï†ÅÏö©
     AddMovementInput(forwardDirection, movementVector.X);
     AddMovementInput(rightDirection, movementVector.Y);
 
-    // ¿Ãµø ¿‘∑¬¿Ã ¿÷¿ª ∂ß∏∏ ƒ≥∏Ø≈Õ »∏¿¸
+    // Ïù¥Îèô ÏûÖÎ†•Ïù¥ ÏûàÏùÑ ÎïåÎßå Ï∫êÎ¶≠ÌÑ∞ ÌöåÏ†Ñ
     if (!movementVector.IsZero()) {
-        // Ω«¡¶ ¿Ãµø πÊ«‚ ∞ËªÍ (ƒ´∏ﬁ∂Û ±‚¡ÿ)
+        // Ïã§Ï†ú Ïù¥Îèô Î∞©Ìñ• Í≥ÑÏÇ∞ (Ïπ¥Î©îÎùº Í∏∞Ï§Ä)
         FVector movementDirection = (forwardDirection * movementVector.X) + (rightDirection * movementVector.Y);
         movementDirection.Normalize();
 
-        // ƒ≥∏Ø≈Õ∞° ¿Ãµø πÊ«‚¿ª πŸ∂Û∫∏µµ∑œ »∏¿¸
+        // Ï∫êÎ¶≠ÌÑ∞Í∞Ä Ïù¥Îèô Î∞©Ìñ•ÏùÑ Î∞îÎùºÎ≥¥ÎèÑÎ°ù ÌöåÏ†Ñ
         if (!movementDirection.IsZero()) {
             FRotator targetRotation = movementDirection.Rotation();
 
-            // ∑Œƒ√¿œ ∂ß∏∏ ¿⁄√º¿˚¿∏∑Œ ∫∏∞£, º≠πˆø° πŸ∂Û∫∏¥¬ πÊ«‚ æÀ∏≤
+            // Î°úÏª¨Ïùº ÎïåÎßå ÏûêÏ≤¥Ï†ÅÏúºÎ°ú Î≥¥Í∞Ñ, ÏÑúÎ≤ÑÏóê Î∞îÎùºÎ≥¥Îäî Î∞©Ìñ• ÏïåÎ¶º
             if (IsLocallyControlled())
             {
                 FRotator currentRotation = GetActorRotation();
@@ -132,11 +137,11 @@ void ABaseCharacter::Look(const FInputActionValue& value) {
     FRotator currentRotation = SpringArm->GetComponentRotation();
     FRotator newRotation = currentRotation;
 
-    // ∏∂øÏΩ∫ ¿‘∑¬¿∏∑Œ »∏¿¸ ∞ËªÍ
+    // ÎßàÏö∞Ïä§ ÏûÖÎ†•ÏúºÎ°ú ÌöåÏ†Ñ Í≥ÑÏÇ∞
     newRotation.Yaw += lookAxisVector.X;
     newRotation.Pitch += lookAxisVector.Y;
 
-    // Pitch ¡¶«— (¿ßæ∆∑° ∞¢µµ ¡¶«—)
+    // Pitch Ï†úÌïú (ÏúÑÏïÑÎûò Í∞ÅÎèÑ Ï†úÌïú)
     newRotation.Pitch = FMath::Clamp(newRotation.Pitch, -70.0f, 70.0f);
 
     SpringArm->SetWorldRotation(newRotation);
@@ -201,7 +206,7 @@ void ABaseCharacter::Landed(const FHitResult& hit) {
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
+	UE_LOG(LogTemp, Warning, TEXT("Setting up replication for Character"));
     DOREPLIFETIME(ABaseCharacter, bIsSprinting);
     DOREPLIFETIME(ABaseCharacter, bIsJumping);
     DOREPLIFETIME(ABaseCharacter, ReplicatedRotation);
