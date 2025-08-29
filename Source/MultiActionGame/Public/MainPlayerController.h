@@ -33,8 +33,6 @@ protected:
 
 	void TryBindPawn();
 
-	APawn* MyPawn;
-
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> HealthBarClass; 
 

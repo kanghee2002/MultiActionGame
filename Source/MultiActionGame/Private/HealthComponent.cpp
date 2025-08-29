@@ -6,8 +6,6 @@ UHealthComponent::UHealthComponent()
 	SetIsReplicatedByDefault(true);
 	DefaultMaxHealth = 100;
 	CurrentHealth = DefaultMaxHealth;
-
-	UE_LOG(LogTemp, Warning, TEXT("HealthComponent created with health: %f"), CurrentHealth);
 }
 
 

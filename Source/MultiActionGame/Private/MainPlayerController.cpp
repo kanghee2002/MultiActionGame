@@ -13,20 +13,6 @@
 void AMainPlayerController::BeginPlay() {
     Super::BeginPlay();
 
-    /*UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-
-    if (ensure(subsystem != nullptr))
-    {
-        subsystem->ClearAllMappings();
-        subsystem->AddMappingContext(MappingContext, 0);
-    }
-
-
-    if (!InputComponent) {
-        UE_LOG(LogTemp, Warning, TEXT("InputComponent is nullptr"));
-        return;
-    }*/
-
     if (IsLocalController())
     {
         if (const UMultiGameInstance* GI = Cast<UMultiGameInstance>(GetGameInstance()))
@@ -46,21 +32,21 @@ void AMainPlayerController::CreateHealthBar()
 			if (HealthBarWidget)
 			{
 				HealthBarWidget->AddToViewport();
-				UE_LOG(LogTemp, Warning, TEXT("HealthBar Created in OnPossess"));
+				UE_LOG(LogTemp, Warning, TEXT("HealthBar Created"));
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Failed to create HealthBarWidget in BeginPlay"));
+				UE_LOG(LogTemp, Warning, TEXT("Failed to create HealthBar"));
 			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("HealthBarWidget is already Created"));
+			UE_LOG(LogTemp, Warning, TEXT("HealthBar is already Created"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("HealthBarClass is not valid! Check packaging settings."));
+		UE_LOG(LogTemp, Warning, TEXT("HealthBarClass is not valid!"));
 	}
 
 	if (ABaseCharacter* MyChar = Cast<ABaseCharacter>(GetPawn()))
@@ -80,6 +66,8 @@ void AMainPlayerController::CreateHealthBar()
 		UE_LOG(LogTemp, Warning, TEXT("Failed to Character Cast"));
 	}
 }
+
+// 서버 UI 생성
 void AMainPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -96,6 +84,7 @@ void AMainPlayerController::OnPossess(APawn* InPawn)
 	}
 }
 
+// 클라 UI 생성
 void AMainPlayerController::OnRep_Pawn()
 {
 	Super::OnRep_Pawn();
@@ -106,7 +95,12 @@ void AMainPlayerController::OnRep_Pawn()
 		{
 			CreateHealthBar();
 		}
-		UE_LOG(LogTemp, Warning, TEXT("No HealthBarClass"));
+
+		if (ABaseCharacter* MyPawn = Cast<ABaseCharacter>(GetPawn()))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Setup PlayerInput Component"));
+			MyPawn->SetupPlayerInputComponent(InputComponent);
+		}
 	}
 	else
 	{
@@ -143,7 +137,8 @@ void AMainPlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
 
-    UE_LOG(LogTemp, Warning, TEXT("SetupInputComponent() Called"));
+	UE_LOG(LogTemp, Warning, TEXT("=== PlayerController SetupInputComponent ==="));
+	UE_LOG(LogTemp, Warning, TEXT("Controller: %s, IsLocal: %d"), *GetName(), IsLocalPlayerController());
 
     if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {

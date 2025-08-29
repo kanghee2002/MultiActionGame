@@ -56,7 +56,7 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 
 	if (NewPawn)
 	{
-		PC->Possess(NewPawn);
+		//PC->Possess(NewPawn);
 		UE_LOG(LogTemp, Warning, TEXT("Done Setting Character : %s"), *NewPawn->GetName());
 	}
 	else

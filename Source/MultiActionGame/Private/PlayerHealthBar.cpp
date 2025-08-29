@@ -39,5 +39,5 @@ void UPlayerHealthBar::UpdateHealthBarUI(float NewHealth, float Delta)
 		HealthProgressBar->SetPercent(Percent);
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Health updated: %f. / Delta=%f "), NewHealth, Delta);
+	UE_LOG(LogTemp, Warning, TEXT("Update HealthBar: %f. / Delta=%f "), NewHealth, Delta);
 }
