@@ -15,7 +15,6 @@ class MULTIACTIONGAME_API ABaseCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ABaseCharacter();
 
 	UPROPERTY(Replicated, BlueprintReadOnly)
@@ -24,7 +23,7 @@ public:
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	bool bIsJumping;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bIsAttacking;
 
 protected:
@@ -35,7 +34,6 @@ protected:
 		return 400.f;
 	}
 
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual void Jump() override;
@@ -58,13 +56,34 @@ protected:
 
 	// Server
 	UFUNCTION(Server, Reliable)
-	void ServerStartSprint();
+	void Server_StartSprint();
 
 	UFUNCTION(Server, Reliable)
-	void ServerStopSprint();
+	void Server_StopSprint();
 
 	UFUNCTION(Server, Reliable)
-	void ServerSetRotation(FRotator NewRotation);
+	void Server_SetRotation(FRotator NewRotation);
+
+	// 서버에서만 실행
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Combat")
+	void Server_Attack();
+	virtual void Server_Attack_Implementation();
+
+	// 모든 클라(서버 포함)에서 실행
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
+	void Multicast_PlayAttackAnimation();
+	virtual void Multicast_PlayAttackAnimation_Implementation();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	bool BP_CanAttack() const;
+
+	// 공격과 관련된 계산 적용
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void BP_ExecuteAttack();
+
+	// 공격 애니메이션 실행
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void BP_PlayAttackAnimation();
 
 	UPROPERTY(Replicated)
 	FRotator ReplicatedRotation;
@@ -78,10 +97,8 @@ private:
 	UHealthComponent* HealthCompRef;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

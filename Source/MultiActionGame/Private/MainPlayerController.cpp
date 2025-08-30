@@ -95,12 +95,6 @@ void AMainPlayerController::OnRep_Pawn()
 		{
 			CreateHealthBar();
 		}
-
-		if (ABaseCharacter* MyPawn = Cast<ABaseCharacter>(GetPawn()))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Setup PlayerInput Component"));
-			MyPawn->SetupPlayerInputComponent(InputComponent);
-		}
 	}
 	else
 	{

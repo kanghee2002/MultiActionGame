@@ -11,9 +11,7 @@
 #include "BaseAnimInstance.h"
 #include <EnhancedInputComponent.h>
 
-// Sets default values
 ABaseCharacter::ABaseCharacter() {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
     static ConstructorHelpers::FObjectFinder<UInputActionGroup> ActionGroupAsset(TEXT("/Game/Input/InputActionGroup.InputActionGroup"));
@@ -56,7 +54,6 @@ ABaseCharacter::ABaseCharacter() {
 	HealthCompRef = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
-// Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay() {
 	Super::BeginPlay();
 
@@ -65,7 +62,6 @@ void ABaseCharacter::BeginPlay() {
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay Character: %s"), *this->GetName());
 }
 
-// Called every frame
 void ABaseCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
@@ -92,7 +88,6 @@ void ABaseCharacter::Tick(float DeltaTime) {
 	}
 }
 
-// Called to bind functionality to input
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
@@ -146,7 +141,7 @@ void ABaseCharacter::Move(const FInputActionValue& value) {
                 FRotator currentRotation = GetActorRotation();
 
 				TargetRotation = targetRotation;
-                ServerSetRotation(targetRotation);
+                Server_SetRotation(targetRotation);
             }
         }
     }
@@ -174,7 +169,7 @@ void ABaseCharacter::StartSprint() {
 
     if (!HasAuthority())
     {
-        ServerStartSprint();
+        Server_StartSprint();
     }
 }
 
@@ -184,34 +179,61 @@ void ABaseCharacter::StopSprint() {
 
     if (!HasAuthority())
     {
-        ServerStopSprint();
+        Server_StopSprint();
     }
 }
 
 void ABaseCharacter::LightAttack()
 {
-	//bIsAttacking = true;
 	UE_LOG(LogTemp, Warning, TEXT("Light Attack"));
 
+	if (!HasAuthority())
+	{
+		// 클라라면 서버에 요청
+		Server_Attack();
+	}
+	else
+	{
+		// 서버라면 바로 실행
+		Server_Attack_Implementation();
+	}
+}
+
+void ABaseCharacter::Server_Attack_Implementation()
+{
+	if (!BP_CanAttack())
+	{
+		return;
+	}
+
+	bIsAttacking = true;
+
+	BP_ExecuteAttack();
+
+	Multicast_PlayAttackAnimation();
+}
+
+void ABaseCharacter::Multicast_PlayAttackAnimation_Implementation()
+{
+	BP_PlayAttackAnimation();
 }
 
 void ABaseCharacter::HeavyAttack()
 {
-	//bIsAttacking = true;
 	UE_LOG(LogTemp, Warning, TEXT("Heavy Attack"));
 }
 
-void ABaseCharacter::ServerSetRotation_Implementation(FRotator NewRotation)
+void ABaseCharacter::Server_SetRotation_Implementation(FRotator NewRotation)
 {
     ReplicatedRotation = NewRotation;
 }
 
-void ABaseCharacter::ServerStartSprint_Implementation()
+void ABaseCharacter::Server_StartSprint_Implementation()
 {
     StartSprint();
 }
 
-void ABaseCharacter::ServerStopSprint_Implementation()
+void ABaseCharacter::Server_StopSprint_Implementation()
 {
     StopSprint();
 }
@@ -245,5 +267,6 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
     DOREPLIFETIME(ABaseCharacter, bIsSprinting);
     DOREPLIFETIME(ABaseCharacter, bIsJumping);
+    DOREPLIFETIME(ABaseCharacter, bIsAttacking);
     DOREPLIFETIME(ABaseCharacter, ReplicatedRotation);
 }
