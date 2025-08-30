@@ -139,7 +139,7 @@ void ABaseCharacter::Look(const FInputActionValue& value) {
 
     // 마우스 입력으로 회전 계산
     newRotation.Yaw += lookAxisVector.X;
-    newRotation.Pitch += lookAxisVector.Y;
+    newRotation.Pitch -= lookAxisVector.Y;
 
     // Pitch 제한 (위아래 각도 제한)
     newRotation.Pitch = FMath::Clamp(newRotation.Pitch, -70.0f, 70.0f);

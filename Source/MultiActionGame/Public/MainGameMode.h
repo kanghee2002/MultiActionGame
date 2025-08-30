@@ -23,4 +23,9 @@ protected:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Characters")
 	TSubclassOf<ACharacter> KnightCharacter;
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Characters")
+	TSubclassOf<ACharacter> BossCharacter;
+
 };
