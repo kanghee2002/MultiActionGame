@@ -21,15 +21,25 @@ ABaseCharacter::ABaseCharacter() {
     if (ActionGroupAsset.Succeeded()) InputActionGroup = ActionGroupAsset.Object;
     else UE_LOG(LogAssetData, Fatal, TEXT("InputActionGroup cannot be found!"));
 
+	// 카메라 설정
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
     SpringArm->SetupAttachment(RootComponent);
-    SpringArm->TargetArmLength = 400.f;
-    SpringArm->SocketOffset = FVector(0., 100., 80.);
+
+	// 카메라 위치
+    SpringArm->TargetArmLength = 500.0f;
+    SpringArm->SocketOffset = FVector(0.0f, 0.0f, 100.0f);
+
+	// 마우스로 회전, 부드러운 움직임
     SpringArm->bUsePawnControlRotation = true;
     SpringArm->bEnableCameraLag = true;
+	
+	// 캐릭터 회전해도 카메라 영향 X
     SpringArm->bInheritYaw = false;
     SpringArm->bInheritPitch = false;
     SpringArm->bInheritRoll = false;
+
+	// 충돌 X -> 카메라 당겨짐 X
+	SpringArm->bDoCollisionTest = false;
 
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     Camera->SetupAttachment(SpringArm);
@@ -39,6 +49,7 @@ ABaseCharacter::ABaseCharacter() {
     bUseControllerRotationPitch = false;
     bUseControllerRotationRoll = false;
 
+	// 멀티 설정
 	bReplicates = true;
 	bAlwaysRelevant = true;
 
@@ -58,19 +69,27 @@ void ABaseCharacter::BeginPlay() {
 void ABaseCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-    // 로컬이 아닌 경우에만 보간
-    if (!IsLocallyControlled())
-    {
-        FRotator currentRotation = GetActorRotation();
+	FRotator currentRotation = GetActorRotation();
 
-        float angleDifference = FMath::Abs(FMath::FindDeltaAngleDegrees(currentRotation.Yaw, ReplicatedRotation.Yaw));
-        
-        if (angleDifference > 1.0f)
-        {
-            FRotator newRotation = FMath::RInterpTo(currentRotation, ReplicatedRotation, DeltaTime, 10.0f);
-            SetActorRotation(newRotation);
-        }
-    }
+	float angleDifference = FMath::Abs(FMath::FindDeltaAngleDegrees(currentRotation.Yaw, ReplicatedRotation.Yaw));
+
+	float rotationSpeed = 8.0f;
+
+	if (angleDifference > 1.0f)
+	{
+		FRotator newRotation;
+		if (IsLocallyControlled())
+		{
+			// 로컬일 경우 지정된 방향으로 회전
+			newRotation = FMath::RInterpTo(currentRotation, TargetRotation, DeltaTime, rotationSpeed);
+		}
+		else
+		{
+			// 로컬이 아닐 경우 복제된 방향으로 회전
+			newRotation = FMath::RInterpTo(currentRotation, ReplicatedRotation, DeltaTime, rotationSpeed);
+		}
+		SetActorRotation(newRotation);
+	}
 }
 
 // Called to bind functionality to input
@@ -90,10 +109,12 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
     component->BindAction(InputActionGroup->SprintAction, ETriggerEvent::Completed, this, &ABaseCharacter::StopSprint);
     component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Started, this, &ABaseCharacter::Jump);
     component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Completed, this, &ABaseCharacter::StopJumping);
+	component->BindAction(InputActionGroup->LightAttackAction, ETriggerEvent::Started, this, &ABaseCharacter::LightAttack);
+	component->BindAction(InputActionGroup->HeavyAttackAction, ETriggerEvent::Started, this, &ABaseCharacter::HeavyAttack);
 }
 
 void ABaseCharacter::Move(const FInputActionValue& value) {
-    if (bIsJumping) return;
+    if (bIsJumping || bIsAttacking) return;
 
     FVector2D movementVector = value.Get<FVector2D>();
 
@@ -119,12 +140,12 @@ void ABaseCharacter::Move(const FInputActionValue& value) {
         if (!movementDirection.IsZero()) {
             FRotator targetRotation = movementDirection.Rotation();
 
-            // 로컬일 때만 자체적으로 보간, 서버에 바라보는 방향 알림
+            // 로컬은 바라보는 방향 지정, 서버에 바라보는 방향 알림
             if (IsLocallyControlled())
             {
                 FRotator currentRotation = GetActorRotation();
-                FRotator newRotation = FMath::RInterpTo(currentRotation, targetRotation, GetWorld()->GetDeltaSeconds(), 8.0f);
-                SetActorRotation(newRotation);
+
+				TargetRotation = targetRotation;
                 ServerSetRotation(targetRotation);
             }
         }
@@ -167,6 +188,19 @@ void ABaseCharacter::StopSprint() {
     }
 }
 
+void ABaseCharacter::LightAttack()
+{
+	//bIsAttacking = true;
+	UE_LOG(LogTemp, Warning, TEXT("Light Attack"));
+
+}
+
+void ABaseCharacter::HeavyAttack()
+{
+	//bIsAttacking = true;
+	UE_LOG(LogTemp, Warning, TEXT("Heavy Attack"));
+}
+
 void ABaseCharacter::ServerSetRotation_Implementation(FRotator NewRotation)
 {
     ReplicatedRotation = NewRotation;
@@ -183,6 +217,8 @@ void ABaseCharacter::ServerStopSprint_Implementation()
 }
 
 void ABaseCharacter::Jump() {
+	if (bIsAttacking) return;
+
     Super::Jump();
 
     bIsJumping = true;
@@ -206,7 +242,7 @@ void ABaseCharacter::Landed(const FHitResult& hit) {
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	UE_LOG(LogTemp, Warning, TEXT("Setting up replication for Character"));
+
     DOREPLIFETIME(ABaseCharacter, bIsSprinting);
     DOREPLIFETIME(ABaseCharacter, bIsJumping);
     DOREPLIFETIME(ABaseCharacter, ReplicatedRotation);

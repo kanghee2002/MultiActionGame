@@ -24,6 +24,9 @@ public:
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	bool bIsJumping;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsAttacking;
+
 protected:
 	virtual const float GetMaxSprintSpeed() {
 		return 800.f;
@@ -42,6 +45,9 @@ protected:
 	virtual void Look(const FInputActionValue& value);
 	virtual void StartSprint();
 	virtual void StopSprint();
+
+	virtual void LightAttack();
+	virtual void HeavyAttack();
 
 	// Movement
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -62,6 +68,8 @@ protected:
 
 	UPROPERTY(Replicated)
 	FRotator ReplicatedRotation;
+
+	FRotator TargetRotation;
 
 private:
 	TObjectPtr<class UInputActionGroup> InputActionGroup;
