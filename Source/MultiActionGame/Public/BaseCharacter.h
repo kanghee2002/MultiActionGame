@@ -26,6 +26,9 @@ public:
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bIsAttacking;
 
+	UPROPERTY(Replicated, BlueprintReadWrite)
+	bool bCanPlayerControl;
+
 protected:
 	virtual const float GetMaxSprintSpeed() {
 		return 800.f;

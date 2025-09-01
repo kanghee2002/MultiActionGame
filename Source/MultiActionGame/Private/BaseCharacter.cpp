@@ -109,7 +109,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 }
 
 void ABaseCharacter::Move(const FInputActionValue& value) {
-    if (bIsJumping || bIsAttacking) return;
+    if (bIsJumping || bIsAttacking || !bCanPlayerControl) return;
 
     FVector2D movementVector = value.Get<FVector2D>();
 
@@ -206,8 +206,6 @@ void ABaseCharacter::Server_Attack_Implementation()
 		return;
 	}
 
-	bIsAttacking = true;
-
 	BP_ExecuteAttack();
 
 	Multicast_PlayAttackAnimation();
@@ -268,5 +266,6 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
     DOREPLIFETIME(ABaseCharacter, bIsSprinting);
     DOREPLIFETIME(ABaseCharacter, bIsJumping);
     DOREPLIFETIME(ABaseCharacter, bIsAttacking);
+	DOREPLIFETIME(ABaseCharacter, bCanPlayerControl);
     DOREPLIFETIME(ABaseCharacter, ReplicatedRotation);
 }
