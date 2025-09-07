@@ -70,12 +70,10 @@ protected:
 	// 서버에서만 실행
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Combat")
 	void Server_Attack();
-	virtual void Server_Attack_Implementation();
 
 	// 모든 클라(서버 포함)에서 실행
 	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
 	void Multicast_PlayAttackAnimation();
-	virtual void Multicast_PlayAttackAnimation_Implementation();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	bool BP_CanAttack() const;

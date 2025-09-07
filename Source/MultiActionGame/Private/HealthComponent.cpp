@@ -43,13 +43,11 @@ void UHealthComponent::ResetHealth()
 void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	// 이 함수가 서버에서만 실행되도록 보장
-	if (!GetOwner()->HasAuthority())
-	{
-		return;
-	}
+	if (!GetOwner()->HasAuthority()) return; 
 
-	if (Damage <= 0)
-		return;
+	if (Damage <= 0) return;
+
+	if (DamagedActor == DamageCauser) return;
 
 	if (!ShouldApplyDamage(DamageCauser, InstigatedBy)) return; // 팀킬 필터링
 
