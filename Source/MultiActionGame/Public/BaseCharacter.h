@@ -86,6 +86,16 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlayAttackAnimation();
 
+	UFUNCTION()
+	void OnDamageReceived(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
+
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
+	void Multicast_PlayHitAnimation();
+
+	// 피격 애니메이션 실행
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void BP_PlayHitAnimation();
+
 	UPROPERTY(Replicated)
 	FRotator ReplicatedRotation;
 

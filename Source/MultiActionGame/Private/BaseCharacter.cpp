@@ -52,6 +52,8 @@ ABaseCharacter::ABaseCharacter() {
 	bAlwaysRelevant = true;
 
 	HealthCompRef = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
+	OnTakeAnyDamage.AddDynamic(this, &ABaseCharacter::OnDamageReceived);
 }
 
 void ABaseCharacter::BeginPlay() {
@@ -257,6 +259,16 @@ void ABaseCharacter::Landed(const FHitResult& hit) {
     Super::Landed(hit);
 
     bIsJumping = false;
+}
+
+void ABaseCharacter::OnDamageReceived(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+	Multicast_PlayHitAnimation();
+}
+
+void ABaseCharacter::Multicast_PlayHitAnimation_Implementation()
+{
+	BP_PlayHitAnimation();
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
