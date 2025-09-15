@@ -24,7 +24,7 @@ public:
 	bool bIsJumping;
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
-	bool bIsAttacking;
+	bool bCanDoComboAttack;
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bCanPlayerControl;

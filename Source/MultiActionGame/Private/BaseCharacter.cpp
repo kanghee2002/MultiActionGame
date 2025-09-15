@@ -61,6 +61,8 @@ void ABaseCharacter::BeginPlay() {
 
     GetCharacterMovement()->MaxWalkSpeed = GetMaxWalkSpeed();
 
+	bCanPlayerControl = true;
+
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay Character: %s"), *this->GetName());
 }
 
@@ -111,7 +113,10 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 }
 
 void ABaseCharacter::Move(const FInputActionValue& value) {
-    if (bIsJumping || bIsAttacking || !bCanPlayerControl) return;
+	if (bIsJumping || !bCanPlayerControl)
+	{
+		return;
+	}
 
     FVector2D movementVector = value.Get<FVector2D>();
 
@@ -239,7 +244,6 @@ void ABaseCharacter::Server_StopSprint_Implementation()
 }
 
 void ABaseCharacter::Jump() {
-	if (bIsAttacking) return;
 
     Super::Jump();
 
@@ -263,6 +267,7 @@ void ABaseCharacter::Landed(const FHitResult& hit) {
 
 void ABaseCharacter::OnDamageReceived(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
+	bCanPlayerControl = false;
 	Multicast_PlayHitAnimation();
 }
 
@@ -277,7 +282,7 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
     DOREPLIFETIME(ABaseCharacter, bIsSprinting);
     DOREPLIFETIME(ABaseCharacter, bIsJumping);
-    DOREPLIFETIME(ABaseCharacter, bIsAttacking);
+    DOREPLIFETIME(ABaseCharacter, bCanDoComboAttack);
 	DOREPLIFETIME(ABaseCharacter, bCanPlayerControl);
     DOREPLIFETIME(ABaseCharacter, ReplicatedRotation);
 }
