@@ -2,13 +2,15 @@
 
 
 #include "BaseCharacter.h"
-#include <Camera/CameraComponent.h>
-#include <GameFramework/SpringArmComponent.h>
-#include <GameFramework/CharacterMovementComponent.h>
 #include "InputActionGroup.h"
 #include "MainPlayerController.h"
 #include "PlayerHealthBar.h"
+
 #include "BaseAnimInstance.h"
+
+#include <Camera/CameraComponent.h>
+#include <GameFramework/SpringArmComponent.h>
+#include <GameFramework/CharacterMovementComponent.h>
 #include <EnhancedInputComponent.h>
 
 ABaseCharacter::ABaseCharacter() 
@@ -73,7 +75,6 @@ void ABaseCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	SynchronizeRotation(DeltaTime);
-	SynchronizeRotation(DeltaTime);
 }
 
 void ABaseCharacter::SynchronizeRotation(float DeltaTime)
@@ -117,14 +118,14 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
     component->BindAction(InputActionGroup->SprintAction, ETriggerEvent::Started, this, &ABaseCharacter::StartSprint);
     component->BindAction(InputActionGroup->SprintAction, ETriggerEvent::Completed, this, &ABaseCharacter::StopSprint);
     component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Started, this, &ABaseCharacter::Roll);
-    //component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Completed, this, &ABaseCharacter::StopJumping);
 	component->BindAction(InputActionGroup->LightAttackAction, ETriggerEvent::Started, this, &ABaseCharacter::LightAttack);
 	component->BindAction(InputActionGroup->HeavyAttackAction, ETriggerEvent::Started, this, &ABaseCharacter::HeavyAttack);
 }
 
+// Movement
 void ABaseCharacter::Move(const FInputActionValue& value) 
 {
-	if (bIsJumping || !bCanPlayerControl)
+	if (!bCanPlayerControl)
 	{
 		return;
 	}
@@ -218,6 +219,41 @@ void ABaseCharacter::LightAttack()
 	}
 }
 
+void ABaseCharacter::HeavyAttack()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Heavy Attack"));
+}
+
+void ABaseCharacter::Roll()
+{
+	if (!HasAuthority())
+	{
+		Server_Roll();
+	}
+	else
+	{
+		Server_Roll_Implementation();
+	}
+}
+
+// Server Rotation
+void ABaseCharacter::Server_SetRotation_Implementation(FRotator NewRotation)
+{
+	ReplicatedRotation = NewRotation;
+}
+
+// Server Sprint
+void ABaseCharacter::Server_StartSprint_Implementation()
+{
+	StartSprint();
+}
+
+void ABaseCharacter::Server_StopSprint_Implementation()
+{
+	StopSprint();
+}
+
+// Server Attack
 void ABaseCharacter::Server_Attack_Implementation()
 {
 	if (!BP_CanAttack())
@@ -235,62 +271,7 @@ void ABaseCharacter::Multicast_PlayAttackAnimation_Implementation()
 	BP_PlayAttackAnimation();
 }
 
-void ABaseCharacter::HeavyAttack()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Heavy Attack"));
-}
-
-void ABaseCharacter::Server_SetRotation_Implementation(FRotator NewRotation)
-{
-    ReplicatedRotation = NewRotation;
-}
-
-void ABaseCharacter::Server_StartSprint_Implementation()
-{
-    StartSprint();
-}
-
-void ABaseCharacter::Server_StopSprint_Implementation()
-{
-    StopSprint();
-}
-
-void ABaseCharacter::Jump() {
-
-    Super::Jump();
-
-    bIsJumping = true;
-
-    UBaseAnimInstance* inst = Cast<UBaseAnimInstance>(GetMesh()->GetAnimInstance());
-    if (inst) {
-        inst->JumpStart();
-    }
-}
-
-void ABaseCharacter::StopJumping() 
-{
-    Super::StopJumping();
-}
-
-void ABaseCharacter::Landed(const FHitResult& hit) 
-{
-    Super::Landed(hit);
-
-    bIsJumping = false;
-}
-
-void ABaseCharacter::Roll()
-{
-	if (!HasAuthority())
-	{
-		Server_Roll();
-	}
-	else
-	{
-		Server_Roll_Implementation();
-	}
-}
-
+// Server Roll
 void ABaseCharacter::Server_Roll_Implementation()
 {
 	if (!BP_CanRoll())
@@ -315,7 +296,6 @@ void ABaseCharacter::Server_Roll_Implementation()
 	}
 
 	LaunchCharacter(directionVector * 900.0f + FVector(0.0f, 0.0f, 200.0f), true, true);
-	//LaunchCharacter(GetActorForwardVector() * 900.0f + FVector(0.0f, 0.0f, 200.0f), true, true);
 
 	Multicast_PlayRollAnimation();
 }
@@ -325,7 +305,8 @@ void ABaseCharacter::Multicast_PlayRollAnimation_Implementation()
 	BP_PlayRollAnimation();
 }
 
-void ABaseCharacter::OnDamageReceived(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+// Server Hit
+void ABaseCharacter::OnDamageReceived_Implementation(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	bCanPlayerControl = false;
 	Multicast_PlayHitAnimation();
@@ -336,12 +317,12 @@ void ABaseCharacter::Multicast_PlayHitAnimation_Implementation()
 	BP_PlayHitAnimation();
 }
 
+// Replication
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(ABaseCharacter, bIsSprinting);
-    DOREPLIFETIME(ABaseCharacter, bIsJumping);
 	DOREPLIFETIME(ABaseCharacter, bIsInvincible);
     DOREPLIFETIME(ABaseCharacter, bCanDoComboAttack);
 	DOREPLIFETIME(ABaseCharacter, bCanPlayerControl);

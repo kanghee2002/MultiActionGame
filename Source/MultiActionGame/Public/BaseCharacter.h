@@ -20,9 +20,6 @@ public:
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	bool bIsSprinting;
 
-	UPROPERTY(Replicated, BlueprintReadOnly)
-	bool bIsJumping;
-
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bCanDoComboAttack;
 
@@ -36,6 +33,20 @@ public:
 	}
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<class USpringArmComponent> SpringArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<class UCameraComponent> Camera;
+
+	UPROPERTY(Replicated)
+	FRotator ReplicatedRotation;
+
+	FRotator TargetRotation;
+
+	UPROPERTY(Replicated, BlueprintReadWrite)
+	bool bIsInvincible;
+
 	virtual const float GetMaxSprintSpeed() 
 	{
 		return 800.0f;
@@ -46,10 +57,17 @@ protected:
 	}
 
 	virtual void BeginPlay() override;
-	virtual void Landed(const FHitResult& Hit) override;
-	virtual void Jump() override;
-	virtual void StopJumping() override;
+	virtual void Tick(float DeltaTime) override;
 
+	void SynchronizeRotation(float DeltaTime);
+
+	virtual void Move(const FInputActionValue& value);
+	virtual void Look(const FInputActionValue& value);
+	virtual void StartSprint();
+	virtual void StopSprint();
+
+	virtual void LightAttack();
+	virtual void HeavyAttack();
 	virtual void Roll();
 
 	UFUNCTION(Server, Reliable)
@@ -65,22 +83,6 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlayRollAnimation();
 
-	virtual void Move(const FInputActionValue& value);
-	virtual void Look(const FInputActionValue& value);
-	virtual void StartSprint();
-	virtual void StopSprint();
-
-	virtual void LightAttack();
-	virtual void HeavyAttack();
-
-	// Movement
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	TObjectPtr<class USpringArmComponent> SpringArm;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	TObjectPtr<class UCameraComponent> Camera;
-
-	// Server
 	UFUNCTION(Server, Reliable)
 	void Server_StartSprint();
 
@@ -109,34 +111,20 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlayAttackAnimation();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintNativeEvent)
 	void OnDamageReceived(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 
 	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
 	void Multicast_PlayHitAnimation();
 
-	// 피격 애니메이션 실행
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlayHitAnimation();
-
-	void SynchronizeRotation(float DeltaTime);
-
-	UPROPERTY(Replicated)
-	FRotator ReplicatedRotation;
-
-	FRotator TargetRotation;
-
-	UPROPERTY(Replicated, BlueprintReadWrite)
-	bool bIsInvincible;
 
 private:
 	TObjectPtr<class UInputActionGroup> InputActionGroup;
 
 	UPROPERTY()
 	UHealthComponent* HealthCompRef;
-
-public:	
-	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
