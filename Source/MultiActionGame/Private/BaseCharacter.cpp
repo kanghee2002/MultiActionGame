@@ -11,7 +11,8 @@
 #include "BaseAnimInstance.h"
 #include <EnhancedInputComponent.h>
 
-ABaseCharacter::ABaseCharacter() {
+ABaseCharacter::ABaseCharacter() 
+{
 	PrimaryActorTick.bCanEverTick = true;
 
     static ConstructorHelpers::FObjectFinder<UInputActionGroup> ActionGroupAsset(TEXT("/Game/Input/InputActionGroup.InputActionGroup"));
@@ -56,7 +57,8 @@ ABaseCharacter::ABaseCharacter() {
 	OnTakeAnyDamage.AddDynamic(this, &ABaseCharacter::OnDamageReceived);
 }
 
-void ABaseCharacter::BeginPlay() {
+void ABaseCharacter::BeginPlay() 
+{
 	Super::BeginPlay();
 
     GetCharacterMovement()->MaxWalkSpeed = GetMaxWalkSpeed();
@@ -66,9 +68,16 @@ void ABaseCharacter::BeginPlay() {
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay Character: %s"), *this->GetName());
 }
 
-void ABaseCharacter::Tick(float DeltaTime) {
+void ABaseCharacter::Tick(float DeltaTime) 
+{
 	Super::Tick(DeltaTime);
 
+	SynchronizeRotation(DeltaTime);
+	SynchronizeRotation(DeltaTime);
+}
+
+void ABaseCharacter::SynchronizeRotation(float DeltaTime)
+{
 	FRotator currentRotation = GetActorRotation();
 
 	float angleDifference = FMath::Abs(FMath::FindDeltaAngleDegrees(currentRotation.Yaw, ReplicatedRotation.Yaw));
@@ -92,7 +101,8 @@ void ABaseCharacter::Tick(float DeltaTime) {
 	}
 }
 
-void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
+void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) 
+{
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
     UEnhancedInputComponent* component = Cast<UEnhancedInputComponent>(PlayerInputComponent);
@@ -106,13 +116,14 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
     component->BindAction(InputActionGroup->LookAction, ETriggerEvent::Triggered, this, &ABaseCharacter::Look);
     component->BindAction(InputActionGroup->SprintAction, ETriggerEvent::Started, this, &ABaseCharacter::StartSprint);
     component->BindAction(InputActionGroup->SprintAction, ETriggerEvent::Completed, this, &ABaseCharacter::StopSprint);
-    component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Started, this, &ABaseCharacter::Jump);
-    component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Completed, this, &ABaseCharacter::StopJumping);
+    component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Started, this, &ABaseCharacter::Roll);
+    //component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Completed, this, &ABaseCharacter::StopJumping);
 	component->BindAction(InputActionGroup->LightAttackAction, ETriggerEvent::Started, this, &ABaseCharacter::LightAttack);
 	component->BindAction(InputActionGroup->HeavyAttackAction, ETriggerEvent::Started, this, &ABaseCharacter::HeavyAttack);
 }
 
-void ABaseCharacter::Move(const FInputActionValue& value) {
+void ABaseCharacter::Move(const FInputActionValue& value) 
+{
 	if (bIsJumping || !bCanPlayerControl)
 	{
 		return;
@@ -145,8 +156,6 @@ void ABaseCharacter::Move(const FInputActionValue& value) {
             // 로컬은 바라보는 방향 지정, 서버에 바라보는 방향 알림
             if (IsLocallyControlled())
             {
-                FRotator currentRotation = GetActorRotation();
-
 				TargetRotation = targetRotation;
                 Server_SetRotation(targetRotation);
             }
@@ -154,7 +163,8 @@ void ABaseCharacter::Move(const FInputActionValue& value) {
     }
 }
     
-void ABaseCharacter::Look(const FInputActionValue& value) {
+void ABaseCharacter::Look(const FInputActionValue& value) 
+{
     FVector2D lookAxisVector = value.Get<FVector2D>();
 
     FRotator currentRotation = SpringArm->GetComponentRotation();
@@ -170,7 +180,8 @@ void ABaseCharacter::Look(const FInputActionValue& value) {
     SpringArm->SetWorldRotation(newRotation);
 }
 
-void ABaseCharacter::StartSprint() {
+void ABaseCharacter::StartSprint() 
+{
     bIsSprinting = true;
     GetCharacterMovement()->MaxWalkSpeed = GetMaxSprintSpeed();
 
@@ -180,7 +191,8 @@ void ABaseCharacter::StartSprint() {
     }
 }
 
-void ABaseCharacter::StopSprint() {
+void ABaseCharacter::StopSprint() 
+{
     bIsSprinting = false;
     GetCharacterMovement()->MaxWalkSpeed = GetMaxWalkSpeed();
 
@@ -255,14 +267,62 @@ void ABaseCharacter::Jump() {
     }
 }
 
-void ABaseCharacter::StopJumping() {
+void ABaseCharacter::StopJumping() 
+{
     Super::StopJumping();
 }
 
-void ABaseCharacter::Landed(const FHitResult& hit) {
+void ABaseCharacter::Landed(const FHitResult& hit) 
+{
     Super::Landed(hit);
 
     bIsJumping = false;
+}
+
+void ABaseCharacter::Roll()
+{
+	if (!HasAuthority())
+	{
+		Server_Roll();
+	}
+	else
+	{
+		Server_Roll_Implementation();
+	}
+}
+
+void ABaseCharacter::Server_Roll_Implementation()
+{
+	if (!BP_CanRoll())
+	{
+		return;
+	}
+
+	// TODO
+	// Decrease Stamina
+
+	bIsInvincible = true;
+	bCanPlayerControl = false;
+
+	FVector directionVector;
+	if (IsLocallyControlled())
+	{
+		directionVector = TargetRotation.Vector();
+	}
+	else
+	{
+		directionVector = ReplicatedRotation.Vector();
+	}
+
+	LaunchCharacter(directionVector * 900.0f + FVector(0.0f, 0.0f, 200.0f), true, true);
+	//LaunchCharacter(GetActorForwardVector() * 900.0f + FVector(0.0f, 0.0f, 200.0f), true, true);
+
+	Multicast_PlayRollAnimation();
+}
+
+void ABaseCharacter::Multicast_PlayRollAnimation_Implementation()
+{
+	BP_PlayRollAnimation();
 }
 
 void ABaseCharacter::OnDamageReceived(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
@@ -282,6 +342,7 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
     DOREPLIFETIME(ABaseCharacter, bIsSprinting);
     DOREPLIFETIME(ABaseCharacter, bIsJumping);
+	DOREPLIFETIME(ABaseCharacter, bIsInvincible);
     DOREPLIFETIME(ABaseCharacter, bCanDoComboAttack);
 	DOREPLIFETIME(ABaseCharacter, bCanPlayerControl);
     DOREPLIFETIME(ABaseCharacter, ReplicatedRotation);

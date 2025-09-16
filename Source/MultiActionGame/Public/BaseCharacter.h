@@ -29,18 +29,41 @@ public:
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bCanPlayerControl;
 
-protected:
-	virtual const float GetMaxSprintSpeed() {
-		return 800.f;
+	UFUNCTION(BlueprintCallable)
+	bool const IsInvincible()
+	{
+		return bIsInvincible;
 	}
-	virtual const float GetMaxWalkSpeed() {
-		return 400.f;
+
+protected:
+	virtual const float GetMaxSprintSpeed() 
+	{
+		return 800.0f;
+	}
+	virtual const float GetMaxWalkSpeed() 
+	{
+		return 400.0f;
 	}
 
 	virtual void BeginPlay() override;
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual void Jump() override;
 	virtual void StopJumping() override;
+
+	virtual void Roll();
+
+	UFUNCTION(Server, Reliable)
+	void Server_Roll();
+
+	// 모든 클라(서버 포함)에서 실행
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
+	void Multicast_PlayRollAnimation();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	bool BP_CanRoll() const;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void BP_PlayRollAnimation();
 
 	virtual void Move(const FInputActionValue& value);
 	virtual void Look(const FInputActionValue& value);
@@ -96,10 +119,15 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlayHitAnimation();
 
+	void SynchronizeRotation(float DeltaTime);
+
 	UPROPERTY(Replicated)
 	FRotator ReplicatedRotation;
 
 	FRotator TargetRotation;
+
+	UPROPERTY(Replicated, BlueprintReadWrite)
+	bool bIsInvincible;
 
 private:
 	TObjectPtr<class UInputActionGroup> InputActionGroup;
