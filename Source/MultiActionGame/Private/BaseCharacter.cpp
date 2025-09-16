@@ -120,6 +120,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
     component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Started, this, &ABaseCharacter::Roll);
 	component->BindAction(InputActionGroup->LightAttackAction, ETriggerEvent::Started, this, &ABaseCharacter::LightAttack);
 	component->BindAction(InputActionGroup->HeavyAttackAction, ETriggerEvent::Started, this, &ABaseCharacter::HeavyAttack);
+	component->BindAction(InputActionGroup->SelfHealAction, ETriggerEvent::Started, this, &ABaseCharacter::SelfHeal);
 }
 
 // Movement
@@ -183,7 +184,6 @@ void ABaseCharacter::Look(const FInputActionValue& value)
 
 void ABaseCharacter::StartSprint() 
 {
-    bIsSprinting = true;
     GetCharacterMovement()->MaxWalkSpeed = GetMaxSprintSpeed();
 
     if (!HasAuthority())
@@ -194,7 +194,6 @@ void ABaseCharacter::StartSprint()
 
 void ABaseCharacter::StopSprint() 
 {
-    bIsSprinting = false;
     GetCharacterMovement()->MaxWalkSpeed = GetMaxWalkSpeed();
 
     if (!HasAuthority())
@@ -256,10 +255,13 @@ void ABaseCharacter::Server_StopSprint_Implementation()
 // Server Attack
 void ABaseCharacter::Server_Attack_Implementation()
 {
+	// TODO: Check Stamina
 	if (!BP_CanAttack())
 	{
 		return;
 	}
+
+	// TODO: Decrease Stamina
 
 	BP_ExecuteAttack();
 
@@ -271,16 +273,28 @@ void ABaseCharacter::Multicast_PlayAttackAnimation_Implementation()
 	BP_PlayAttackAnimation();
 }
 
+// Server Hit
+void ABaseCharacter::OnDamageReceived_Implementation(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+	bCanPlayerControl = false;
+	Multicast_PlayHitAnimation();
+}
+
+void ABaseCharacter::Multicast_PlayHitAnimation_Implementation()
+{
+	BP_PlayHitAnimation();
+}
+
 // Server Roll
 void ABaseCharacter::Server_Roll_Implementation()
 {
+	// TODO: Check Stamina
 	if (!BP_CanRoll())
 	{
 		return;
 	}
 
-	// TODO
-	// Decrease Stamina
+	// TODO: Decrease Stamina
 
 	bIsInvincible = true;
 	bCanPlayerControl = false;
@@ -305,16 +319,35 @@ void ABaseCharacter::Multicast_PlayRollAnimation_Implementation()
 	BP_PlayRollAnimation();
 }
 
-// Server Hit
-void ABaseCharacter::OnDamageReceived_Implementation(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+void ABaseCharacter::SelfHeal()
 {
-	bCanPlayerControl = false;
-	Multicast_PlayHitAnimation();
+	if (!HasAuthority())
+	{
+		Server_SelfHeal();
+	}
+	else
+	{
+		Server_SelfHeal_Implementation();
+	}
 }
 
-void ABaseCharacter::Multicast_PlayHitAnimation_Implementation()
+void ABaseCharacter::Server_SelfHeal_Implementation()
 {
-	BP_PlayHitAnimation();
+	// TODO: Check Remaining Self Heal Count
+	if (!BP_CanSelfHeal())
+	{
+		return;
+	}
+
+	bCanPlayerControl = false;
+	HealthCompRef->Heal(100.0f);
+
+	Multicast_PlaySelfHealAnimation();
+}
+
+void ABaseCharacter::Multicast_PlaySelfHealAnimation_Implementation()
+{
+	BP_PlaySelfHealAnimation();
 }
 
 // Replication
@@ -322,7 +355,6 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-    DOREPLIFETIME(ABaseCharacter, bIsSprinting);
 	DOREPLIFETIME(ABaseCharacter, bIsInvincible);
     DOREPLIFETIME(ABaseCharacter, bCanDoComboAttack);
 	DOREPLIFETIME(ABaseCharacter, bCanPlayerControl);

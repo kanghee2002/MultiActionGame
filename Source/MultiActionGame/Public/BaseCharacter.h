@@ -17,9 +17,6 @@ class MULTIACTIONGAME_API ABaseCharacter : public ACharacter
 public:
 	ABaseCharacter();
 
-	UPROPERTY(Replicated, BlueprintReadOnly)
-	bool bIsSprinting;
-
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bCanDoComboAttack;
 
@@ -69,29 +66,20 @@ protected:
 	virtual void LightAttack();
 	virtual void HeavyAttack();
 	virtual void Roll();
+	virtual void SelfHeal();
 
-	UFUNCTION(Server, Reliable)
-	void Server_Roll();
-
-	// 모든 클라(서버 포함)에서 실행
-	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
-	void Multicast_PlayRollAnimation();
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
-	bool BP_CanRoll() const;
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
-	void BP_PlayRollAnimation();
-
+	// Sprint
 	UFUNCTION(Server, Reliable)
 	void Server_StartSprint();
 
 	UFUNCTION(Server, Reliable)
 	void Server_StopSprint();
 
+	// Rotation
 	UFUNCTION(Server, Reliable)
 	void Server_SetRotation(FRotator NewRotation);
 
+	// Attack
 	// 서버에서만 실행
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Combat")
 	void Server_Attack();
@@ -111,6 +99,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlayAttackAnimation();
 
+	// Hit
 	UFUNCTION(BlueprintNativeEvent)
 	void OnDamageReceived(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 
@@ -119,6 +108,33 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlayHitAnimation();
+
+	// Roll
+	UFUNCTION(Server, Reliable)
+	void Server_Roll();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	bool BP_CanRoll() const;
+
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
+	void Multicast_PlayRollAnimation();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void BP_PlayRollAnimation();
+
+	// Self Heal
+	UFUNCTION(Server, Reliable)
+	void Server_SelfHeal();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	bool BP_CanSelfHeal() const;
+
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
+	void Multicast_PlaySelfHealAnimation();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void BP_PlaySelfHealAnimation();
+
 
 private:
 	TObjectPtr<class UInputActionGroup> InputActionGroup;
