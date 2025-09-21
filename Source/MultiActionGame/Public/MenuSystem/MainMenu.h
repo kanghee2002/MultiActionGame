@@ -6,7 +6,7 @@
 #include "MenuWidget.h"
 #include "Components/CheckBox.h"
 #include "RadioCheckBox.h"
-#include "CharacterType.h"
+#include "Character/CharacterType.h"
 #include "MainMenu.generated.h"
 
 /**

@@ -2,13 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "PlayerHealthBar.generated.h"
+#include "InGameHUD.generated.h"
 
 class UProgressBar;
 class UHealthComponent;
 
 UCLASS()
-class MULTIACTIONGAME_API UPlayerHealthBar : public UUserWidget
+class MULTIACTIONGAME_API UInGameHUD : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -27,6 +27,9 @@ protected:
 	// 위젯 그래프에서 BindWidget 해야 함 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UProgressBar* HealthProgressBar;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UProgressBar* StaminaProgressBar;
 
 	UPROPERTY()
 	TObjectPtr<UHealthComponent> BoundHealthComponent;

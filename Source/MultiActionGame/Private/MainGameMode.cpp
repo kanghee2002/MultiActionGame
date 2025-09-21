@@ -2,10 +2,10 @@
 
 
 #include "MainGameMode.h"
-#include "CharacterType.h"
+#include "Character/CharacterType.h"
 #include "MainPlayerController.h"
 #include "MultiGameInstance.h"
-#include "TestCharacter1.h"
+#include "Character/TestCharacter1.h"
 
 APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot)
 {
@@ -36,11 +36,11 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 		// FOR DEBUG
 		if (count % 2 == 0)
 		{
-			PawnToSpawn = BossCharacter;
+			//PawnToSpawn = BossCharacter;
 		}
 		else
 		{
-			PawnToSpawn = DefaultPawnClass;
+			//PawnToSpawn = DefaultPawnClass;
 		}
 		break;
 	case ECharacterType::Knight:

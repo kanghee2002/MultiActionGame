@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "CharacterType.h"
+#include "Character/CharacterType.h"
 #include "MenuInterface.generated.h"
 
 // This class does not need to be modified.

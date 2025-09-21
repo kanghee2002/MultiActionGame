@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "CharacterType.h"
+#include "Character/CharacterType.h"
 #include "Net/UnrealNetwork.h"
 #include "MainPlayerController.generated.h"
 
-class UPlayerHealthBar;
+class UInGameHUD;
 class UHealthComponent;
 
 /**
@@ -48,5 +48,5 @@ public:
 	void CreateHealthBar();
 
 	UPROPERTY()
-	UPlayerHealthBar* HealthBarWidget;
+	UInGameHUD* HealthBarWidget;
 };

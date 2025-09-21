@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "MenuSystem/MenuInterface.h"
-#include "CharacterType.h"
+#include "Character/CharacterType.h"
 #include "MultiGameInstance.generated.h"
 
 /**

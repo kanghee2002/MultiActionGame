@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "TestCharacter1.h"
+#include "Character/TestCharacter1.h"
 
 // Sets default values
 ATestCharacter1::ATestCharacter1()

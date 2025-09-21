@@ -1,5 +1,5 @@
 
-#include "HealthComponent.h"
+#include "Character/HealthComponent.h"
 UHealthComponent::UHealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;

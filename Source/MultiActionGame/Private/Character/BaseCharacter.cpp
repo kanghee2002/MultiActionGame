@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BaseCharacter.h"
+#include "Character/BaseCharacter.h"
 #include "InputActionGroup.h"
 #include "MainPlayerController.h"
-#include "PlayerHealthBar.h"
+#include "InGameHUD.h"
 
 #include "BaseAnimInstance.h"
 

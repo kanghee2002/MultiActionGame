@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "MainPlayerController.h"
 
-#include "BaseCharacter.h"
-#include "PlayerHealthBar.h"        // UPlayerHealthBar 클래스 헤더
-#include "HealthComponent.h"        // UHealthComponent 클래스 헤더
+#include "Character/BaseCharacter.h"
+#include "InGameHUD.h"        // UInGameHUD 클래스 헤더
+#include "Character/HealthComponent.h"        // UHealthComponent 클래스 헤더
 #include "Blueprint/UserWidget.h"   // CreateWidget 함수 사용을 위한 헤더
 #include "MultiGameInstance.h"
 
@@ -28,7 +28,7 @@ void AMainPlayerController::CreateHealthBar()
 	{
 		if (!HealthBarWidget)
 		{
-			HealthBarWidget = CreateWidget<UPlayerHealthBar>(this, HealthBarClass);
+			HealthBarWidget = CreateWidget<UInGameHUD>(this, HealthBarClass);
 			if (HealthBarWidget)
 			{
 				HealthBarWidget->AddToViewport();
