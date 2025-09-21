@@ -36,6 +36,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> HealthBarClass; 
 
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> StaminaBarClass; 
+
 public:
 	UPROPERTY(Replicated)
 	ECharacterType SelectedCharacterType;
@@ -48,5 +51,5 @@ public:
 	void CreateHealthBar();
 
 	UPROPERTY()
-	UInGameHUD* HealthBarWidget;
+	UInGameHUD* InGameHUDWidget;
 };

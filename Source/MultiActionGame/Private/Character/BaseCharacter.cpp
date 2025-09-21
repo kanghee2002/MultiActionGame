@@ -55,8 +55,12 @@ ABaseCharacter::ABaseCharacter()
 	bAlwaysRelevant = true;
 
 	HealthCompRef = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	StaminaCompRef = CreateDefaultSubobject<UStaminaComponent>(TEXT("StaminaComponent"));
 
 	OnTakeAnyDamage.AddDynamic(this, &ABaseCharacter::OnDamageReceived);
+
+	// 변수 설정
+	AttackStaminaCost = 30.0f;
 }
 
 void ABaseCharacter::BeginPlay() 
@@ -255,13 +259,15 @@ void ABaseCharacter::Server_StopSprint_Implementation()
 // Server Attack
 void ABaseCharacter::Server_Attack_Implementation()
 {
-	// TODO: Check Stamina
 	if (!BP_CanAttack())
 	{
 		return;
 	}
 
-	// TODO: Decrease Stamina
+	if (!StaminaCompRef->TryUseStamina(AttackStaminaCost))
+	{
+		return;
+	}
 
 	BP_ExecuteAttack();
 

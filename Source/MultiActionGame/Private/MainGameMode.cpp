@@ -36,11 +36,11 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 		// FOR DEBUG
 		if (count % 2 == 0)
 		{
-			//PawnToSpawn = BossCharacter;
+			PawnToSpawn = BossCharacter;
 		}
 		else
 		{
-			//PawnToSpawn = DefaultPawnClass;
+			PawnToSpawn = DefaultPawnClass;
 		}
 		break;
 	case ECharacterType::Knight:

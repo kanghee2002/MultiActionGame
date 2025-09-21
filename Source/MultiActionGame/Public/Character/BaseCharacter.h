@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "HealthComponent.h"
+#include "StaminaComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "BaseCharacter.generated.h"
 
@@ -35,6 +36,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<class UCameraComponent> Camera;
+
+	UPROPERTY(BlueprintReadWrite)
+	float AttackStaminaCost;
 
 	UPROPERTY(Replicated)
 	FRotator ReplicatedRotation;
@@ -141,6 +145,8 @@ private:
 
 	UPROPERTY()
 	UHealthComponent* HealthCompRef;
+
+	UStaminaComponent* StaminaCompRef;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 

@@ -26,12 +26,12 @@ void AMainPlayerController::CreateHealthBar()
 {
 	if (HealthBarClass)
 	{
-		if (!HealthBarWidget)
+		if (!InGameHUDWidget)
 		{
-			HealthBarWidget = CreateWidget<UInGameHUD>(this, HealthBarClass);
-			if (HealthBarWidget)
+			InGameHUDWidget = CreateWidget<UInGameHUD>(this, HealthBarClass);
+			if (InGameHUDWidget)
 			{
-				HealthBarWidget->AddToViewport();
+				InGameHUDWidget->AddToViewport();
 				UE_LOG(LogTemp, Warning, TEXT("HealthBar Created"));
 			}
 			else
@@ -53,12 +53,22 @@ void AMainPlayerController::CreateHealthBar()
 	{
 		if (UHealthComponent* HealthComp = MyChar->FindComponentByClass<UHealthComponent>())
 		{
-			HealthBarWidget->InitializeWithHealthComponent(HealthComp);
+			InGameHUDWidget->InitializeHealthComponent(HealthComp);
 			UE_LOG(LogTemp, Warning, TEXT("HealthBar bound to replicated Pawn: %s"), *MyChar->GetName());
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Failed to Find Health Component"));
+		}
+
+		if (UStaminaComponent* StaminaComp = MyChar->FindComponentByClass<UStaminaComponent>())
+		{
+			InGameHUDWidget->InitializeStaminaComponent(StaminaComp);
+			UE_LOG(LogTemp, Warning, TEXT("StaminaBar bound to replicated Pawn: %s"), *MyChar->GetName());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to Find Stamina Component"));
 		}
 	}
 	else
@@ -91,7 +101,7 @@ void AMainPlayerController::OnRep_Pawn()
 
 	if (IsLocalController())
 	{
-		if (HealthBarClass && !HealthBarWidget)
+		if (HealthBarClass && !InGameHUDWidget)
 		{
 			CreateHealthBar();
 		}
@@ -105,7 +115,7 @@ void AMainPlayerController::OnRep_Pawn()
 
 void AMainPlayerController::TryBindPawn()
 {
-	if (!HealthBarWidget) // ✅ 위젯 생성 안됐으면 리턴
+	if (!InGameHUDWidget) // ✅ 위젯 생성 안됐으면 리턴
 	{
 		UE_LOG(LogTemp, Warning, TEXT("TryBindPawn called but HealthBarWidget is nullptr"));
 		return;
@@ -115,7 +125,7 @@ void AMainPlayerController::TryBindPawn()
 	{
 		if (UHealthComponent* HealthComp = MyChar->FindComponentByClass<UHealthComponent>())
 		{
-			HealthBarWidget->InitializeWithHealthComponent(HealthComp);
+			InGameHUDWidget->InitializeHealthComponent(HealthComp);
 			UE_LOG(LogTemp, Warning, TEXT("HealthBar bound in TryBindPawn: %s"), *MyChar->GetName());
 		}
 	}

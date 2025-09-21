@@ -6,6 +6,7 @@
 
 class UProgressBar;
 class UHealthComponent;
+class UStaminaComponent;
 
 UCLASS()
 class MULTIACTIONGAME_API UInGameHUD : public UUserWidget
@@ -15,7 +16,11 @@ class MULTIACTIONGAME_API UInGameHUD : public UUserWidget
 public:
 	// HealthComponent 바인딩
 	UFUNCTION(BlueprintCallable, Category = "UI")
-	void InitializeWithHealthComponent(UHealthComponent* HealthComp);
+	void InitializeHealthComponent(UHealthComponent* HealthComp);
+
+	// StaminaComponent 바인딩
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void InitializeStaminaComponent(UStaminaComponent* StaminaComp);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -23,6 +28,9 @@ protected:
 	// 이벤트 콜백 
 	UFUNCTION(BlueprintCallable)
 	void UpdateHealthBarUI(float NewHealth, float Delta);
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateStaminaBarUI(float NewStamina);
 
 	// 위젯 그래프에서 BindWidget 해야 함 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -35,6 +43,7 @@ protected:
 	TObjectPtr<UHealthComponent> BoundHealthComponent;
 
 private:
-	// 최대 체력 값 
 	float MaxHealth;
+
+	float MaxStamina;
 };
