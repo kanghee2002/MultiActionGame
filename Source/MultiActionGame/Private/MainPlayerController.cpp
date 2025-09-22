@@ -25,11 +25,11 @@ void AMainPlayerController::BeginPlay() {
 void AMainPlayerController::CreateInGameHUD()
 {
 	// Create InGameHUD
-	if (HealthBarClass)
+	if (InGameHUD)
 	{
 		if (!InGameHUDWidget)
 		{
-			InGameHUDWidget = CreateWidget<UInGameHUD>(this, HealthBarClass);
+			InGameHUDWidget = CreateWidget<UInGameHUD>(this, InGameHUD);
 			if (InGameHUDWidget)
 			{
 				InGameHUDWidget->AddToViewport();
@@ -87,7 +87,7 @@ void AMainPlayerController::OnRep_Pawn()
 
 	if (IsLocalController())
 	{
-		if (HealthBarClass && !InGameHUDWidget)
+		if (InGameHUD && !InGameHUDWidget)
 		{
 			CreateInGameHUD();
 		}

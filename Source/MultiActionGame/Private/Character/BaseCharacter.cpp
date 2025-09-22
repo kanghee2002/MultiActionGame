@@ -55,12 +55,13 @@ ABaseCharacter::ABaseCharacter()
 	bAlwaysRelevant = true;
 
 	HealthCompRef = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-	StaminaCompRef = CreateDefaultSubobject<UStaminaComponent>(TEXT("StaminaComponent"));
+	StaminaCompRef = CreateDefaultSubobject<UStaminaComponent>(TEXT("StaminaCompRef"));
 
 	OnTakeAnyDamage.AddDynamic(this, &ABaseCharacter::OnDamageReceived);
 
 	// 변수 설정
-	AttackStaminaCost = 30.0f;
+	AttackStaminaCost = 15.0f;
+	RollStaminaCost = 20.0f;
 	CurrentHealCount = 5;
 }
 
@@ -275,6 +276,8 @@ void ABaseCharacter::Server_Attack_Implementation()
 		return;
 	}
 
+	StopRecoveryStamina();
+
 	BP_ExecuteAttack();
 
 	Multicast_PlayAttackAnimation();
@@ -289,6 +292,9 @@ void ABaseCharacter::Multicast_PlayAttackAnimation_Implementation()
 void ABaseCharacter::OnDamageReceived_Implementation(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	bCanPlayerControl = false;
+
+	StopRecoveryStamina();
+
 	Multicast_PlayHitAnimation();
 }
 
@@ -300,13 +306,22 @@ void ABaseCharacter::Multicast_PlayHitAnimation_Implementation()
 // Server Roll
 void ABaseCharacter::Server_Roll_Implementation()
 {
-	// TODO: Check Stamina
 	if (!BP_CanRoll())
 	{
 		return;
 	}
 
-	// TODO: Decrease Stamina
+	if (!StaminaCompRef)
+	{
+		return;
+	}
+
+	if (!StaminaCompRef->TryUseStamina(AttackStaminaCost))
+	{
+		return;
+	}
+
+	StopRecoveryStamina();
 
 	bIsInvincible = true;
 	bCanPlayerControl = false;

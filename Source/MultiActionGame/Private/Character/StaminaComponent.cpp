@@ -10,22 +10,61 @@ UStaminaComponent::UStaminaComponent()
 	SetIsReplicatedByDefault(true);
 	DefaultMaxStamina = 100;
 	CurrentStamina = DefaultMaxStamina;
+	StaminaRecoveryRate = 10.0f;
 }
 
 void UStaminaComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (HasAuthority())
+	{
+		IsRecovering = true;
+	}
 }
 
 void UStaminaComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (HasAuthority())
+	{
+		if (IsRecovering && CurrentStamina < DefaultMaxStamina)
+		{
+			CurrentStamina += StaminaRecoveryRate * DeltaTime;
+			
+			OnStaminaChanged.Broadcast(CurrentStamina);
+		}
+	}
+}
+
+void UStaminaComponent::StartRecovery()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	IsRecovering = true;
+}
+
+void UStaminaComponent::StopRecovery()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	IsRecovering = false;
 }
 
 bool UStaminaComponent::TryUseStamina(float Amount)
 {
+	if (!HasAuthority())
+	{
+		return false;
+	}
+
 	if (CurrentStamina >= Amount)
 	{
 		CurrentStamina -= Amount;
@@ -48,5 +87,6 @@ void UStaminaComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UStaminaComponent, CurrentStamina);
+	DOREPLIFETIME(UStaminaComponent, IsRecovering);
 }
 

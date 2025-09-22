@@ -26,6 +26,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentStamina)
 	float CurrentStamina;
 
+	UPROPERTY(BlueprintReadWrite)
+	float StaminaRecoveryRate;
+
+	UFUNCTION(BlueprintCallable)
+	void StartRecovery();
+
+	UFUNCTION(BlueprintCallable)
+	void StopRecovery();
+
 	bool TryUseStamina(float Amount);
 
 	UFUNCTION()
@@ -36,8 +45,21 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	bool const HasAuthority()
+	{
+		if (GetOwner()->HasAuthority())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	UPROPERTY(Replicated, BlueprintReadWrite)
+	bool IsRecovering;
+
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
 };

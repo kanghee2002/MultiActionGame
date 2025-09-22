@@ -51,6 +51,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	float AttackStaminaCost;
 
+	UPROPERTY(BlueprintReadWrite)
+	float RollStaminaCost;
+
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentHealCount)
 	int CurrentHealCount;
 
@@ -69,6 +72,24 @@ protected:
 	virtual const float GetMaxWalkSpeed() 
 	{
 		return 400.0f;
+	}
+
+	UFUNCTION(BlueprintCallable)
+	const void StartRecoveryStamina()
+	{
+		if (StaminaCompRef)
+		{
+			StaminaCompRef->StartRecovery();
+		}
+	}
+
+	UFUNCTION(BlueprintCallable)
+	const void StopRecoveryStamina()
+	{
+		if (StaminaCompRef)
+		{
+			StaminaCompRef->StopRecovery();
+		}
 	}
 
 	virtual void BeginPlay() override;

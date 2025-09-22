@@ -34,10 +34,7 @@ protected:
 	void TryBindPawn();
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> HealthBarClass; 
-
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> StaminaBarClass; 
+	TSubclassOf<UUserWidget> InGameHUD;
 
 public:
 	UPROPERTY(Replicated)
