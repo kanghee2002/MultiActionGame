@@ -9,6 +9,16 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStaminaChanged, float, NewStamina);
 
+UENUM(BlueprintType)
+enum class EStaminaState : uint8
+{
+	Normal = 0		UMETA(DisplayName = "Normal"),
+	Acting = 1		UMETA(DisplayName = "Acting"),
+	Sprinting = 2   UMETA(DisplayName = "Sprinting"),
+	Exhausted = 3   UMETA(DisplayName = "Exhausted"),
+	MAX = 4			UMETA(Hidden)
+};
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MULTIACTIONGAME_API UStaminaComponent : public UActorComponent
 {
@@ -29,11 +39,23 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	float StaminaRecoveryRate;
 
+	UPROPERTY(BlueprintReadWrite)
+	float ExhaustionRecoveryThreshold;
+
 	UFUNCTION(BlueprintCallable)
 	void StartRecovery();
 
 	UFUNCTION(BlueprintCallable)
 	void StopRecovery();
+
+	UFUNCTION(BlueprintCallable)
+	bool CanSprint();
+
+	UFUNCTION(BlueprintCallable)
+	void StartSprint();
+
+	UFUNCTION(BlueprintCallable)
+	void StopSprint();
 
 	bool TryUseStamina(float Amount);
 
@@ -57,8 +79,11 @@ protected:
 		}
 	}
 
+	UFUNCTION()
+	void UpdateStamina(float DeltaTime);
+
 	UPROPERTY(Replicated, BlueprintReadWrite)
-	bool IsRecovering;
+	EStaminaState StaminaState;
 
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

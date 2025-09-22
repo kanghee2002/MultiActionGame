@@ -63,15 +63,21 @@ ABaseCharacter::ABaseCharacter()
 	AttackStaminaCost = 15.0f;
 	RollStaminaCost = 20.0f;
 	CurrentHealCount = 5;
+	SprintSpeed = 800.0f;
+	WalkSpeed = 400.0f;
 }
 
 void ABaseCharacter::BeginPlay() 
 {
 	Super::BeginPlay();
 
-    GetCharacterMovement()->MaxWalkSpeed = GetMaxWalkSpeed();
+	if (HasAuthority())
+	{
+		CurrentSpeed = WalkSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
 
-	bCanPlayerControl = true;
+		bCanPlayerControl = true;
+	}
 
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay Character: %s"), *this->GetName());
 }
@@ -121,7 +127,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
     component->BindAction(InputActionGroup->MoveAction, ETriggerEvent::Triggered, this, &ABaseCharacter::Move);
     component->BindAction(InputActionGroup->LookAction, ETriggerEvent::Triggered, this, &ABaseCharacter::Look);
-    component->BindAction(InputActionGroup->SprintAction, ETriggerEvent::Started, this, &ABaseCharacter::StartSprint);
+    component->BindAction(InputActionGroup->SprintAction, ETriggerEvent::Triggered, this, &ABaseCharacter::StartSprint);
     component->BindAction(InputActionGroup->SprintAction, ETriggerEvent::Completed, this, &ABaseCharacter::StopSprint);
     component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Started, this, &ABaseCharacter::Roll);
 	component->BindAction(InputActionGroup->LightAttackAction, ETriggerEvent::Started, this, &ABaseCharacter::LightAttack);
@@ -193,24 +199,34 @@ void ABaseCharacter::OnRep_CurrentHealCount()
 	OnHealCountChanged.Broadcast(CurrentHealCount);
 }
 
+void ABaseCharacter::OnRep_CurrentMaxSpeed()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_CurrentMaxSpeed: %f"), CurrentSpeed);
+	GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
+}
+
 void ABaseCharacter::StartSprint() 
 {
-    GetCharacterMovement()->MaxWalkSpeed = GetMaxSprintSpeed();
-
     if (!HasAuthority())
     {
         Server_StartSprint();
     }
+	else
+	{
+		Server_StartSprint_Implementation();
+	}
 }
 
 void ABaseCharacter::StopSprint() 
 {
-    GetCharacterMovement()->MaxWalkSpeed = GetMaxWalkSpeed();
-
-    if (!HasAuthority())
-    {
-        Server_StopSprint();
-    }
+	if (!HasAuthority())
+	{
+		Server_StopSprint();
+	}
+	else
+	{
+		Server_StopSprint_Implementation();
+	}
 }
 
 void ABaseCharacter::LightAttack()
@@ -255,12 +271,29 @@ void ABaseCharacter::Server_SetRotation_Implementation(FRotator NewRotation)
 // Server Sprint
 void ABaseCharacter::Server_StartSprint_Implementation()
 {
-	StartSprint();
+	if (!StaminaCompRef || !StaminaCompRef->CanSprint())
+	{
+		CurrentSpeed = WalkSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
+	}
+	else
+	{
+		CurrentSpeed = SprintSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
+
+		StaminaCompRef->StartSprint();
+	}
 }
 
 void ABaseCharacter::Server_StopSprint_Implementation()
 {
-	StopSprint();
+	CurrentSpeed = WalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
+
+	if (StaminaCompRef)
+	{
+		StaminaCompRef->StopSprint();
+	}
 }
 
 // Server Attack
@@ -271,7 +304,7 @@ void ABaseCharacter::Server_Attack_Implementation()
 		return;
 	}
 
-	if (!StaminaCompRef->TryUseStamina(AttackStaminaCost))
+	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(AttackStaminaCost))
 	{
 		return;
 	}
@@ -311,12 +344,7 @@ void ABaseCharacter::Server_Roll_Implementation()
 		return;
 	}
 
-	if (!StaminaCompRef)
-	{
-		return;
-	}
-
-	if (!StaminaCompRef->TryUseStamina(AttackStaminaCost))
+	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(AttackStaminaCost))
 	{
 		return;
 	}
@@ -394,4 +422,5 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
     DOREPLIFETIME(ABaseCharacter, bCanDoComboAttack);
 	DOREPLIFETIME(ABaseCharacter, bCanPlayerControl);
     DOREPLIFETIME(ABaseCharacter, ReplicatedRotation);
+    DOREPLIFETIME(ABaseCharacter, CurrentSpeed);
 }

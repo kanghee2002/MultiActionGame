@@ -54,8 +54,17 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	float RollStaminaCost;
 
+	UPROPERTY(EditDefaultsOnly)
+	float SprintSpeed;
+
+	UPROPERTY(EditDefaultsOnly)
+	float WalkSpeed;
+
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentHealCount)
 	int CurrentHealCount;
+
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentMaxSpeed)
+	float CurrentSpeed;
 
 	UPROPERTY(Replicated)
 	FRotator ReplicatedRotation;
@@ -64,15 +73,6 @@ protected:
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bIsInvincible;
-
-	virtual const float GetMaxSprintSpeed() 
-	{
-		return 800.0f;
-	}
-	virtual const float GetMaxWalkSpeed() 
-	{
-		return 400.0f;
-	}
 
 	UFUNCTION(BlueprintCallable)
 	const void StartRecoveryStamina()
@@ -109,6 +109,9 @@ protected:
 
 	UFUNCTION()
 	void OnRep_CurrentHealCount();
+
+	UFUNCTION()
+	void OnRep_CurrentMaxSpeed();
 
 	// Sprint
 	UFUNCTION(Server, Reliable)
