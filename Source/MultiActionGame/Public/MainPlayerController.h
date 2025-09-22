@@ -48,7 +48,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void CreateHealthBar();
+	void CreateInGameHUD();
 
 	UPROPERTY()
 	UInGameHUD* InGameHUDWidget;

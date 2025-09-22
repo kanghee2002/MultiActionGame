@@ -15,7 +15,6 @@ class MULTIACTIONGAME_API UStaminaComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	UStaminaComponent();
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")

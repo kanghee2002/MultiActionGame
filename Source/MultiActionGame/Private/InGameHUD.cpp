@@ -2,6 +2,7 @@
 #include "Components/ProgressBar.h"
 #include "Character/HealthComponent.h"
 #include "Character/StaminaComponent.h"
+#include "Character/BaseCharacter.h"
 
 void UInGameHUD::NativeConstruct()
 {
@@ -67,5 +68,31 @@ void UInGameHUD::UpdateStaminaBarUI(float NewStamina)
 	{
 		float percent = NewStamina / MaxStamina;
 		StaminaProgressBar->SetPercent(percent);
+	}
+}
+
+void UInGameHUD::InitializeHealCountText(ABaseCharacter* MyCharacter)
+{
+	if (!MyCharacter)
+	{
+		return;
+	}
+
+	MyCharacter->OnHealCountChanged.AddUniqueDynamic(this, &UInGameHUD::UpdateHealCountUI);
+}
+
+void UInGameHUD::UpdateHealCountUI(int NewHealCount)
+{
+	if (HealCountText && NewHealCount >= 0)
+	{
+		HealCountText->SetText(FText::AsNumber(NewHealCount));
+	}
+}
+
+void UInGameHUD::SetBossUI()
+{
+	if (HealOverlay)
+	{
+		HealOverlay->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }

@@ -61,6 +61,7 @@ ABaseCharacter::ABaseCharacter()
 
 	// 변수 설정
 	AttackStaminaCost = 30.0f;
+	CurrentHealCount = 5;
 }
 
 void ABaseCharacter::BeginPlay() 
@@ -184,6 +185,11 @@ void ABaseCharacter::Look(const FInputActionValue& value)
     newRotation.Pitch = FMath::Clamp(newRotation.Pitch, -70.0f, 70.0f);
 
     SpringArm->SetWorldRotation(newRotation);
+}
+
+void ABaseCharacter::OnRep_CurrentHealCount()
+{
+	OnHealCountChanged.Broadcast(CurrentHealCount);
 }
 
 void ABaseCharacter::StartSprint() 
@@ -339,14 +345,22 @@ void ABaseCharacter::SelfHeal()
 
 void ABaseCharacter::Server_SelfHeal_Implementation()
 {
-	// TODO: Check Remaining Self Heal Count
 	if (!BP_CanSelfHeal())
 	{
 		return;
 	}
 
+	if (CurrentHealCount <= 0)
+	{
+		return;
+	}
+
 	bCanPlayerControl = false;
-	HealthCompRef->Heal(100.0f);
+	
+	CurrentHealCount--;
+	OnHealCountChanged.Broadcast(CurrentHealCount);
+
+	HealthCompRef->Heal(50.0f);
 
 	Multicast_PlaySelfHealAnimation();
 }

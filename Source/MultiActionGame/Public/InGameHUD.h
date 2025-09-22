@@ -2,8 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/TextBlock.h"
+#include "Components/Overlay.h"
 #include "InGameHUD.generated.h"
 
+class ABaseCharacter;
 class UProgressBar;
 class UHealthComponent;
 class UStaminaComponent;
@@ -14,13 +17,21 @@ class MULTIACTIONGAME_API UInGameHUD : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	// HealthComponent 바인딩
+	// HealthComponent Binding
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void InitializeHealthComponent(UHealthComponent* HealthComp);
 
-	// StaminaComponent 바인딩
+	// StaminaComponent Binding
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void InitializeStaminaComponent(UStaminaComponent* StaminaComp);
+
+	// StaminaComponent Binding
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void InitializeHealCountText(ABaseCharacter* MyCharacter);
+
+	// Boss UI Setting
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void SetBossUI();
 
 protected:
 	virtual void NativeConstruct() override;
@@ -32,12 +43,21 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void UpdateStaminaBarUI(float NewStamina);
 
+	UFUNCTION(BlueprintCallable)
+	void UpdateHealCountUI(int NewHealCount);
+
 	// 위젯 그래프에서 BindWidget 해야 함 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UProgressBar* HealthProgressBar;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UProgressBar* StaminaProgressBar;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UOverlay* HealOverlay;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* HealCountText;
 
 	UPROPERTY()
 	TObjectPtr<UHealthComponent> BoundHealthComponent;

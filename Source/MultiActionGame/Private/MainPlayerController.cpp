@@ -22,8 +22,9 @@ void AMainPlayerController::BeginPlay() {
     }
 }
 
-void AMainPlayerController::CreateHealthBar()
+void AMainPlayerController::CreateInGameHUD()
 {
+	// Create InGameHUD
 	if (HealthBarClass)
 	{
 		if (!InGameHUDWidget)
@@ -34,21 +35,10 @@ void AMainPlayerController::CreateHealthBar()
 				InGameHUDWidget->AddToViewport();
 				UE_LOG(LogTemp, Warning, TEXT("HealthBar Created"));
 			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Failed to create HealthBar"));
-			}
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("HealthBar is already Created"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("HealthBarClass is not valid!"));
 	}
 
+	// Initialize
 	if (ABaseCharacter* MyChar = Cast<ABaseCharacter>(GetPawn()))
 	{
 		if (UHealthComponent* HealthComp = MyChar->FindComponentByClass<UHealthComponent>())
@@ -56,24 +46,20 @@ void AMainPlayerController::CreateHealthBar()
 			InGameHUDWidget->InitializeHealthComponent(HealthComp);
 			UE_LOG(LogTemp, Warning, TEXT("HealthBar bound to replicated Pawn: %s"), *MyChar->GetName());
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to Find Health Component"));
-		}
 
 		if (UStaminaComponent* StaminaComp = MyChar->FindComponentByClass<UStaminaComponent>())
 		{
 			InGameHUDWidget->InitializeStaminaComponent(StaminaComp);
 			UE_LOG(LogTemp, Warning, TEXT("StaminaBar bound to replicated Pawn: %s"), *MyChar->GetName());
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to Find Stamina Component"));
-		}
+
+		InGameHUDWidget->InitializeHealCountText(MyChar);
 	}
-	else
+
+	// Set Boss UI
+	if (SelectedCharacterType == ECharacterType::Knight)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to Character Cast"));
+		InGameHUDWidget->SetBossUI();
 	}
 }
 
@@ -86,7 +72,7 @@ void AMainPlayerController::OnPossess(APawn* InPawn)
 
 	if (IsLocalPlayerController())
 	{
-		CreateHealthBar();
+		CreateInGameHUD();
 	}
 	else
 	{
@@ -103,7 +89,7 @@ void AMainPlayerController::OnRep_Pawn()
 	{
 		if (HealthBarClass && !InGameHUDWidget)
 		{
-			CreateHealthBar();
+			CreateInGameHUD();
 		}
 	}
 	else

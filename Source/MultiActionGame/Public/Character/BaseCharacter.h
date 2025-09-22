@@ -10,6 +10,8 @@
 #include "Net/UnrealNetwork.h"
 #include "BaseCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealCountChanged, int, NewHealthCount);
+
 UCLASS()
 class MULTIACTIONGAME_API ABaseCharacter : public ACharacter
 {
@@ -17,6 +19,9 @@ class MULTIACTIONGAME_API ABaseCharacter : public ACharacter
 
 public:
 	ABaseCharacter();
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnHealCountChanged OnHealCountChanged;
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bCanDoComboAttack;
@@ -37,8 +42,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<class UCameraComponent> Camera;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
+	UHealthComponent* HealthCompRef;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
+	UStaminaComponent* StaminaCompRef;
+
 	UPROPERTY(BlueprintReadWrite)
 	float AttackStaminaCost;
+
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentHealCount)
+	int CurrentHealCount;
 
 	UPROPERTY(Replicated)
 	FRotator ReplicatedRotation;
@@ -71,6 +85,9 @@ protected:
 	virtual void HeavyAttack();
 	virtual void Roll();
 	virtual void SelfHeal();
+
+	UFUNCTION()
+	void OnRep_CurrentHealCount();
 
 	// Sprint
 	UFUNCTION(Server, Reliable)
@@ -142,11 +159,6 @@ protected:
 
 private:
 	TObjectPtr<class UInputActionGroup> InputActionGroup;
-
-	UPROPERTY()
-	UHealthComponent* HealthCompRef;
-
-	UStaminaComponent* StaminaCompRef;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 

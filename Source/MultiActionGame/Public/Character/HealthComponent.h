@@ -16,7 +16,6 @@ class MULTIACTIONGAME_API UHealthComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
 	UHealthComponent();
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
@@ -45,7 +44,6 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
