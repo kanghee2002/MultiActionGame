@@ -49,6 +49,9 @@ protected:
 	UStaminaComponent* StaminaCompRef;
 
 	UPROPERTY(BlueprintReadWrite)
+	float BasicAttackDamage;
+
+	UPROPERTY(BlueprintReadWrite)
 	float AttackStaminaCost;
 
 	UPROPERTY(BlueprintReadWrite)
@@ -180,6 +183,12 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlaySelfHealAnimation();
 
+	// Death
+	UFUNCTION(NetMulticast, Reliable)
+	void OnDeath();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void BP_PlayDeathAnimation();
 
 private:
 	TObjectPtr<class UInputActionGroup> InputActionGroup;

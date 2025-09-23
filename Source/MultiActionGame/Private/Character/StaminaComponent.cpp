@@ -54,11 +54,11 @@ void UStaminaComponent::UpdateStamina(float DeltaTime)
 			OnStaminaChanged.Broadcast(CurrentStamina);
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("Stamina State: Normal"));
+		//UE_LOG(LogTemp, Warning, TEXT("Stamina State: Normal"));
 		break;
 	case EStaminaState::Acting:
 
-		UE_LOG(LogTemp, Warning, TEXT("Stamina State: Acting"));
+		//UE_LOG(LogTemp, Warning, TEXT("Stamina State: Acting"));
 		break;
 	case EStaminaState::Sprinting:
 		if (CurrentStamina > 0.0f)
@@ -77,7 +77,7 @@ void UStaminaComponent::UpdateStamina(float DeltaTime)
 			}
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("Stamina State: Sprinting"));
+		//UE_LOG(LogTemp, Warning, TEXT("Stamina State: Sprinting"));
 		break;
 	case EStaminaState::Exhausted:
 		if (CurrentStamina < ExhaustionRecoveryThreshold)
@@ -91,7 +91,7 @@ void UStaminaComponent::UpdateStamina(float DeltaTime)
 			StaminaState = EStaminaState::Normal;
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("Stamina State: Exhausted"));
+		//UE_LOG(LogTemp, Warning, TEXT("Stamina State: Exhausted"));
 		break;
 	case EStaminaState::MAX:
 		break;

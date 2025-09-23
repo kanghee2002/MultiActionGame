@@ -60,6 +60,7 @@ ABaseCharacter::ABaseCharacter()
 	OnTakeAnyDamage.AddDynamic(this, &ABaseCharacter::OnDamageReceived);
 
 	// 변수 설정
+	BasicAttackDamage = 10.0f;
 	AttackStaminaCost = 15.0f;
 	RollStaminaCost = 20.0f;
 	CurrentHealCount = 5;
@@ -78,6 +79,9 @@ void ABaseCharacter::BeginPlay()
 
 		bCanPlayerControl = true;
 	}
+
+	HealthCompRef->OnDeath.AddDynamic(this, &ABaseCharacter::OnDeath);
+
 
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay Character: %s"), *this->GetName());
 }
@@ -324,6 +328,11 @@ void ABaseCharacter::Multicast_PlayAttackAnimation_Implementation()
 // Server Hit
 void ABaseCharacter::OnDamageReceived_Implementation(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
+	if (HealthCompRef->CurrentHealth <= 0.0f)
+	{
+		return;
+	}
+
 	bCanPlayerControl = false;
 
 	StopRecoveryStamina();
@@ -411,6 +420,13 @@ void ABaseCharacter::Server_SelfHeal_Implementation()
 void ABaseCharacter::Multicast_PlaySelfHealAnimation_Implementation()
 {
 	BP_PlaySelfHealAnimation();
+}
+
+void ABaseCharacter::OnDeath_Implementation()
+{
+	bCanPlayerControl = false;
+
+	BP_PlayDeathAnimation();
 }
 
 // Replication

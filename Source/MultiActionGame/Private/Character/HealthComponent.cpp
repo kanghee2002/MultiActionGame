@@ -14,7 +14,6 @@ void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-
 	AActor* Owner = GetOwner();
 	if (Owner) {
 		// OnTakeAnyDamage 호출은 서버에서 이루어짐
@@ -45,11 +44,14 @@ void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDam
 	// 이 함수가 서버에서만 실행되도록 보장
 	if (!GetOwner()->HasAuthority()) return; 
 
-	if (Damage <= 0) return;
+	if (Damage <= 0.0f || CurrentHealth <= 0.0f) return;
 
-	if (DamagedActor == DamageCauser) return;
+	if (DamagedActor == DamageCauser) return;	// 자해 필터링
 
 	if (!ShouldApplyDamage(DamageCauser, InstigatedBy)) return; // 팀킬 필터링
+
+	UE_LOG(LogTemp, Warning, TEXT("TakeDamage | Health : %f"), CurrentHealth);
+
 
 	AActor* MyActor = GetOwner();
 	FString ActorName;
@@ -66,7 +68,7 @@ void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDam
 
 	OnHealthChanged.Broadcast(CurrentHealth, CurrentHealth - OldHealth);
 
-	if (CurrentHealth <= 0)
+	if (CurrentHealth <= 0.0f)
 	{
 		OnDeath.Broadcast();
 	}
@@ -83,7 +85,7 @@ bool UHealthComponent::ShouldApplyDamage(AActor* DamageCauser, AController* Inst
 
 void UHealthComponent::OnRep_CurrentHealth()
 {
-	OnHealthChanged.Broadcast(CurrentHealth, 0.f);
+	OnHealthChanged.Broadcast(CurrentHealth, 0.0f);
 
 	// 로컬 클라이언트에서 로그를 찍어 동기화 확인
 	UE_LOG(LogTemp, Log, TEXT("Client Health Synced: %f"), CurrentHealth);
