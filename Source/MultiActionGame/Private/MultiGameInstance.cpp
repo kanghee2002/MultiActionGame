@@ -5,7 +5,7 @@
 #include "BluePrint/UserWidget.h"
 
 #include "MenuSystem/MainMenu.h"
-//#include "MenuSystem/InGameMenu.h"
+#include "MenuSystem/InGameMenu.h"
 #include "MenuSystem/MenuWidget.h"
 
 UMultiGameInstance::UMultiGameInstance(const FObjectInitializer& ObjectInitializer)
@@ -17,10 +17,10 @@ UMultiGameInstance::UMultiGameInstance(const FObjectInitializer& ObjectInitializ
 	MenuClass = MenuBPClass.Class;
 
 	// Set InGameMenuClass
-	//ConstructorHelpers::FClassFinder<UUserWidget> InGameMenuBPClass(TEXT("/Game/MenuSystem/WBP_InGameMenu"));
-	//if (!ensure(InGameMenuBPClass.Class != nullptr)) return;
+	ConstructorHelpers::FClassFinder<UUserWidget> InGameMenuBPClass(TEXT("/Game/MenuSystem/WBP_InGameMenu"));
+	if (!ensure(InGameMenuBPClass.Class != nullptr)) return;
 
-	//InGameMenuClass = InGameMenuBPClass.Class;
+	InGameMenuClass = InGameMenuBPClass.Class;
 }
 
 void UMultiGameInstance::LoadMenu()
@@ -33,20 +33,18 @@ void UMultiGameInstance::LoadMenu()
 	Menu->Setup();
 
 	Menu->SetMenuInterface(this);
-
-	//UE_LOG(LogTemp, Warning, TEXT("Load Menu"));
 }
 
 void UMultiGameInstance::LoadInGameMenu()
 {
-	/*if (!ensure(InGameMenuClass != nullptr)) return;
+	if (!ensure(InGameMenuClass != nullptr)) return;
 
 	InGameMenu = CreateWidget<UInGameMenu>(this, InGameMenuClass);
 	if (!ensure(InGameMenu != nullptr)) return;
 
 	InGameMenu->Setup();
 
-	InGameMenu->SetMenuInterface(this);*/
+	InGameMenu->SetMenuInterface(this);
 }
 
 void UMultiGameInstance::Host()
@@ -94,8 +92,8 @@ void UMultiGameInstance::Join(const FString& Address, ECharacterType CharacterTy
 
 void UMultiGameInstance::LoadMainMenu()
 {
-	/*APlayerController* PlayerController = GetFirstLocalPlayerController();
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
 	if (!ensure(PlayerController != nullptr)) return;
 
-	PlayerController->ClientTravel("/Game/MenuSystem/MainMenu", ETravelType::TRAVEL_Absolute);*/
+	PlayerController->ClientTravel("/Game/MenuSystem/MainMenu", ETravelType::TRAVEL_Absolute);
 }
