@@ -5,6 +5,8 @@
 #include "InputActionGroup.h"
 #include "MainPlayerController.h"
 #include "InGameHUD.h"
+#include "Components/WidgetComponent.h"
+#include "Character/HealthBarWidget.h"
 
 #include "BaseAnimInstance.h"
 
@@ -72,6 +74,7 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// 초기화 (서버)
 	if (HasAuthority())
 	{
 		CurrentSpeed = WalkSpeed;
@@ -82,6 +85,14 @@ void ABaseCharacter::BeginPlay()
 
 	HealthCompRef->OnDeath.AddDynamic(this, &ABaseCharacter::OnDeath);
 
+	// 체력바 초기화
+	if (UWidgetComponent* widgetComponent = FindComponentByClass<UWidgetComponent>())
+	{
+		if (UHealthBarWidget* healthBarComponent = Cast<UHealthBarWidget>(widgetComponent->GetUserWidgetObject()))
+		{
+			healthBarComponent->InitializeHealthComponent(HealthCompRef);
+		}
+	}
 
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay Character: %s"), *this->GetName());
 }

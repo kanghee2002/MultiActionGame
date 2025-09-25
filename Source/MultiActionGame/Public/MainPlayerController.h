@@ -31,7 +31,7 @@ protected:
 
 	virtual void OnRep_Pawn() override;
 
-	void TryBindPawn();
+	void HideHealthBarWidget(APawn* MyPawn);
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> InGameHUD;

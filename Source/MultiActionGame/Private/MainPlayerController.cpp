@@ -5,6 +5,8 @@
 #include "InGameHUD.h"        // UInGameHUD 클래스 헤더
 #include "Character/HealthComponent.h"        // UHealthComponent 클래스 헤더
 #include "Blueprint/UserWidget.h"   // CreateWidget 함수 사용을 위한 헤더
+#include "Components/WidgetComponent.h"
+#include "Character/HealthBarWidget.h"
 #include "MultiGameInstance.h"
 
 #include "Net/UnrealNetwork.h"
@@ -15,11 +17,42 @@ void AMainPlayerController::BeginPlay() {
 
     if (IsLocalController())
     {
-        if (const UMultiGameInstance* GI = Cast<UMultiGameInstance>(GetGameInstance()))
+        if (const UMultiGameInstance* gameInstance = Cast<UMultiGameInstance>(GetGameInstance()))
         {
-            ServerSetCharacterType(GI->SelectedCharacterType);
+            ServerSetCharacterType(gameInstance->SelectedCharacterType);
         }
     }
+}
+
+// 서버 UI 생성
+void AMainPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	UE_LOG(LogTemp, Warning, TEXT("OnPossess: %s"), *InPawn->GetName());
+
+	if (IsLocalPlayerController())
+	{
+		CreateInGameHUD();
+
+		HideHealthBarWidget(InPawn);
+	}
+}
+
+// 클라 UI 생성
+void AMainPlayerController::OnRep_Pawn()
+{
+	Super::OnRep_Pawn();
+	
+	if (IsLocalController())
+	{
+		if (InGameHUD && !InGameHUDWidget)
+		{
+			CreateInGameHUD();
+		}
+
+		HideHealthBarWidget(GetPawn());
+	}
 }
 
 void AMainPlayerController::CreateInGameHUD()
@@ -33,27 +66,28 @@ void AMainPlayerController::CreateInGameHUD()
 			if (InGameHUDWidget)
 			{
 				InGameHUDWidget->AddToViewport();
-				UE_LOG(LogTemp, Warning, TEXT("HealthBar Created"));
+				UE_LOG(LogTemp, Warning, TEXT("InGameHUD Created"));
 			}
 		}
 	}
 
 	// Initialize
-	if (ABaseCharacter* MyChar = Cast<ABaseCharacter>(GetPawn()))
+	if (ABaseCharacter* myChar = Cast<ABaseCharacter>(GetPawn()))
 	{
-		if (UHealthComponent* HealthComp = MyChar->FindComponentByClass<UHealthComponent>())
+		if (UHealthComponent* healthComp = myChar->FindComponentByClass<UHealthComponent>())
 		{
-			InGameHUDWidget->InitializeHealthComponent(HealthComp);
-			UE_LOG(LogTemp, Warning, TEXT("HealthBar bound to replicated Pawn: %s"), *MyChar->GetName());
+			InGameHUDWidget->InitializeHealthComponent(healthComp);
+			UE_LOG(LogTemp, Warning, TEXT("HealthBar bound to replicated Pawn: %s"), *myChar->GetName());
+
 		}
 
-		if (UStaminaComponent* StaminaComp = MyChar->FindComponentByClass<UStaminaComponent>())
+		if (UStaminaComponent* staminaComp = myChar->FindComponentByClass<UStaminaComponent>())
 		{
-			InGameHUDWidget->InitializeStaminaComponent(StaminaComp);
-			UE_LOG(LogTemp, Warning, TEXT("StaminaBar bound to replicated Pawn: %s"), *MyChar->GetName());
+			InGameHUDWidget->InitializeStaminaComponent(staminaComp);
+			UE_LOG(LogTemp, Warning, TEXT("StaminaBar bound to replicated Pawn: %s"), *myChar->GetName());
 		}
 
-		InGameHUDWidget->InitializeHealCountText(MyChar);
+		InGameHUDWidget->InitializeHealCountText(myChar);
 	}
 
 	// Set Boss UI
@@ -63,64 +97,17 @@ void AMainPlayerController::CreateInGameHUD()
 	}
 }
 
-// 서버 UI 생성
-void AMainPlayerController::OnPossess(APawn* InPawn)
+void AMainPlayerController::HideHealthBarWidget(APawn* MyPawn)
 {
-	Super::OnPossess(InPawn);
+	ABaseCharacter* myChar = Cast<ABaseCharacter>(MyPawn);
 
-	UE_LOG(LogTemp, Warning, TEXT("OnPossess: %s"), *InPawn->GetName());
+	if (UWidgetComponent* widgetComponent = myChar->FindComponentByClass<UWidgetComponent>())
+	{
+		widgetComponent->SetVisibility(false);
 
-	if (IsLocalPlayerController())
-	{
-		CreateInGameHUD();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Not Local Controller on OnPossess"));
+		UE_LOG(LogTemp, Warning, TEXT("Hide WidgetComp"));
 	}
 }
-
-// 클라 UI 생성
-void AMainPlayerController::OnRep_Pawn()
-{
-	Super::OnRep_Pawn();
-
-	if (IsLocalController())
-	{
-		if (InGameHUD && !InGameHUDWidget)
-		{
-			CreateInGameHUD();
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Not Local Controller on OnRep_Pawn"));
-	}
-}
-
-
-void AMainPlayerController::TryBindPawn()
-{
-	if (!InGameHUDWidget) // ✅ 위젯 생성 안됐으면 리턴
-	{
-		UE_LOG(LogTemp, Warning, TEXT("TryBindPawn called but HealthBarWidget is nullptr"));
-		return;
-	}
-
-	if (ABaseCharacter* MyChar = Cast<ABaseCharacter>(GetPawn()))
-	{
-		if (UHealthComponent* HealthComp = MyChar->FindComponentByClass<UHealthComponent>())
-		{
-			InGameHUDWidget->InitializeHealthComponent(HealthComp);
-			UE_LOG(LogTemp, Warning, TEXT("HealthBar bound in TryBindPawn: %s"), *MyChar->GetName());
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("TryBindPawn: Pawn is nullptr"));
-	}
-}
-
 
 // Called After InputComponent is created
 void AMainPlayerController::SetupInputComponent()
@@ -130,10 +117,10 @@ void AMainPlayerController::SetupInputComponent()
 	UE_LOG(LogTemp, Warning, TEXT("=== PlayerController SetupInputComponent ==="));
 	UE_LOG(LogTemp, Warning, TEXT("Controller: %s, IsLocal: %d"), *GetName(), IsLocalPlayerController());
 
-    if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+    if (UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {
-        Subsystem->ClearAllMappings();
-        Subsystem->AddMappingContext(MappingContext, 0);
+        subsystem->ClearAllMappings();
+        subsystem->AddMappingContext(MappingContext, 0);
 
         UE_LOG(LogTemp, Warning, TEXT("InputComponent is Set"));
     }
