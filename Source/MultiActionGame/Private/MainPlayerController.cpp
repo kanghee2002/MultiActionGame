@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"   // CreateWidget 함수 사용을 위한 헤더
 #include "Components/WidgetComponent.h"
 #include "Character/HealthBarWidget.h"
+#include "MenuSystem/GameOverWidget.h"
 #include "MultiGameInstance.h"
 
 #include "Net/UnrealNetwork.h"
@@ -133,6 +134,29 @@ void AMainPlayerController::SetupInputComponent()
     {
         UE_LOG(LogTemp, Error, TEXT("InputComponent is still nullptr"));
     }
+}
+
+void AMainPlayerController::Client_CreateGameOverWidget_Implementation(bool IsWin)
+{
+	UE_LOG(LogTemp, Warning, TEXT("ClientShowGameOver called with IsWin: %s"), IsWin ? TEXT("true") : TEXT("false"));
+
+	if (GameOverWidget)
+	{
+		if (!GameOverWidgetRef)
+		{
+			GameOverWidgetRef = CreateWidget<UGameOverWidget>(this, GameOverWidget);
+			if (GameOverWidgetRef && GameOverWidgetRef->FadeIn)
+			{
+				GameOverWidgetRef->AddToViewport();
+				GameOverWidgetRef->PlayAnimation(GameOverWidgetRef->FadeIn);
+				GameOverWidgetRef->InitializeResult(IsWin);
+
+				GameOverWidgetRef->Setup();
+				
+				GameOverWidgetRef->SetMenuInterface(Cast<UMultiGameInstance>(GetGameInstance()));
+			}
+		}
+	}
 }
 
 void AMainPlayerController::ServerSetCharacterType_Implementation(ECharacterType CharacterType)

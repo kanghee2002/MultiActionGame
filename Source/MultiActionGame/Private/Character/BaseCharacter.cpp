@@ -9,6 +9,7 @@
 #include "Character/HealthBarWidget.h"
 
 #include "BaseAnimInstance.h"
+#include "MainGameMode.h"
 
 #include <Camera/CameraComponent.h>
 #include <GameFramework/SpringArmComponent.h>
@@ -62,7 +63,7 @@ ABaseCharacter::ABaseCharacter()
 	OnTakeAnyDamage.AddDynamic(this, &ABaseCharacter::OnDamageReceived);
 
 	// 변수 설정
-	BasicAttackDamage = 4.0f;
+	BasicAttackDamage = 40.0f;
 	AttackStaminaCost = 15.0f;
 	RollStaminaCost = 20.0f;
 	CurrentHealCount = 5;
@@ -438,6 +439,12 @@ void ABaseCharacter::OnDeath_Implementation()
 	bCanPlayerControl = false;
 
 	BP_PlayDeathAnimation();
+
+	AMainGameMode* GameMode = Cast<AMainGameMode>(GetWorld()->GetAuthGameMode());
+	if (GameMode)
+	{
+		GameMode->ProcessPlayerDeath(Cast<AMainPlayerController>(GetController())->SelectedCharacterType);
+	}
 }
 
 // Replication

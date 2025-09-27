@@ -9,6 +9,7 @@
 #include "MainPlayerController.generated.h"
 
 class UInGameHUD;
+class UGameOverWidget;
 class UHealthComponent;
 
 /**
@@ -36,6 +37,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> InGameHUD;
 
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> GameOverWidget;
+
 public:
 	UPROPERTY(Replicated)
 	ECharacterType SelectedCharacterType;
@@ -50,6 +54,12 @@ public:
 
 	void CreateInGameHUD();
 
+	UFUNCTION(Client, Reliable)
+	void Client_CreateGameOverWidget(bool IsWin);
+
 	UPROPERTY()
 	UInGameHUD* InGameHUDWidget;
+
+	UPROPERTY()
+	UGameOverWidget* GameOverWidgetRef;
 };

@@ -2,10 +2,15 @@
 
 
 #include "MainGameMode.h"
-#include "Character/CharacterType.h"
 #include "MainPlayerController.h"
 #include "MultiGameInstance.h"
 #include "Character/TestCharacter1.h"
+
+AMainGameMode::AMainGameMode()
+{
+	HeroCount = 0;
+	HeroDeathCount = 0;
+}
 
 APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot)
 {
@@ -45,19 +50,20 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 		{
 			PawnToSpawn = KnightCharacter;
 			PC->SelectedCharacterType = ECharacterType::Knight;
+			HeroCount++;
 			UE_LOG(LogTemp, Warning, TEXT("[GameMode] Spawn Knight"));
 		}
 #endif
 		break;
 	case ECharacterType::Knight:
 		PawnToSpawn = DefaultPawnClass;
+		HeroCount++;
 		break;
 	case ECharacterType::Archer:
 	case ECharacterType::Healer:
 		PawnToSpawn = ATestCharacter1::StaticClass();
 
 		// TODO
-		//ControllerToUse = AController3::StaticClass();
 		break;
 	default:
 		PawnToSpawn = DefaultPawnClass;
@@ -108,4 +114,44 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 	}
 
 	return OutError;
+}
+
+void AMainGameMode::ProcessPlayerDeath(ECharacterType CharacterType)
+{
+	switch (CharacterType)
+	{
+	case ECharacterType::Boss:
+		ProcessGameOver(false);
+		break;
+	case ECharacterType::Knight:
+	case ECharacterType::Archer:
+	case ECharacterType::Healer:
+		HeroDeathCount++;
+		break;
+	default:
+		break;
+	}
+
+	if (HeroDeathCount == HeroCount)
+	{
+		ProcessGameOver(true);
+	}
+}
+
+void AMainGameMode::ProcessGameOver(bool IsBossWin)
+{
+	int playerDeathCount = GetNumPlayers() - 1;
+	for (FConstPlayerControllerIterator iterator = GetWorld()->GetPlayerControllerIterator(); iterator; ++iterator)
+	{
+		AMainPlayerController* controller = Cast<AMainPlayerController>(iterator->Get());
+
+		if (controller->SelectedCharacterType == ECharacterType::Boss)
+		{
+			controller->Client_CreateGameOverWidget(IsBossWin);
+		}
+		else
+		{
+			controller->Client_CreateGameOverWidget(!IsBossWin);
+		}
+	}
 }
