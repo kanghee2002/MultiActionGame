@@ -91,9 +91,9 @@ void AMainPlayerController::CreateInGameHUD()
 	}
 
 	// Set Boss UI
-	if (SelectedCharacterType == ECharacterType::Knight)
+	if (SelectedCharacterType == ECharacterType::Boss)
 	{
-		InGameHUDWidget->SetBossUI();
+		InGameHUDWidget->SetBossHUD();
 	}
 }
 
@@ -138,6 +138,11 @@ void AMainPlayerController::SetupInputComponent()
 void AMainPlayerController::ServerSetCharacterType_Implementation(ECharacterType CharacterType)
 {
     SelectedCharacterType = CharacterType;
+}
+
+void AMainPlayerController::InitializeBossHealth(UHealthComponent* HealthComp)
+{
+	InGameHUDWidget->InitializeBossHealthComponent(HealthComp);
 }
 
 void AMainPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

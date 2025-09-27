@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Overlay.h"
+#include "Components/HorizontalBox.h"
 #include "InGameHUD.generated.h"
 
 class ABaseCharacter;
@@ -29,9 +30,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void InitializeHealCountText(ABaseCharacter* MyCharacter);
 
+	// HealthComponent Binding
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void InitializeBossHealthComponent(UHealthComponent* HealthComp);
+
 	// Boss UI Setting
 	UFUNCTION(BlueprintCallable, Category = "UI")
-	void SetBossUI();
+	void SetBossHUD();
 
 protected:
 	virtual void NativeConstruct() override;
@@ -46,6 +51,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void UpdateHealCountUI(int NewHealCount);
 
+	UFUNCTION(BlueprintCallable)
+	void UpdateBossHealthBarUI(float NewHealth, float Delta);
+
 	// 위젯 그래프에서 BindWidget 해야 함 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UProgressBar* HealthProgressBar;
@@ -59,6 +67,15 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* HealCountText;
 
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UHorizontalBox* BossInfo;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UProgressBar* BossHealthProgressBar;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* BossNameText;
+
 	UPROPERTY()
 	TObjectPtr<UHealthComponent> BoundHealthComponent;
 
@@ -66,4 +83,6 @@ private:
 	float MaxHealth;
 
 	float MaxStamina;
+
+	float BossMaxHealth;
 };

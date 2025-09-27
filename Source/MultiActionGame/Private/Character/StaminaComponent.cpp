@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/BaseCharacter.h"
 #include "Character/StaminaComponent.h"
+#include "Character/BaseCharacter.h"
 
 UStaminaComponent::UStaminaComponent()
 {

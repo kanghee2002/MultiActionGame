@@ -43,6 +43,9 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerSetCharacterType(ECharacterType CharacterType);
 
+	UFUNCTION(BlueprintCallable)
+	void InitializeBossHealth(UHealthComponent* HealthComp);
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void CreateInGameHUD();

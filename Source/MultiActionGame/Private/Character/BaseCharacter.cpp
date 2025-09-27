@@ -62,7 +62,7 @@ ABaseCharacter::ABaseCharacter()
 	OnTakeAnyDamage.AddDynamic(this, &ABaseCharacter::OnDamageReceived);
 
 	// 변수 설정
-	BasicAttackDamage = 10.0f;
+	BasicAttackDamage = 4.0f;
 	AttackStaminaCost = 15.0f;
 	RollStaminaCost = 20.0f;
 	CurrentHealCount = 5;

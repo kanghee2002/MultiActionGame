@@ -34,12 +34,12 @@ void UInGameHUD::InitializeHealthComponent(UHealthComponent* HealthComp)
 	UE_LOG(LogTemp, Warning, TEXT("Bound to HealthComponent: %p (Owner: %s) (Owner: %p)"),
 		HealthComp, HealthComp->GetOwner() ? *HealthComp->GetOwner()->GetName() : TEXT("None"), HealthComp->GetOwner());
 
-	UpdateHealthBarUI(HealthComp->DefaultMaxHealth, 0.f);
+	UpdateHealthBarUI(HealthComp->DefaultMaxHealth, 0.0f);
 }
 
 void UInGameHUD::UpdateHealthBarUI(float NewHealth, float Delta)
 {
-	if (HealthProgressBar && MaxHealth > 0)
+	if (HealthProgressBar && MaxHealth > 0.0f)
 	{
 		float percent = NewHealth / MaxHealth;
 		HealthProgressBar->SetPercent(percent);
@@ -64,7 +64,7 @@ void UInGameHUD::InitializeStaminaComponent(UStaminaComponent* StaminaComp)
 
 void UInGameHUD::UpdateStaminaBarUI(float NewStamina)
 {
-	if (StaminaProgressBar && MaxStamina > 0)
+	if (StaminaProgressBar && MaxStamina > 0.0f)
 	{
 		float percent = NewStamina / MaxStamina;
 		StaminaProgressBar->SetPercent(percent);
@@ -89,10 +89,40 @@ void UInGameHUD::UpdateHealCountUI(int NewHealCount)
 	}
 }
 
-void UInGameHUD::SetBossUI()
+void UInGameHUD::InitializeBossHealthComponent(UHealthComponent* HealthComp)
+{
+	if (!HealthComp)
+	{
+		return;
+	}
+
+	BossMaxHealth = HealthComp->DefaultMaxHealth;
+
+	// 이미 바인딩되어 있지 않은 경우에만 바인딩
+	HealthComp->OnHealthChanged.AddDynamic(this, &UInGameHUD::UpdateBossHealthBarUI);
+
+	UpdateBossHealthBarUI(HealthComp->DefaultMaxHealth, 0.0f);
+}
+
+void UInGameHUD::UpdateBossHealthBarUI(float NewHealth, float Delta)
+{
+	if (BossHealthProgressBar && MaxHealth > 0.0f)
+	{
+		float percent = NewHealth / MaxHealth;
+		BossHealthProgressBar->SetPercent(percent);
+	}
+}
+
+
+void UInGameHUD::SetBossHUD()
 {
 	if (HealOverlay)
 	{
 		HealOverlay->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	if (BossInfo)
+	{
+		BossInfo->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }

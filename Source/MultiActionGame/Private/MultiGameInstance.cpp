@@ -64,6 +64,8 @@ void UMultiGameInstance::Host()
 
 	//World->ServerTravel("/Game/ThirdPerson/Lvl_ThirdPerson?listen");
 
+	SelectedCharacterType = ECharacterType::Boss;
+
 	World->ServerTravel("/Game/TestMap?listen?game=/Game/General/MainGameModeBP.MainGameModeBP_C");
 }
 

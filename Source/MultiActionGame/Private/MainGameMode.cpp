@@ -33,15 +33,21 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 	case ECharacterType::Boss:
 		PawnToSpawn = BossCharacter;
 
+#if WITH_EDITOR
 		// FOR DEBUG
 		if (count % 2 == 0)
 		{
 			PawnToSpawn = BossCharacter;
+			PC->SelectedCharacterType = ECharacterType::Boss;
+			UE_LOG(LogTemp, Warning, TEXT("[GameMode] Spawn Boss"));
 		}
 		else
 		{
-			PawnToSpawn = DefaultPawnClass;
+			PawnToSpawn = KnightCharacter;
+			PC->SelectedCharacterType = ECharacterType::Knight;
+			UE_LOG(LogTemp, Warning, TEXT("[GameMode] Spawn Knight"));
 		}
+#endif
 		break;
 	case ECharacterType::Knight:
 		PawnToSpawn = DefaultPawnClass;
