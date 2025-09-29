@@ -26,18 +26,18 @@ void UInGameHUD::InitializeHealthComponent(UHealthComponent* HealthComp)
 	// 새 컴포넌트를 멤버 변수에 저장
 	BoundHealthComponent = HealthComp;
 
-	MaxHealth = HealthComp->DefaultMaxHealth;
-
 	// 이미 바인딩되어 있지 않은 경우에만 바인딩
 	HealthComp->OnHealthChanged.AddUniqueDynamic(this, &UInGameHUD::UpdateHealthBarUI);
 
 	UE_LOG(LogTemp, Warning, TEXT("Bound to HealthComponent: %p (Owner: %s) (Owner: %p)"),
 		HealthComp, HealthComp->GetOwner() ? *HealthComp->GetOwner()->GetName() : TEXT("None"), HealthComp->GetOwner());
 
-	UpdateHealthBarUI(HealthComp->DefaultMaxHealth, 0.0f);
+	float maxHealth = HealthComp->GetMaxHealth();
+
+	UpdateHealthBarUI(maxHealth, maxHealth);
 }
 
-void UInGameHUD::UpdateHealthBarUI(float NewHealth, float Delta)
+void UInGameHUD::UpdateHealthBarUI(float NewHealth, float MaxHealth)
 {
 	if (HealthProgressBar && MaxHealth > 0.0f)
 	{
@@ -45,7 +45,7 @@ void UInGameHUD::UpdateHealthBarUI(float NewHealth, float Delta)
 		HealthProgressBar->SetPercent(percent);
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Update HealthBar: %f. / Delta=%f "), NewHealth, Delta);
+	UE_LOG(LogTemp, Warning, TEXT("Update HealthBar: %f. / MaxHealth = %f "), NewHealth, MaxHealth);
 }
 
 void UInGameHUD::InitializeStaminaComponent(UStaminaComponent* StaminaComp)
@@ -96,15 +96,15 @@ void UInGameHUD::InitializeBossHealthComponent(UHealthComponent* HealthComp)
 		return;
 	}
 
-	BossMaxHealth = HealthComp->DefaultMaxHealth;
+	float bossMaxHealth = HealthComp->GetMaxHealth();
 
 	// 이미 바인딩되어 있지 않은 경우에만 바인딩
 	HealthComp->OnHealthChanged.AddDynamic(this, &UInGameHUD::UpdateBossHealthBarUI);
 
-	UpdateBossHealthBarUI(HealthComp->DefaultMaxHealth, 0.0f);
+	UpdateBossHealthBarUI(bossMaxHealth, bossMaxHealth);
 }
 
-void UInGameHUD::UpdateBossHealthBarUI(float NewHealth, float Delta)
+void UInGameHUD::UpdateBossHealthBarUI(float NewHealth, float MaxHealth)
 {
 	if (BossHealthProgressBar && MaxHealth > 0.0f)
 	{

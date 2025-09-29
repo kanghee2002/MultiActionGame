@@ -43,7 +43,7 @@ protected:
 
 	// 이벤트 콜백 
 	UFUNCTION(BlueprintCallable)
-	void UpdateHealthBarUI(float NewHealth, float Delta);
+	void UpdateHealthBarUI(float NewHealth, float MaxHealth);
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateStaminaBarUI(float NewStamina);
@@ -52,7 +52,7 @@ protected:
 	void UpdateHealCountUI(int NewHealCount);
 
 	UFUNCTION(BlueprintCallable)
-	void UpdateBossHealthBarUI(float NewHealth, float Delta);
+	void UpdateBossHealthBarUI(float NewHealth, float MaxHealth);
 
 	// 위젯 그래프에서 BindWidget 해야 함 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -80,9 +80,5 @@ protected:
 	TObjectPtr<UHealthComponent> BoundHealthComponent;
 
 private:
-	float MaxHealth;
-
 	float MaxStamina;
-
-	float BossMaxHealth;
 };

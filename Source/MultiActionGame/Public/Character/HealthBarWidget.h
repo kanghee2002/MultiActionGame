@@ -20,14 +20,11 @@ public:
 
 protected:
 	UFUNCTION(BlueprintCallable)
-	void UpdateHealthBar(float NewHealth, float Delta);
+	void UpdateHealthBar(float NewHealth, float MaxHealth);
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UProgressBar* HealthProgressBar;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* NameText;
-
-private:
-	float MaxHealth;
 };

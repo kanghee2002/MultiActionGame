@@ -7,7 +7,7 @@
 #include "Net/UnrealNetwork.h"
 #include "HealthComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, NewHealth, float, Delta);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, NewHealth, float, MaxHealth);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeath);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -24,8 +24,21 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnDeath OnDeath;
 
+	float GetMaxHealth() const
+	{
+		return CurrentMaxHealth;
+	}
+
+	float GetCurrentHealth() const
+	{
+		return CurrentHealth;
+	}
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float DefaultMaxHealth;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float CurrentMaxHealth;
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth;
@@ -37,6 +50,10 @@ public:
 	// 체력 초기화 함수
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void ResetHealth();
+
+	// 최대 체력 증가 함수
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void IncreaseMaxHealth();
 
 	UFUNCTION()
 	void OnRep_CurrentHealth();

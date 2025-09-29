@@ -5,6 +5,7 @@ UHealthComponent::UHealthComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 	SetIsReplicatedByDefault(true);
 	DefaultMaxHealth = 100;
+	CurrentMaxHealth = DefaultMaxHealth;
 	CurrentHealth = DefaultMaxHealth;
 }
 
@@ -29,14 +30,21 @@ void UHealthComponent::Heal(float Amount)
 	float OldHealth = CurrentHealth;
 	CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.0f, DefaultMaxHealth);
 
-	OnHealthChanged.Broadcast(CurrentHealth, CurrentHealth - OldHealth);
+	OnHealthChanged.Broadcast(CurrentHealth, CurrentMaxHealth);
 }
 
 void UHealthComponent::ResetHealth()
 {
 	CurrentHealth = DefaultMaxHealth;
 
-	OnHealthChanged.Broadcast(CurrentHealth, 0);
+	OnHealthChanged.Broadcast(CurrentHealth, CurrentMaxHealth);
+}
+
+void UHealthComponent::IncreaseMaxHealth()
+{
+	CurrentMaxHealth += DefaultMaxHealth;
+
+	ResetHealth();
 }
 
 void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
@@ -66,7 +74,7 @@ void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDam
 	float OldHealth = CurrentHealth;
 	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.0f, DefaultMaxHealth);
 
-	OnHealthChanged.Broadcast(CurrentHealth, CurrentHealth - OldHealth);
+	OnHealthChanged.Broadcast(CurrentHealth, CurrentMaxHealth);
 
 	if (CurrentHealth <= 0.0f)
 	{
@@ -85,7 +93,7 @@ bool UHealthComponent::ShouldApplyDamage(AActor* DamageCauser, AController* Inst
 
 void UHealthComponent::OnRep_CurrentHealth()
 {
-	OnHealthChanged.Broadcast(CurrentHealth, 0.0f);
+	OnHealthChanged.Broadcast(CurrentHealth, CurrentMaxHealth);
 
 	// 로컬 클라이언트에서 로그를 찍어 동기화 확인
 	UE_LOG(LogTemp, Log, TEXT("Client Health Synced: %f"), CurrentHealth);

@@ -13,17 +13,17 @@ void UHealthBarWidget::InitializeHealthComponent(UHealthComponent* HealthComp)
 		return;
 	}
 
-	MaxHealth = HealthComp->DefaultMaxHealth;
-
 	HealthComp->OnHealthChanged.AddUniqueDynamic(this, &UHealthBarWidget::UpdateHealthBar);
 
-	UpdateHealthBar(HealthComp->DefaultMaxHealth, 0.f);
+	float maxHealth = HealthComp->GetMaxHealth();
+
+	UpdateHealthBar(maxHealth, maxHealth);
 }
 
 
-void UHealthBarWidget::UpdateHealthBar(float NewHealth, float Delta)
+void UHealthBarWidget::UpdateHealthBar(float NewHealth, float MaxHealth)
 {
-	if (HealthProgressBar && MaxHealth > 0)
+	if (HealthProgressBar && MaxHealth > 0.0f)
 	{
 		float percent = NewHealth / MaxHealth;
 		HealthProgressBar->SetPercent(percent);
