@@ -25,10 +25,12 @@ void UGameOverWidget::InitializeResult(bool IsWin)
 	if (IsWin)
 	{
 		ResultText->SetText(FText::FromString(TEXT("ENEMY FELLED")));
+		ResultText->SetColorAndOpacity(WinTextColor);
 	}
 	else
 	{
 		ResultText->SetText(FText::FromString(TEXT("YOU DIED")));
+		ResultText->SetColorAndOpacity(LoseTextColor);
 	}
 }
 

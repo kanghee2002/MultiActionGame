@@ -40,7 +40,7 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 
 #if WITH_EDITOR
 		// FOR DEBUG
-		if (count % 2 == 0)
+		if (count % 2 == 1)
 		{
 			PawnToSpawn = BossCharacter;
 			PC->SelectedCharacterType = ECharacterType::Boss;

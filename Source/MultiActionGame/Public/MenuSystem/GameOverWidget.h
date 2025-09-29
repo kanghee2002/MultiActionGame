@@ -33,4 +33,7 @@ public:
 
 	void InitializeResult(bool IsWin);
 
+	const FSlateColor  WinTextColor = FLinearColor(0.8f, 0.58f, 0.04f, 1.0f);
+
+	const FSlateColor  LoseTextColor = FLinearColor(0.47f, 0.0f, 0.007f, 1.0f);
 };
