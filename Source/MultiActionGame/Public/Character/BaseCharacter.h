@@ -35,6 +35,11 @@ public:
 		return bIsInvincible;
 	}
 
+	UHealthComponent* GetHealthComponent() const
+	{
+		return HealthCompRef;
+	}
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<class USpringArmComponent> SpringArm;

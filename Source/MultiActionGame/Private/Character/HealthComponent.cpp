@@ -35,7 +35,7 @@ void UHealthComponent::Heal(float Amount)
 
 void UHealthComponent::ResetHealth()
 {
-	CurrentHealth = DefaultMaxHealth;
+	CurrentHealth = CurrentMaxHealth;
 
 	OnHealthChanged.Broadcast(CurrentHealth, CurrentMaxHealth);
 }
@@ -71,8 +71,7 @@ void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDam
 	UE_LOG(LogTemp, Warning, TEXT("TakeDamage: Damage=%.2f, Causer=%s, Object=%s, Obj Ptr=%p"), Damage,
 		DamageCauser ? *DamageCauser->GetName() : TEXT("None"), *ActorName, MyActor);
 
-	float OldHealth = CurrentHealth;
-	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.0f, DefaultMaxHealth);
+	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.0f, CurrentMaxHealth);
 
 	OnHealthChanged.Broadcast(CurrentHealth, CurrentMaxHealth);
 

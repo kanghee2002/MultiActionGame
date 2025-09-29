@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "Character/CharacterType.h"
+#include "Character/BaseCharacter.h"
 #include "MainGameMode.generated.h"
 
 UCLASS()
@@ -13,6 +14,10 @@ class MULTIACTIONGAME_API AMainGameMode : public AGameModeBase
 	GENERATED_BODY()
 private:
 	void ProcessGameOver(bool IsBossWin);
+
+	void AddNewCharacter(APawn* NewPawn, ECharacterType CharacterType);
+
+	void IncreaseBossMaxHealth();
 
 protected:
 	AMainGameMode();
@@ -23,7 +28,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Characters")
 	TSubclassOf<ACharacter> BossCharacter;
 
-	int HeroCount;
+	UPROPERTY()
+	TArray<ABaseCharacter*> BossCharacters;
+
+	UPROPERTY()
+	TArray<ABaseCharacter*> HeroCharacters;
 
 	int HeroDeathCount;
 

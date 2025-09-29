@@ -8,7 +8,6 @@
 
 AMainGameMode::AMainGameMode()
 {
-	HeroCount = 0;
 	HeroDeathCount = 0;
 }
 
@@ -19,17 +18,6 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 
 	TSubclassOf<APawn> PawnToSpawn;
 	TSubclassOf<APlayerController> ControllerToUse = PlayerControllerClass;
-
-	// Log Character Type ---------------------------------------------------------------------------------------
-	const UEnum* EnumPtr = StaticEnum<ECharacterType>();
-
-	if (EnumPtr)
-	{
-		FString CharacterTypeName = EnumPtr->GetNameStringByValue(static_cast<int64>(PC->SelectedCharacterType));
-
-		//UE_LOG(LogTemp, Warning, TEXT("Selected Character Type: %s"), *CharacterTypeName);
-	}
-	// ----------------------------------------------------------------------------------------------------------
 
 	static int count = 0;
 	count++;
@@ -50,14 +38,13 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 		{
 			PawnToSpawn = KnightCharacter;
 			PC->SelectedCharacterType = ECharacterType::Knight;
-			HeroCount++;
 			UE_LOG(LogTemp, Warning, TEXT("[GameMode] Spawn Knight"));
 		}
 #endif
+
 		break;
 	case ECharacterType::Knight:
 		PawnToSpawn = DefaultPawnClass;
-		HeroCount++;
 		break;
 	case ECharacterType::Archer:
 	case ECharacterType::Healer:
@@ -78,17 +65,48 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 
 	APawn* NewPawn = GetWorld()->SpawnActor<APawn>(PawnToSpawn, SpawnLocation, SpawnRotation, SpawnParams);
 
-	if (NewPawn)
-	{
-		//PC->Possess(NewPawn);
-		UE_LOG(LogTemp, Warning, TEXT("Done Setting Character : %s"), *NewPawn->GetName());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to spawn pawn"));
-	}
+	AddNewCharacter(NewPawn, PC->SelectedCharacterType);
 
 	return NewPawn;
+}
+
+void AMainGameMode::AddNewCharacter(APawn* NewPawn, ECharacterType CharacterType)
+{
+	if (ABaseCharacter* newCharacter = Cast<ABaseCharacter>(NewPawn))
+	{
+		switch (CharacterType)
+		{
+		case ECharacterType::Boss:
+			BossCharacters.Add(newCharacter);
+			UE_LOG(LogTemp, Warning, TEXT("[GameMode] Add Boss to Array"));
+			break;
+		case ECharacterType::Knight:
+		case ECharacterType::Archer:
+		case ECharacterType::Healer:
+			HeroCharacters.Add(newCharacter);
+			UE_LOG(LogTemp, Warning, TEXT("[GameMode] Add Hero to Array"));
+			break;
+		case ECharacterType::MAX:
+		default:
+			break;
+		}
+	}
+}
+
+void AMainGameMode::IncreaseBossMaxHealth()
+{
+	if (BossCharacters.IsEmpty() || HeroCharacters.Num() <= 1)
+	{
+		return;
+	}
+
+	for (ABaseCharacter* bossCharacter : BossCharacters)
+	{
+		if (bossCharacter)
+		{
+			bossCharacter->GetHealthComponent()->IncreaseMaxHealth();
+		}
+	}
 }
 
 FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId,
@@ -105,12 +123,6 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 	{
 		int32 ParsedIndex = FCString::Atoi(*CharacterTypeStr);
 		PC->SelectedCharacterType = static_cast<ECharacterType>(ParsedIndex);
-
-		//UE_LOG(LogTemp, Warning, TEXT("InitNewPlayer - Parsed CharacterType from URL: %d"), ParsedIndex);
-	}
-	else
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("InitNewPlayer - No CharacterType in URL"));
 	}
 
 	return OutError;
@@ -132,7 +144,7 @@ void AMainGameMode::ProcessPlayerDeath(ECharacterType CharacterType)
 		break;
 	}
 
-	if (HeroDeathCount == HeroCount)
+	if (HeroDeathCount == HeroCharacters.Num())
 	{
 		ProcessGameOver(true);
 	}
