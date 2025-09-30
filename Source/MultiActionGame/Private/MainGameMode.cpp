@@ -30,7 +30,7 @@ AActor* AMainGameMode::ChoosePlayerStart_Implementation(AController* Player)
 			}
 		}
 	}
-
+	
 	return Super::ChoosePlayerStart_Implementation(Player);
 }
 

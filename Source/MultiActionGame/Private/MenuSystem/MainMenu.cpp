@@ -8,6 +8,7 @@
 #include "Components/EditableTextBox.h"
 #include "MenuSystem/MenuInterface.h"
 #include "MainPlayerController.h"
+#include "MultiGameInstance.h"
 
 
 bool UMainMenu::Initialize()
@@ -37,6 +38,24 @@ bool UMainMenu::Initialize()
 	if (!ensure(ConfirmJoinButton != nullptr)) return false;
 	ConfirmJoinButton->OnClicked.AddDynamic(this, &UMainMenu::JoinServer);
 
+	if (!ensure(GraphicSettingButton != nullptr)) return false;
+	GraphicSettingButton->OnClicked.AddDynamic(this, &UMainMenu::OpenGraphicMenu);
+
+	if (!ensure(GraphicCancelButton != nullptr)) return false;
+	GraphicCancelButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
+
+	if (!ensure(EpicButton != nullptr)) return false;
+	EpicButton->OnClicked.AddDynamic(this, &UMainMenu::SetGraphicEpic);
+
+	if (!ensure(HighButton != nullptr)) return false;
+	HighButton->OnClicked.AddDynamic(this, &UMainMenu::SetGraphicHigh);
+
+	if (!ensure(MediumButton != nullptr)) return false;
+	MediumButton->OnClicked.AddDynamic(this, &UMainMenu::SetGraphicMedium);
+
+	if (!ensure(LowButton != nullptr)) return false;
+	LowButton->OnClicked.AddDynamic(this, &UMainMenu::SetGraphicLow);
+
 	// Initialize Character Select CheckBoxes
 	CharacterCheckBoxes.Empty();
 
@@ -48,16 +67,10 @@ bool UMainMenu::Initialize()
 	{
 		if (CheckBox)
 		{
-			//CheckBox->OnCheckStateChanged.Clear();
-			//CheckBox->OnCheckStateChanged.AddDynamic(this, &UMainMenu::UncheckAll);
 			CheckBox->Initialize(CharacterCheckBoxes);
 			CheckBox->OnSelected.AddDynamic(this, &UMainMenu::SelectCharacter);
 		}
 	}
-
-	//KnightCheckBox->OnCheckStateChanged.AddDynamic(this, &UMainMenu::SelectKnight);
-	//ArcherCheckBox->OnCheckStateChanged.AddDynamic(this, &UMainMenu::SelectArcher);
-	//HealerCheckBox->OnCheckStateChanged.AddDynamic(this, &UMainMenu::SelectHealer);
 
 	KnightCheckBox->SetCheckedState(ECheckBoxState::Checked);
 	SelectedCharacterType = ECharacterType::Knight;
@@ -69,7 +82,6 @@ void UMainMenu::HostServer()
 {
 	if (MenuInterface != nullptr)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Host"));
 		MenuInterface->Host();
 	}
 }
@@ -81,7 +93,6 @@ void UMainMenu::JoinServer()
 		if (!ensure(IPAddressField != nullptr)) return;
 
 		const FString& Address = IPAddressField->GetText().ToString();
-		//UE_LOG(LogTemp, Warning, TEXT("Join with %s, Index %d"), *Address, static_cast<int32>(SelectedCharacterType));
 		MenuInterface->Join(Address, SelectedCharacterType);
 	}
 }
@@ -114,32 +125,51 @@ void UMainMenu::Quit()
 	PlayerController->ConsoleCommand("Quit");
 }
 
-void UMainMenu::SelectKnight(bool bIsChecked)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Select Knight"));
-	//SelectedCharacterType = ECharacterType::Knight;
-	KnightCheckBox->SetCheckedState(ECheckBoxState::Checked);
-}
-
-void UMainMenu::SelectArcher(bool bIsChecked)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Select Archer"));
-	//SelectedCharacterType = ECharacterType::Archer;
-	//ArcherCheckBox->SetCheckedState(ECheckBoxState::Checked);
-}
-
-void UMainMenu::SelectHealer(bool bIsChecked)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Select Healer"));
-	//SelectedCharacterType = ECharacterType::Healer;
-	HealerCheckBox->SetCheckedState(ECheckBoxState::Checked);
-}
-
 void UMainMenu::UncheckAll(bool bIsChecked)
 {
 	for (UCheckBox* CheckBox : CharacterCheckBoxes)
 	{
 		CheckBox->SetCheckedState(ECheckBoxState::Unchecked);
+	}
+}
+
+void UMainMenu::OpenGraphicMenu()
+{
+	if (MenuSwitcher && GraphicMenu)
+	{
+		MenuSwitcher->SetActiveWidget(GraphicMenu);
+	}
+}
+
+void UMainMenu::SetGraphicEpic()
+{
+	if (UMultiGameInstance* multiGameInstance = Cast<UMultiGameInstance>(GetGameInstance()))
+	{
+		multiGameInstance->SetGraphicSetting(EGraphicSetting::Epic);
+	}
+}
+
+void UMainMenu::SetGraphicHigh()
+{
+	if (UMultiGameInstance* multiGameInstance = Cast<UMultiGameInstance>(GetGameInstance()))
+	{
+		multiGameInstance->SetGraphicSetting(EGraphicSetting::High);
+	}
+}
+
+void UMainMenu::SetGraphicMedium()
+{
+	if (UMultiGameInstance* multiGameInstance = Cast<UMultiGameInstance>(GetGameInstance()))
+	{
+		multiGameInstance->SetGraphicSetting(EGraphicSetting::Medium);
+	}
+}
+
+void UMainMenu::SetGraphicLow()
+{
+	if (UMultiGameInstance* multiGameInstance = Cast<UMultiGameInstance>(GetGameInstance()))
+	{
+		multiGameInstance->SetGraphicSetting(EGraphicSetting::Low);
 	}
 }
 
@@ -157,12 +187,6 @@ void UMainMenu::SelectCharacter(int32 Index)
 		if (MainPC)
 		{
 			MainPC->ServerSetCharacterType(CurrentCharacterType);
-
-			//UE_LOG(LogTemp, Warning, TEXT("Set Character Type (Server): %d"), Index);
 		}
-	}
-	else
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("Invalid CharacterType: %d"), Index);
 	}
 }

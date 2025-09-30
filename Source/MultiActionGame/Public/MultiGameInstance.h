@@ -8,9 +8,15 @@
 #include "Character/CharacterType.h"
 #include "MultiGameInstance.generated.h"
 
-/**
- * 
- */
+UENUM(BlueprintType)
+enum class EGraphicSetting : uint8
+{
+	Low = 0			UMETA(DisplayName = "Low"),
+	Medium = 1		UMETA(DisplayName = "Medium"),
+	High = 2		UMETA(DisplayName = "High"),
+	Epic = 3		UMETA(DisplayName = "Epic"),
+	MAX = 4			UMETA(Hidden)
+};
 
 UCLASS()
 class MULTIACTIONGAME_API UMultiGameInstance : public UGameInstance, public IMenuInterface
@@ -35,6 +41,8 @@ public:
 	virtual void Join(const FString& Address, ECharacterType CharacterType) override;
 
 	virtual void LoadMainMenu() override;
+
+	void SetGraphicSetting(EGraphicSetting GraphicSetting);
 
 private:
 	TSubclassOf<class UUserWidget> MenuClass;

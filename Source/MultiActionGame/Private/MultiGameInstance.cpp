@@ -8,6 +8,8 @@
 #include "MenuSystem/InGameMenu.h"
 #include "MenuSystem/MenuWidget.h"
 
+#include "GameFramework/GameUserSettings.h"
+
 UMultiGameInstance::UMultiGameInstance(const FObjectInitializer& ObjectInitializer)
 {
 	// Set MenuClass
@@ -98,4 +100,12 @@ void UMultiGameInstance::LoadMainMenu()
 	if (!ensure(PlayerController != nullptr)) return;
 
 	PlayerController->ClientTravel("/Game/MenuSystem/MainMenu", ETravelType::TRAVEL_Absolute);
+}
+
+void UMultiGameInstance::SetGraphicSetting(EGraphicSetting GraphicSetting)
+{
+	UGameUserSettings* Settings = GEngine->GetGameUserSettings();
+	Settings->SetOverallScalabilityLevel(static_cast<int32>(GraphicSetting));
+	Settings->ApplySettings(false);
+	Settings->SaveSettings();
 }

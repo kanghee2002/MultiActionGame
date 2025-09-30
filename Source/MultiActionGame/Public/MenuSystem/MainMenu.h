@@ -30,6 +30,9 @@ private:
 	class UButton* JoinButton;
 
 	UPROPERTY(meta = (BindWidget))
+	class UButton* GraphicSettingButton;
+
+	UPROPERTY(meta = (BindWidget))
 	class UButton* QuitButton;
 
 	UPROPERTY(meta = (BindWidget))
@@ -48,6 +51,9 @@ private:
 	class UWidget* JoinMenu;
 
 	UPROPERTY(meta = (BindWidget))
+	class UWidget* GraphicMenu;
+
+	UPROPERTY(meta = (BindWidget))
 	class UEditableTextBox* IPAddressField;
 
 	UPROPERTY(meta = (BindWidget))
@@ -61,6 +67,21 @@ private:
 
 	UPROPERTY()
 	TArray<URadioCheckBox*> CharacterCheckBoxes;
+	
+	UPROPERTY(meta = (BindWidget))
+	class UButton* EpicButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* HighButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* MediumButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* LowButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* GraphicCancelButton;
 
 	UFUNCTION()
 	void HostServer();
@@ -75,16 +96,22 @@ private:
 	void OpenMainMenu();
 
 	UFUNCTION()
-	void SelectKnight(bool bIsChecked);
-
-	UFUNCTION()
-	void SelectArcher(bool bIsChecked);
-
-	UFUNCTION()
-	void SelectHealer(bool bIsChecked);
-
-	UFUNCTION()
 	void UncheckAll(bool bIsChecked);
+
+	UFUNCTION()
+	void OpenGraphicMenu();
+
+	UFUNCTION()
+	void SetGraphicEpic();
+
+	UFUNCTION()
+	void SetGraphicHigh();
+
+	UFUNCTION()
+	void SetGraphicMedium();
+
+	UFUNCTION()
+	void SetGraphicLow();
 
 	UFUNCTION()
 	void Quit();
