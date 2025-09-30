@@ -2,13 +2,36 @@
 
 
 #include "MainGameMode.h"
+
 #include "MainPlayerController.h"
 #include "MultiGameInstance.h"
 #include "Character/TestCharacter1.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerStart.h"
+
 AMainGameMode::AMainGameMode()
 {
 	HeroDeathCount = 0;
+}
+
+AActor* AMainGameMode::ChoosePlayerStart_Implementation(AController* Player)
+{
+	TArray<AActor*> playerStarts;
+	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), playerStarts);
+
+	if (IsBossType(Cast<AMainPlayerController>(Player)->SelectedCharacterType))
+	{
+		for (AActor* playerStart : playerStarts)
+		{
+			if (playerStart->ActorHasTag("Boss"))
+			{
+				return playerStart;
+			}
+		}
+	}
+
+	return Super::ChoosePlayerStart_Implementation(Player);
 }
 
 APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot)
@@ -74,21 +97,15 @@ void AMainGameMode::AddNewCharacter(APawn* NewPawn, ECharacterType CharacterType
 {
 	if (ABaseCharacter* newCharacter = Cast<ABaseCharacter>(NewPawn))
 	{
-		switch (CharacterType)
+		if (IsBossType(CharacterType))
 		{
-		case ECharacterType::Boss:
 			BossCharacters.Add(newCharacter);
 			UE_LOG(LogTemp, Warning, TEXT("[GameMode] Add Boss to Array"));
-			break;
-		case ECharacterType::Knight:
-		case ECharacterType::Archer:
-		case ECharacterType::Healer:
+		}
+		else
+		{
 			HeroCharacters.Add(newCharacter);
 			UE_LOG(LogTemp, Warning, TEXT("[GameMode] Add Hero to Array"));
-			break;
-		case ECharacterType::MAX:
-		default:
-			break;
 		}
 	}
 }
@@ -130,18 +147,13 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 
 void AMainGameMode::ProcessPlayerDeath(ECharacterType CharacterType)
 {
-	switch (CharacterType)
+	if (IsBossType(CharacterType))
 	{
-	case ECharacterType::Boss:
 		ProcessGameOver(false);
-		break;
-	case ECharacterType::Knight:
-	case ECharacterType::Archer:
-	case ECharacterType::Healer:
+	}
+	else
+	{
 		HeroDeathCount++;
-		break;
-	default:
-		break;
 	}
 
 	if (HeroDeathCount == HeroCharacters.Num())

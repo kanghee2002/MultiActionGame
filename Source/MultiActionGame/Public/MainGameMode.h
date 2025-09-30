@@ -22,6 +22,11 @@ private:
 protected:
 	AMainGameMode();
 
+	bool IsBossType(ECharacterType CharacterType) const
+	{
+		return CharacterType == ECharacterType::Boss;
+	}
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Characters")
 	TSubclassOf<ACharacter> KnightCharacter;
 
@@ -35,6 +40,8 @@ protected:
 	TArray<ABaseCharacter*> HeroCharacters;
 
 	int HeroDeathCount;
+
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player);
 
 	virtual APawn* SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot);
 
