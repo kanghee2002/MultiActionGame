@@ -63,8 +63,9 @@ ABaseCharacter::ABaseCharacter()
 	OnTakeAnyDamage.AddDynamic(this, &ABaseCharacter::OnDamageReceived);
 
 	// 변수 설정
-	BasicAttackDamage = 5.0f;
-	AttackStaminaCost = 15.0f;
+	BasicAttackDamage = 3.5f;
+	LightAttackStaminaCost = 15.0f;
+	HeavyAttackStaminaCost = 25.0f;
 	RollStaminaCost = 20.0f;
 	CurrentHealCount = 5;
 	SprintSpeed = 800.0f;
@@ -252,18 +253,29 @@ void ABaseCharacter::LightAttack()
 	if (!HasAuthority())
 	{
 		// 클라라면 서버에 요청
-		Server_Attack();
+		Server_LightAttack();
 	}
 	else
 	{
 		// 서버라면 바로 실행
-		Server_Attack_Implementation();
+		Server_LightAttack_Implementation();
 	}
 }
 
 void ABaseCharacter::HeavyAttack()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Heavy Attack"));
+
+	if (!HasAuthority())
+	{
+		// 클라라면 서버에 요청
+		Server_HeavyAttack();
+	}
+	else
+	{
+		// 서버라면 바로 실행
+		Server_HeavyAttack_Implementation();
+	}
 }
 
 void ABaseCharacter::Roll()
@@ -312,29 +324,54 @@ void ABaseCharacter::Server_StopSprint_Implementation()
 	}
 }
 
-// Server Attack
-void ABaseCharacter::Server_Attack_Implementation()
+// Server Light Attack
+void ABaseCharacter::Server_LightAttack_Implementation()
 {
 	if (!BP_CanAttack())
 	{
 		return;
 	}
 
-	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(AttackStaminaCost))
+	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(LightAttackStaminaCost))
 	{
 		return;
 	}
 
 	StopRecoveryStamina();
 
-	BP_ExecuteAttack();
+	BP_ExecuteLightAttack();
 
-	Multicast_PlayAttackAnimation();
+	Multicast_PlayLightAttackAnimation();
 }
 
-void ABaseCharacter::Multicast_PlayAttackAnimation_Implementation()
+void ABaseCharacter::Multicast_PlayLightAttackAnimation_Implementation()
 {
-	BP_PlayAttackAnimation();
+	BP_PlayLightAttackAnimation();
+}
+
+// Server Heavy Attack
+void ABaseCharacter::Server_HeavyAttack_Implementation()
+{
+	if (!BP_CanAttack())
+	{
+		return;
+	}
+
+	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(HeavyAttackStaminaCost))
+	{
+		return;
+	}
+
+	StopRecoveryStamina();
+
+	BP_ExecuteHeavyAttack();
+
+	Multicast_PlayHeavyAttackAnimation();
+}
+
+void ABaseCharacter::Multicast_PlayHeavyAttackAnimation_Implementation()
+{
+	BP_PlayHeavyAttackAnimation();
 }
 
 // Server Hit
@@ -365,7 +402,7 @@ void ABaseCharacter::Server_Roll_Implementation()
 		return;
 	}
 
-	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(AttackStaminaCost))
+	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(LightAttackStaminaCost))
 	{
 		return;
 	}

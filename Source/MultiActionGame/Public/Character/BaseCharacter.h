@@ -57,7 +57,10 @@ protected:
 	float BasicAttackDamage;
 
 	UPROPERTY(BlueprintReadWrite)
-	float AttackStaminaCost;
+	float LightAttackStaminaCost;
+
+	UPROPERTY(BlueprintReadWrite)
+	float HeavyAttackStaminaCost;
 
 	UPROPERTY(BlueprintReadWrite)
 	float RollStaminaCost;
@@ -132,25 +135,39 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_SetRotation(FRotator NewRotation);
 
-	// Attack
+	// Light Attack
 	// 서버에서만 실행
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Combat")
-	void Server_Attack();
+	void Server_LightAttack();
 
 	// 모든 클라(서버 포함)에서 실행
 	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
-	void Multicast_PlayAttackAnimation();
+	void Multicast_PlayLightAttackAnimation();
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Combat")
+	void Server_HeavyAttack();
+
+	// 모든 클라(서버 포함)에서 실행
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
+	void Multicast_PlayHeavyAttackAnimation();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	bool BP_CanAttack() const;
 
 	// 공격과 관련된 계산 적용
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
-	void BP_ExecuteAttack();
+	void BP_ExecuteLightAttack();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void BP_ExecuteHeavyAttack();
 
 	// 공격 애니메이션 실행
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
-	void BP_PlayAttackAnimation();
+	void BP_PlayLightAttackAnimation();
+
+	// 공격 애니메이션 실행
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void BP_PlayHeavyAttackAnimation();
 
 	// Hit
 	UFUNCTION(BlueprintNativeEvent)
