@@ -26,11 +26,40 @@ AActor* AMainGameMode::ChoosePlayerStart_Implementation(AController* Player)
 		{
 			if (playerStart->ActorHasTag("Boss"))
 			{
+				UE_LOG(LogTemp, Warning, TEXT("[GameMode] Choose Player Start -> Boss"));
 				return playerStart;
 			}
 		}
 	}
-	
+	else
+	{
+		TArray<AActor*> heroStarts;
+
+		for (AActor* playerStart : playerStarts)
+		{
+			if (playerStart->ActorHasTag("Hero"))
+			{
+				TArray<AActor*> overlappingActors;
+				playerStart->GetOverlappingActors(overlappingActors, APawn::StaticClass());
+
+				if (overlappingActors.Num() == 0) // 주변에 오브젝트 없으면
+				{
+					heroStarts.Add(playerStart);
+				}
+			}
+		}
+
+		if (heroStarts.Num() > 0)
+		{
+			int32 randomIndex = FMath::RandRange(0, heroStarts.Num() - 1);
+			AActor* randomStart = heroStarts[randomIndex];
+
+			UE_LOG(LogTemp, Warning, TEXT("[GameMode] Choose Player Start -> Knight"));
+
+			return randomStart;
+		}
+	}
+
 	return Super::ChoosePlayerStart_Implementation(Player);
 }
 
@@ -48,26 +77,11 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 	{
 	case ECharacterType::Boss:
 		PawnToSpawn = BossCharacter;
-
-#if WITH_EDITOR
-		// FOR DEBUG
-		if (count % 2 == 1)
-		{
-			PawnToSpawn = BossCharacter;
-			PC->SelectedCharacterType = ECharacterType::Boss;
-			UE_LOG(LogTemp, Warning, TEXT("[GameMode] Spawn Boss"));
-		}
-		else
-		{
-			PawnToSpawn = KnightCharacter;
-			PC->SelectedCharacterType = ECharacterType::Knight;
-			UE_LOG(LogTemp, Warning, TEXT("[GameMode] Spawn Knight"));
-		}
-#endif
-
+		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Spawn Boss"));
 		break;
 	case ECharacterType::Knight:
 		PawnToSpawn = DefaultPawnClass;
+		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Spawn Knight"));
 		break;
 	case ECharacterType::Archer:
 	case ECharacterType::Healer:
@@ -106,6 +120,8 @@ void AMainGameMode::AddNewCharacter(APawn* NewPawn, ECharacterType CharacterType
 		{
 			HeroCharacters.Add(newCharacter);
 			UE_LOG(LogTemp, Warning, TEXT("[GameMode] Add Hero to Array"));
+
+			IncreaseBossMaxHealth();
 		}
 	}
 }
@@ -121,6 +137,8 @@ void AMainGameMode::IncreaseBossMaxHealth()
 	{
 		if (bossCharacter)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("[GameMode] Boss Health Increased"));
+
 			bossCharacter->GetHealthComponent()->IncreaseMaxHealth();
 		}
 	}
@@ -129,18 +147,36 @@ void AMainGameMode::IncreaseBossMaxHealth()
 FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId,
 	const FString& Options, const FString& Portal)
 {
-	FString OutError = Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
-
 	AMainPlayerController* PC = Cast<AMainPlayerController>(NewPlayerController);
-	if (!PC) return OutError;
 
-	// Parse Character Type from Options String
-	FString CharacterTypeStr;
-	if (FParse::Value(*Options, TEXT("CharacterType="), CharacterTypeStr))
+	if (PC)
 	{
-		int32 ParsedIndex = FCString::Atoi(*CharacterTypeStr);
-		PC->SelectedCharacterType = static_cast<ECharacterType>(ParsedIndex);
+		// Parse Character Type from Options String
+		FString CharacterTypeStr;
+		if (FParse::Value(*Options, TEXT("CharacterType="), CharacterTypeStr))
+		{
+			int32 ParsedIndex = FCString::Atoi(*CharacterTypeStr);
+			PC->SelectedCharacterType = static_cast<ECharacterType>(ParsedIndex);
+		}
 	}
+
+#if WITH_EDITOR
+	// FOR DEBUG
+	static int startCount = 0;
+	startCount++;
+	if (startCount % 2 == 1)
+	{
+		PC->SelectedCharacterType = ECharacterType::Boss;
+		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Init Boss Player"));
+	}
+	else
+	{
+		PC->SelectedCharacterType = ECharacterType::Knight;
+		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Init Knight Player"));
+	}
+#endif
+
+	FString OutError = Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
 
 	return OutError;
 }
