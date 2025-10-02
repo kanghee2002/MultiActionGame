@@ -1,5 +1,6 @@
 #include "InGameHUD.h"
 #include "Components/ProgressBar.h"
+#include "UI/BackProgressBar.h"
 #include "Character/HealthComponent.h"
 #include "Character/StaminaComponent.h"
 #include "Character/BaseCharacter.h"
@@ -7,7 +8,41 @@
 void UInGameHUD::NativeConstruct()
 {
 	Super::NativeConstruct();
-	// 초기화 작업 가능
+
+	bIsHealthIncreased = false;
+
+	StaminaBackProgressBar->DecreaseDelay = 0.3f;
+	StaminaBackProgressBar->DecreaseSpeed = 1.5f;
+}
+
+void UInGameHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	if (bIsHealthIncreased)
+	{
+		UpdateHealthSmoothing(InDeltaTime);
+	}
+}
+
+void UInGameHUD::UpdateHealthSmoothing(float Delta)
+{
+	float currentPercent = HealthProgressBar->GetPercent();
+
+	if (currentPercent >= TargetHealthPercent)
+	{
+		bIsHealthIncreased = false;
+
+		HealthProgressBar->SetPercent(TargetHealthPercent);
+		HealthBackProgressBar->SetPercent(TargetHealthPercent);
+		return;
+	}
+
+	float increasingSpeed = 1.0f;
+
+	float newPercent = currentPercent + increasingSpeed * Delta;
+	HealthProgressBar->SetPercent(newPercent);
+	HealthBackProgressBar->SetPercent(newPercent);
 }
 
 void UInGameHUD::InitializeHealthComponent(UHealthComponent* HealthComp)
@@ -35,6 +70,8 @@ void UInGameHUD::InitializeHealthComponent(UHealthComponent* HealthComp)
 	float maxHealth = HealthComp->GetMaxHealth();
 
 	UpdateHealthBarUI(maxHealth, maxHealth);
+
+	HealthBackProgressBar->SetPercent(1.0f);
 }
 
 void UInGameHUD::UpdateHealthBarUI(float NewHealth, float MaxHealth)
@@ -42,7 +79,21 @@ void UInGameHUD::UpdateHealthBarUI(float NewHealth, float MaxHealth)
 	if (HealthProgressBar && MaxHealth > 0.0f)
 	{
 		float percent = NewHealth / MaxHealth;
-		HealthProgressBar->SetPercent(percent);
+
+		// 체력 감소한 경우
+		if (HealthProgressBar->GetPercent() >= percent)
+		{
+			HealthBackProgressBar->SetTargetPercent(percent);
+			HealthProgressBar->SetPercent(percent);
+			bIsHealthIncreased = false;
+		}
+		// 체력 증가한 경우
+		else
+		{
+			// 체력 부드럽게 증가
+			TargetHealthPercent = percent;
+			bIsHealthIncreased = true;
+		}
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Update HealthBar: %f. / MaxHealth = %f "), NewHealth, MaxHealth);
@@ -67,6 +118,26 @@ void UInGameHUD::UpdateStaminaBarUI(float NewStamina)
 	if (StaminaProgressBar && MaxStamina > 0.0f)
 	{
 		float percent = NewStamina / MaxStamina;
+
+		// 스태미나 감소한 경우
+		if (StaminaProgressBar->GetPercent() >= percent)
+		{
+			// 변화량이 매우 작은 경우
+			if (FMath::Abs(StaminaProgressBar->GetPercent() - percent) < 0.01f)
+			{
+				StaminaBackProgressBar->SetPercent(percent);
+			}
+			else
+			{
+				StaminaBackProgressBar->SetTargetPercent(percent);
+			}
+		}
+		// 스태미나 증가한 경우
+		else
+		{
+			StaminaBackProgressBar->SetPercent(percent);
+		}
+
 		StaminaProgressBar->SetPercent(percent);
 	}
 }
@@ -102,6 +173,8 @@ void UInGameHUD::InitializeBossHealthComponent(UHealthComponent* HealthComp)
 	HealthComp->OnHealthChanged.AddDynamic(this, &UInGameHUD::UpdateBossHealthBarUI);
 
 	UpdateBossHealthBarUI(bossMaxHealth, bossMaxHealth);
+
+	BossHealthBackProgressBar->SetPercent(1.0f);
 }
 
 void UInGameHUD::UpdateBossHealthBarUI(float NewHealth, float MaxHealth)
@@ -109,7 +182,17 @@ void UInGameHUD::UpdateBossHealthBarUI(float NewHealth, float MaxHealth)
 	if (BossHealthProgressBar && MaxHealth > 0.0f)
 	{
 		float percent = NewHealth / MaxHealth;
-		BossHealthProgressBar->SetPercent(percent);
+
+		if (BossHealthProgressBar->GetPercent() >= percent)
+		{
+			BossHealthBackProgressBar->SetTargetPercent(percent);
+			BossHealthProgressBar->SetPercent(percent);
+		}
+		else
+		{
+			// TODO (Boss Healed)
+			BossHealthProgressBar->SetPercent(percent);
+		}
 	}
 }
 

@@ -8,6 +8,7 @@
 #include "HealthBarWidget.generated.h"
 
 class UProgressBar;
+class UBackProgressBar;
 class UHealthComponent;
 
 UCLASS()
@@ -19,6 +20,12 @@ public:
 	void InitializeHealthComponent(UHealthComponent* HealthComp);
 
 protected:
+	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+	// 부드러운 체력 증가
+	void UpdateHealthSmoothing(float Delta);
+
 	UFUNCTION(BlueprintCallable)
 	void UpdateHealthBar(float NewHealth, float MaxHealth);
 
@@ -26,5 +33,12 @@ protected:
 	UProgressBar* HealthProgressBar;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UBackProgressBar* HealthBackProgressBar;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* NameText;
+
+private:
+	bool bIsHealthIncreased;
+	float TargetHealthPercent;
 };

@@ -9,6 +9,7 @@
 
 class ABaseCharacter;
 class UProgressBar;
+class UBackProgressBar;
 class UHealthComponent;
 class UStaminaComponent;
 
@@ -40,6 +41,7 @@ public:
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	// 이벤트 콜백 
 	UFUNCTION(BlueprintCallable)
@@ -54,12 +56,21 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void UpdateBossHealthBarUI(float NewHealth, float MaxHealth);
 
+	// 부드러운 체력 증가
+	void UpdateHealthSmoothing(float Delta);
+
 	// 위젯 그래프에서 BindWidget 해야 함 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UProgressBar* HealthProgressBar;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UBackProgressBar* HealthBackProgressBar;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UProgressBar* StaminaProgressBar;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UBackProgressBar* StaminaBackProgressBar;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UOverlay* HealOverlay;
@@ -74,6 +85,9 @@ protected:
 	UProgressBar* BossHealthProgressBar;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UBackProgressBar* BossHealthBackProgressBar;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* BossNameText;
 
 	UPROPERTY()
@@ -81,4 +95,7 @@ protected:
 
 private:
 	float MaxStamina;
+
+	bool bIsHealthIncreased;
+	float TargetHealthPercent;
 };
