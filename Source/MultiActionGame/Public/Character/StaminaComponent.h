@@ -39,6 +39,9 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	float StaminaRecoveryRate;
 
+	UPROPERTY(EditDefaultsOnly)
+	float SprintDrainRate;
+
 	UPROPERTY(BlueprintReadWrite)
 	float ExhaustionRecoveryThreshold;
 

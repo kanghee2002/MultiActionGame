@@ -12,6 +12,7 @@ UStaminaComponent::UStaminaComponent()
 	DefaultMaxStamina = 100;
 	CurrentStamina = DefaultMaxStamina;
 	StaminaRecoveryRate = 25.0f;
+	SprintDrainRate = 1.0f;
 	ExhaustionRecoveryThreshold = 10.0f;
 }
 
@@ -63,7 +64,7 @@ void UStaminaComponent::UpdateStamina(float DeltaTime)
 	case EStaminaState::Sprinting:
 		if (CurrentStamina > 0.0f)
 		{
-			CurrentStamina -= deltaStamina * 0.5f;
+			CurrentStamina -= deltaStamina * SprintDrainRate;
 
 			OnStaminaChanged.Broadcast(CurrentStamina);
 		}

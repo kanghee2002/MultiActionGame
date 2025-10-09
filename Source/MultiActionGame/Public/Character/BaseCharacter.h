@@ -51,7 +51,7 @@ protected:
 	UHealthComponent* HealthCompRef;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
-	UStaminaComponent* StaminaCompRef;
+	UStaminaComponent* StaminaCompRef1;
 
 	UPROPERTY(BlueprintReadWrite)
 	float BasicAttackDamage;
@@ -88,18 +88,18 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	const void StartRecoveryStamina()
 	{
-		if (StaminaCompRef)
+		if (StaminaCompRef1)
 		{
-			StaminaCompRef->StartRecovery();
+			StaminaCompRef1->StartRecovery();
 		}
 	}
 
 	UFUNCTION(BlueprintCallable)
 	const void StopRecoveryStamina()
 	{
-		if (StaminaCompRef)
+		if (StaminaCompRef1)
 		{
-			StaminaCompRef->StopRecovery();
+			StaminaCompRef1->StopRecovery();
 		}
 	}
 

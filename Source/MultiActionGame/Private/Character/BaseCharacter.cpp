@@ -58,17 +58,17 @@ ABaseCharacter::ABaseCharacter()
 	bAlwaysRelevant = true;
 
 	HealthCompRef = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-	StaminaCompRef = CreateDefaultSubobject<UStaminaComponent>(TEXT("StaminaCompRef"));
+	StaminaCompRef1 = CreateDefaultSubobject<UStaminaComponent>(TEXT("StaminaCompRef1"));
 
 	OnTakeAnyDamage.AddDynamic(this, &ABaseCharacter::OnDamageReceived);
 
 	// 변수 설정
 	BasicAttackDamage = 3.5f;
-	LightAttackStaminaCost = 15.0f;
-	HeavyAttackStaminaCost = 25.0f;
-	RollStaminaCost = 20.0f;
+	LightAttackStaminaCost = 10.0f;
+	HeavyAttackStaminaCost = 20.0f;
+	RollStaminaCost = 30.0f;
 	CurrentHealCount = 5;
-	SprintSpeed = 800.0f;
+	SprintSpeed = 700.0f;
 	WalkSpeed = 400.0f;
 }
 
@@ -299,7 +299,7 @@ void ABaseCharacter::Server_SetRotation_Implementation(FRotator NewRotation)
 // Server Sprint
 void ABaseCharacter::Server_StartSprint_Implementation()
 {
-	if (!StaminaCompRef || !StaminaCompRef->CanSprint())
+	if (!StaminaCompRef1 || !StaminaCompRef1->CanSprint())
 	{
 		CurrentSpeed = WalkSpeed;
 		GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
@@ -309,7 +309,7 @@ void ABaseCharacter::Server_StartSprint_Implementation()
 		CurrentSpeed = SprintSpeed;
 		GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
 
-		StaminaCompRef->StartSprint();
+		StaminaCompRef1->StartSprint();
 	}
 }
 
@@ -318,9 +318,9 @@ void ABaseCharacter::Server_StopSprint_Implementation()
 	CurrentSpeed = WalkSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
 
-	if (StaminaCompRef)
+	if (StaminaCompRef1)
 	{
-		StaminaCompRef->StopSprint();
+		StaminaCompRef1->StopSprint();
 	}
 }
 
@@ -332,7 +332,7 @@ void ABaseCharacter::Server_LightAttack_Implementation()
 		return;
 	}
 
-	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(LightAttackStaminaCost))
+	if (!StaminaCompRef1 || !StaminaCompRef1->TryUseStamina(LightAttackStaminaCost))
 	{
 		return;
 	}
@@ -357,7 +357,7 @@ void ABaseCharacter::Server_HeavyAttack_Implementation()
 		return;
 	}
 
-	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(HeavyAttackStaminaCost))
+	if (!StaminaCompRef1 || !StaminaCompRef1->TryUseStamina(HeavyAttackStaminaCost))
 	{
 		return;
 	}
@@ -402,7 +402,7 @@ void ABaseCharacter::Server_Roll_Implementation()
 		return;
 	}
 
-	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(LightAttackStaminaCost))
+	if (!StaminaCompRef1 || !StaminaCompRef1->TryUseStamina(RollStaminaCost))
 	{
 		return;
 	}
@@ -422,7 +422,7 @@ void ABaseCharacter::Server_Roll_Implementation()
 		directionVector = ReplicatedRotation.Vector();
 	}
 
-	LaunchCharacter(directionVector * 900.0f + FVector(0.0f, 0.0f, 200.0f), true, true);
+	LaunchCharacter(directionVector * 800.0f + FVector(0.0f, 0.0f, 150.0f), true, true);
 
 	Multicast_PlayRollAnimation();
 }
