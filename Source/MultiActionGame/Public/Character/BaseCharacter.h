@@ -54,6 +54,9 @@ protected:
 	UStaminaComponent* StaminaCompRef1;
 
 	UPROPERTY(BlueprintReadWrite)
+	TArray<AActor*> HitEnemies;
+
+	UPROPERTY(BlueprintReadWrite)
 	float BasicAttackDamage;
 
 	UPROPERTY(BlueprintReadWrite)

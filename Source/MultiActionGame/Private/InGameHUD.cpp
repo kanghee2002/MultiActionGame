@@ -11,8 +11,11 @@ void UInGameHUD::NativeConstruct()
 
 	bIsHealthIncreased = false;
 
-	StaminaBackProgressBar->DecreaseDelay = 0.3f;
-	StaminaBackProgressBar->DecreaseSpeed = 1.5f;
+	StaminaBackProgressBar->DecreaseDelay = 0.75f;
+	StaminaBackProgressBar->DecreaseSpeed = 1.0f;
+
+	HealthBackProgressBar->SetPercent(1.0f);
+	StaminaBackProgressBar->SetPercent(1.0f);
 }
 
 void UInGameHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -70,8 +73,6 @@ void UInGameHUD::InitializeHealthComponent(UHealthComponent* HealthComp)
 	float maxHealth = HealthComp->GetMaxHealth();
 
 	UpdateHealthBarUI(maxHealth, maxHealth);
-
-	HealthBackProgressBar->SetPercent(1.0f);
 }
 
 void UInGameHUD::UpdateHealthBarUI(float NewHealth, float MaxHealth)
@@ -135,7 +136,11 @@ void UInGameHUD::UpdateStaminaBarUI(float NewStamina)
 		// 스태미나 증가한 경우
 		else
 		{
-			StaminaBackProgressBar->SetPercent(percent);
+			if (StaminaBackProgressBar->GetPercent() < StaminaProgressBar->GetPercent())
+			{
+				StaminaBackProgressBar->StopUpdatePercent();
+				StaminaBackProgressBar->SetPercent(percent);
+			}
 		}
 
 		StaminaProgressBar->SetPercent(percent);

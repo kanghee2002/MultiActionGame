@@ -21,6 +21,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetTargetPercent(float NewPercent);
 
+	UFUNCTION(BlueprintCallable)
+	void StopUpdatePercent();
+
 	float DecreaseDelay = 0.75f;
 	float UpdateInterval = 0.016f;
 	float DecreaseSpeed = 1.0f;

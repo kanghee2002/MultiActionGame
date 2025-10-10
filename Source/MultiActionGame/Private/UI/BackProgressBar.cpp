@@ -54,3 +54,9 @@ void UBackProgressBar::UpdatePercent()
 		true  // 반복 실행
 	);
 }
+
+void UBackProgressBar::StopUpdatePercent()
+{
+	GetWorld()->GetTimerManager().ClearTimer(UpdateTimerHandle);
+	bIsDecreasing = false;
+}

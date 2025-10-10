@@ -218,7 +218,6 @@ void ABaseCharacter::OnRep_CurrentHealCount()
 
 void ABaseCharacter::OnRep_CurrentMaxSpeed()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnRep_CurrentMaxSpeed: %f"), CurrentSpeed);
 	GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
 }
 
