@@ -107,6 +107,12 @@ protected:
 		}
 	}
 
+	UFUNCTION(BlueprintCallable)
+	const void ClearHitEnemies()
+	{
+		HitEnemies.Empty();
+	}
+
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
@@ -156,7 +162,7 @@ protected:
 	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
 	void Multicast_PlayHeavyAttackAnimation();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Combat")
 	bool BP_CanAttack() const;
 
 	// 공격과 관련된 계산 적용
