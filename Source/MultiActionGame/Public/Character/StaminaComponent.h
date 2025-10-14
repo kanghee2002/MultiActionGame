@@ -60,6 +60,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopSprint();
 
+	UFUNCTION(BlueprintCallable)
 	bool TryUseStamina(float Amount);
 
 	UFUNCTION()

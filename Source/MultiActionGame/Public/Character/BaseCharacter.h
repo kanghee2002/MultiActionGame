@@ -51,7 +51,7 @@ protected:
 	UHealthComponent* HealthCompRef;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
-	UStaminaComponent* StaminaCompRef1;
+	UStaminaComponent* StaminaCompRef;
 
 	UPROPERTY(BlueprintReadWrite)
 	TArray<AActor*> HitEnemies;
@@ -80,9 +80,10 @@ protected:
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentMaxSpeed)
 	float CurrentSpeed;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(BlueprintReadOnly, Replicated)
 	FRotator ReplicatedRotation;
 
+	UPROPERTY(BlueprintReadOnly)
 	FRotator TargetRotation;
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
@@ -91,18 +92,18 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	const void StartRecoveryStamina()
 	{
-		if (StaminaCompRef1)
+		if (StaminaCompRef)
 		{
-			StaminaCompRef1->StartRecovery();
+			StaminaCompRef->StartRecovery();
 		}
 	}
 
 	UFUNCTION(BlueprintCallable)
 	const void StopRecoveryStamina()
 	{
-		if (StaminaCompRef1)
+		if (StaminaCompRef)
 		{
-			StaminaCompRef1->StopRecovery();
+			StaminaCompRef->StopRecovery();
 		}
 	}
 
@@ -118,7 +119,8 @@ protected:
 
 	virtual void LightAttack();
 	virtual void HeavyAttack();
-	virtual void Roll();
+	virtual void UseSkill();
+	virtual void JumpAction();
 	virtual void SelfHeal();
 
 	UFUNCTION()
@@ -172,6 +174,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlayHeavyAttackAnimation();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void BP_UseSkill();
+
 	// Hit
 	UFUNCTION(BlueprintNativeEvent)
 	void OnDamageReceived(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
@@ -182,8 +187,11 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlayHitAnimation();
 
-	// Roll
-	UFUNCTION(Server, Reliable)
+	// Jump (Roll)
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void BP_JumpAction();
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "Combat")
 	void Server_Roll();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")

@@ -58,7 +58,7 @@ ABaseCharacter::ABaseCharacter()
 	bAlwaysRelevant = true;
 
 	HealthCompRef = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-	StaminaCompRef1 = CreateDefaultSubobject<UStaminaComponent>(TEXT("StaminaCompRef1"));
+	StaminaCompRef = CreateDefaultSubobject<UStaminaComponent>(TEXT("StaminaCompRef"));
 
 	OnTakeAnyDamage.AddDynamic(this, &ABaseCharacter::OnDamageReceived);
 
@@ -146,10 +146,11 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
     component->BindAction(InputActionGroup->LookAction, ETriggerEvent::Triggered, this, &ABaseCharacter::Look);
     component->BindAction(InputActionGroup->SprintAction, ETriggerEvent::Triggered, this, &ABaseCharacter::StartSprint);
     component->BindAction(InputActionGroup->SprintAction, ETriggerEvent::Completed, this, &ABaseCharacter::StopSprint);
-    component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Started, this, &ABaseCharacter::Roll);
+    component->BindAction(InputActionGroup->JumpAction, ETriggerEvent::Started, this, &ABaseCharacter::JumpAction);
 	component->BindAction(InputActionGroup->LightAttackAction, ETriggerEvent::Started, this, &ABaseCharacter::LightAttack);
 	component->BindAction(InputActionGroup->HeavyAttackAction, ETriggerEvent::Started, this, &ABaseCharacter::HeavyAttack);
 	component->BindAction(InputActionGroup->SelfHealAction, ETriggerEvent::Started, this, &ABaseCharacter::SelfHeal);
+	component->BindAction(InputActionGroup->SkillAction, ETriggerEvent::Started, this, &ABaseCharacter::UseSkill);
 }
 
 // Movement
@@ -277,16 +278,16 @@ void ABaseCharacter::HeavyAttack()
 	}
 }
 
-void ABaseCharacter::Roll()
+void ABaseCharacter::UseSkill()
 {
-	if (!HasAuthority())
-	{
-		Server_Roll();
-	}
-	else
-	{
-		Server_Roll_Implementation();
-	}
+	UE_LOG(LogTemp, Warning, TEXT("Use Skill"));
+
+	BP_UseSkill();
+}
+
+void ABaseCharacter::JumpAction()
+{
+	BP_JumpAction();
 }
 
 // Server Rotation
@@ -298,7 +299,7 @@ void ABaseCharacter::Server_SetRotation_Implementation(FRotator NewRotation)
 // Server Sprint
 void ABaseCharacter::Server_StartSprint_Implementation()
 {
-	if (!StaminaCompRef1 || !StaminaCompRef1->CanSprint())
+	if (!StaminaCompRef || !StaminaCompRef->CanSprint())
 	{
 		CurrentSpeed = WalkSpeed;
 		GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
@@ -308,7 +309,7 @@ void ABaseCharacter::Server_StartSprint_Implementation()
 		CurrentSpeed = SprintSpeed;
 		GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
 
-		StaminaCompRef1->StartSprint();
+		StaminaCompRef->StartSprint();
 	}
 }
 
@@ -317,9 +318,9 @@ void ABaseCharacter::Server_StopSprint_Implementation()
 	CurrentSpeed = WalkSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
 
-	if (StaminaCompRef1)
+	if (StaminaCompRef)
 	{
-		StaminaCompRef1->StopSprint();
+		StaminaCompRef->StopSprint();
 	}
 }
 
@@ -331,7 +332,7 @@ void ABaseCharacter::Server_LightAttack_Implementation()
 		return;
 	}
 
-	if (!StaminaCompRef1 || !StaminaCompRef1->TryUseStamina(LightAttackStaminaCost))
+	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(LightAttackStaminaCost))
 	{
 		return;
 	}
@@ -356,7 +357,7 @@ void ABaseCharacter::Server_HeavyAttack_Implementation()
 		return;
 	}
 
-	if (!StaminaCompRef1 || !StaminaCompRef1->TryUseStamina(HeavyAttackStaminaCost))
+	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(HeavyAttackStaminaCost))
 	{
 		return;
 	}
@@ -401,7 +402,7 @@ void ABaseCharacter::Server_Roll_Implementation()
 		return;
 	}
 
-	if (!StaminaCompRef1 || !StaminaCompRef1->TryUseStamina(RollStaminaCost))
+	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(RollStaminaCost))
 	{
 		return;
 	}
@@ -421,7 +422,7 @@ void ABaseCharacter::Server_Roll_Implementation()
 		directionVector = ReplicatedRotation.Vector();
 	}
 
-	LaunchCharacter(directionVector * 800.0f + FVector(0.0f, 0.0f, 150.0f), true, true);
+	LaunchCharacter(directionVector * 1000.0f + FVector(0.0f, 0.0f, 180.0f), true, true);
 
 	Multicast_PlayRollAnimation();
 }
