@@ -1,3 +1,4 @@
 Content/ParagonGrux/** filter=lfs diff=lfs merge=lfs -text
 "Content/MWLandscapeAutoMaterial/**" filter=lfs diff=lfs merge=lfs -text
 "Content/LavaMat/**" filter=lfs diff=lfs merge=lfs -text
+"Content/FreeSampleAnimationSet/**" filter=lfs diff=lfs merge=lfs -text

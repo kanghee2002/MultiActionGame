@@ -472,7 +472,6 @@ void ABaseCharacter::Server_Roll_Implementation()
 
 	StopRecoveryStamina();
 
-	bIsInvincible = true;
 	bCanPlayerControl = false;
 
 	FVector directionVector;
