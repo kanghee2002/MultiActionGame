@@ -81,6 +81,11 @@ void UStaminaComponent::UpdateStamina(float DeltaTime)
 		//UE_LOG(LogTemp, Warning, TEXT("Stamina State: Sprinting"));
 		break;
 	case EStaminaState::Exhausted:
+		if (!Cast<ABaseCharacter>(GetOwner())->bCanPlayerControl)
+		{
+			return;
+		}
+
 		if (CurrentStamina < ExhaustionRecoveryThreshold)
 		{
 			CurrentStamina += deltaStamina / 4.0f;
