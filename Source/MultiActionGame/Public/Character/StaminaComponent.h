@@ -36,13 +36,13 @@ public:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentStamina)
 	float CurrentStamina;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	float StaminaRecoveryRate;
 
 	UPROPERTY(EditDefaultsOnly)
 	float SprintDrainRate;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	float ExhaustionRecoveryThreshold;
 
 	UFUNCTION(BlueprintCallable)

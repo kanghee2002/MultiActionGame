@@ -60,13 +60,13 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	TArray<AActor*> HitEnemies;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float BasicAttackDamage;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	float LightAttackStaminaCost;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	float HeavyAttackStaminaCost;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -75,7 +75,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float SkillCooldown;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	float RollStaminaCost;
 
 	UPROPERTY(EditDefaultsOnly)
