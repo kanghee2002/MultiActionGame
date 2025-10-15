@@ -268,12 +268,10 @@ void ABaseCharacter::HeavyAttack()
 
 	if (!HasAuthority())
 	{
-		// 클라라면 서버에 요청
 		Server_HeavyAttack();
 	}
 	else
 	{
-		// 서버라면 바로 실행
 		Server_HeavyAttack_Implementation();
 	}
 }
@@ -282,7 +280,14 @@ void ABaseCharacter::UseSkill()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Use Skill"));
 
-	BP_UseSkill();
+	if (!HasAuthority())
+	{
+		Server_UseSkill();
+	}
+	else
+	{
+		Server_UseSkill_Implementation();
+	}
 }
 
 void ABaseCharacter::JumpAction()
@@ -372,6 +377,64 @@ void ABaseCharacter::Server_HeavyAttack_Implementation()
 void ABaseCharacter::Multicast_PlayHeavyAttackAnimation_Implementation()
 {
 	BP_PlayHeavyAttackAnimation();
+}
+
+// Server Use Skill
+void ABaseCharacter::Server_UseSkill_Implementation()
+{
+	if (!BP_CanAttack())
+	{
+		return;
+	}
+
+	if (CurrentSkillCooldown > 0.0f)
+	{
+		return;
+	}
+
+	if (!StaminaCompRef || !StaminaCompRef->TryUseStamina(SkillStaminaCost))
+	{
+		return;
+	}
+
+	CurrentSkillCooldown = SkillCooldown;
+	OnSkillCooldownChanged.Broadcast(CurrentSkillCooldown, SkillCooldown);
+
+	StopRecoveryStamina();
+
+	BP_ExecuteSkill();
+
+	Multicast_PlaySkillAnimation();
+}
+
+void ABaseCharacter::Multicast_PlaySkillAnimation_Implementation()
+{
+	BP_PlaySkillAnimation();
+}
+
+void ABaseCharacter::StartSkillCooldown()
+{
+	GetWorld()->GetTimerManager().SetTimer(
+		SkillCooldownTimerHandle,
+		this,
+		&ABaseCharacter::DecreaseSkillCooldown,
+		CooldownUpdateInterval,
+		true  // 반복 실행
+	);
+}
+
+void ABaseCharacter::DecreaseSkillCooldown()
+{
+	CurrentSkillCooldown -= CooldownUpdateInterval;
+
+	if (CurrentSkillCooldown <= 0.0f)
+	{
+		CurrentSkillCooldown = 0.0f;
+
+		GetWorld()->GetTimerManager().ClearTimer(SkillCooldownTimerHandle);
+	}
+
+	OnSkillCooldownChanged.Broadcast(CurrentSkillCooldown, SkillCooldown);
 }
 
 // Server Hit
@@ -493,5 +556,6 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
     DOREPLIFETIME(ABaseCharacter, bCanDoComboAttack);
 	DOREPLIFETIME(ABaseCharacter, bCanPlayerControl);
     DOREPLIFETIME(ABaseCharacter, ReplicatedRotation);
+    DOREPLIFETIME(ABaseCharacter, CurrentHealCount);
     DOREPLIFETIME(ABaseCharacter, CurrentSpeed);
 }

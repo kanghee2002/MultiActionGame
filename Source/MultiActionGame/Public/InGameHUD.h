@@ -4,7 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Overlay.h"
-#include "Components/HorizontalBox.h"
+#include "Components/SizeBox.h"
 #include "InGameHUD.generated.h"
 
 class ABaseCharacter;
@@ -27,9 +27,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void InitializeStaminaComponent(UStaminaComponent* StaminaComp);
 
-	// StaminaComponent Binding
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void InitializeHealCountText(ABaseCharacter* MyCharacter);
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void InitializeSkillCooldownProgressBar(ABaseCharacter* MyCharacter);
 
 	// HealthComponent Binding
 	UFUNCTION(BlueprintCallable, Category = "UI")
@@ -54,6 +56,9 @@ protected:
 	void UpdateHealCountUI(int NewHealCount);
 
 	UFUNCTION(BlueprintCallable)
+	void UpdateSkillCooldownUI(float NewCooldown, float Cooldown);
+
+	UFUNCTION(BlueprintCallable)
 	void UpdateBossHealthBarUI(float NewHealth, float MaxHealth);
 
 	// 부드러운 체력 증가
@@ -73,13 +78,19 @@ protected:
 	UBackProgressBar* StaminaBackProgressBar;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UOverlay* HealOverlay;
+	USizeBox* HealInfo;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	USizeBox* HealSkillSpacer;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* HealCountText;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UHorizontalBox* BossInfo;
+	UProgressBar* SkillCooldownProgressBar;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	USizeBox* BossInfo;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UProgressBar* BossHealthProgressBar;

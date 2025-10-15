@@ -11,6 +11,7 @@
 #include "BaseCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealCountChanged, int, NewHealthCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSkillCooldownChanged, float, NewCooldown, float, Cooldown);
 
 UCLASS()
 class MULTIACTIONGAME_API ABaseCharacter : public ACharacter
@@ -22,6 +23,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHealCountChanged OnHealCountChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnSkillCooldownChanged OnSkillCooldownChanged;
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bCanDoComboAttack;
@@ -65,6 +69,12 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	float HeavyAttackStaminaCost;
 
+	UPROPERTY(EditDefaultsOnly)
+	float SkillStaminaCost;
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillCooldown;
+
 	UPROPERTY(BlueprintReadWrite)
 	float RollStaminaCost;
 
@@ -79,6 +89,9 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentMaxSpeed)
 	float CurrentSpeed;
+
+	UPROPERTY(BlueprintReadWrite)
+	float CurrentSkillCooldown;
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	FRotator ReplicatedRotation;
@@ -162,6 +175,12 @@ protected:
 	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
 	void Multicast_PlayHeavyAttackAnimation();
 
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Combat")
+	void Server_UseSkill();
+
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
+	void Multicast_PlaySkillAnimation();
+
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Combat")
 	bool BP_CanAttack() const;
 
@@ -172,16 +191,25 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_ExecuteHeavyAttack();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void BP_ExecuteSkill();
+
 	// 공격 애니메이션 실행
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlayLightAttackAnimation();
 
-	// 공격 애니메이션 실행
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlayHeavyAttackAnimation();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
-	void BP_UseSkill();
+	void BP_PlaySkillAnimation();
+
+	// 스킬 쿨다운 시작
+	UFUNCTION(BlueprintCallable)
+	void StartSkillCooldown();
+
+	// 스킬 쿨다운 감소
+	void DecreaseSkillCooldown();
 
 	// Hit
 	UFUNCTION(BlueprintNativeEvent)
@@ -235,4 +263,8 @@ private:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	FTimerHandle SkillCooldownTimerHandle;   // 스킬 쿨다운 업데이트
+
+	const float CooldownUpdateInterval = 0.1f;
 };

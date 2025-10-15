@@ -89,6 +89,7 @@ void AMainPlayerController::CreateInGameHUD()
 		}
 
 		InGameHUDWidget->InitializeHealCountText(myChar);
+		InGameHUDWidget->InitializeSkillCooldownProgressBar(myChar);
 	}
 
 	// Set Boss UI

@@ -165,6 +165,25 @@ void UInGameHUD::UpdateHealCountUI(int NewHealCount)
 	}
 }
 
+void UInGameHUD::InitializeSkillCooldownProgressBar(ABaseCharacter* MyCharacter)
+{
+	if (!MyCharacter)
+	{
+		return;
+	}
+
+	MyCharacter->OnSkillCooldownChanged.AddUniqueDynamic(this, &UInGameHUD::UpdateSkillCooldownUI);
+}
+
+void UInGameHUD::UpdateSkillCooldownUI(float NewCooldown, float Cooldown)
+{
+	if (SkillCooldownProgressBar && Cooldown > 0.0f)
+	{
+		float percent = NewCooldown / Cooldown;
+		SkillCooldownProgressBar->SetPercent(percent);
+	}
+}
+
 void UInGameHUD::InitializeBossHealthComponent(UHealthComponent* HealthComp)
 {
 	if (!HealthComp)
@@ -204,13 +223,18 @@ void UInGameHUD::UpdateBossHealthBarUI(float NewHealth, float MaxHealth)
 
 void UInGameHUD::SetBossHUD()
 {
-	if (HealOverlay)
+	if (HealInfo)
 	{
-		HealOverlay->SetVisibility(ESlateVisibility::Collapsed);
+		HealInfo->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	if (HealSkillSpacer)
+	{
+		HealSkillSpacer->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
 	if (BossInfo)
 	{
-		BossInfo->SetVisibility(ESlateVisibility::Collapsed);
+		BossInfo->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
