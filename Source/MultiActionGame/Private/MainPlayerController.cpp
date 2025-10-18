@@ -92,11 +92,7 @@ void AMainPlayerController::CreateInGameHUD()
 		InGameHUDWidget->InitializeSkillCooldownProgressBar(myChar);
 	}
 
-	// Set Boss UI
-	if (SelectedCharacterType == ECharacterType::Boss)
-	{
-		InGameHUDWidget->SetBossHUD();
-	}
+	InGameHUDWidget->InitializeHUD(SelectedCharacterType);
 }
 
 void AMainPlayerController::HideHealthBarWidget(APawn* MyPawn)

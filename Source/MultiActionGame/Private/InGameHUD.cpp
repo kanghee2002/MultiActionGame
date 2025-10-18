@@ -1,6 +1,7 @@
 #include "InGameHUD.h"
 #include "Components/ProgressBar.h"
 #include "UI/BackProgressBar.h"
+#include "Character/CharacterType.h"
 #include "Character/HealthComponent.h"
 #include "Character/StaminaComponent.h"
 #include "Character/BaseCharacter.h"
@@ -172,7 +173,7 @@ void UInGameHUD::InitializeSkillCooldownProgressBar(ABaseCharacter* MyCharacter)
 		return;
 	}
 
-	MyCharacter->OnSkillCooldownChanged.AddUniqueDynamic(this, &UInGameHUD::UpdateSkillCooldownUI);
+	MyCharacter->OnSkillCooldownChanged.AddDynamic(this, &UInGameHUD::UpdateSkillCooldownUI);
 }
 
 void UInGameHUD::UpdateSkillCooldownUI(float NewCooldown, float Cooldown)
@@ -221,20 +222,41 @@ void UInGameHUD::UpdateBossHealthBarUI(float NewHealth, float MaxHealth)
 }
 
 
-void UInGameHUD::SetBossHUD()
+void UInGameHUD::InitializeHUD(ECharacterType CharacterType)
 {
-	if (HealInfo)
+	switch (CharacterType)
 	{
-		HealInfo->SetVisibility(ESlateVisibility::Collapsed);
-	}
-
-	if (HealSkillSpacer)
-	{
-		HealSkillSpacer->SetVisibility(ESlateVisibility::Collapsed);
-	}
-
-	if (BossInfo)
-	{
-		BossInfo->SetVisibility(ESlateVisibility::Hidden);
+	case ECharacterType::Boss:
+		if (SkillImage)
+		{
+			SkillImage->SetBrushFromTexture(BossSkillData->SkillIcon);
+		}
+		if (HealInfo)
+		{
+			HealInfo->SetVisibility(ESlateVisibility::Collapsed);
+		}
+		if (HealSkillSpacer)
+		{
+			HealSkillSpacer->SetVisibility(ESlateVisibility::Collapsed);
+		}
+		if (BossInfo)
+		{
+			BossInfo->SetVisibility(ESlateVisibility::Hidden);
+		}
+		break;
+	case ECharacterType::Knight:
+		if (SkillImage)
+		{
+			SkillImage->SetBrushFromTexture(KnightSkillData->SkillIcon);
+		}
+		break;
+	case ECharacterType::Archer:
+		break;
+	case ECharacterType::Healer:
+		break;
+	case ECharacterType::MAX:
+		break;
+	default:
+		break;
 	}
 }

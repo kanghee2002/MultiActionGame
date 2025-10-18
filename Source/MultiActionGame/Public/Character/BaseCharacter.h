@@ -90,7 +90,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentMaxSpeed)
 	float CurrentSpeed;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentSkillCooldown)
 	float CurrentSkillCooldown;
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
@@ -101,6 +101,9 @@ protected:
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bIsInvincible;
+
+	UPROPERTY(Replicated, BlueprintReadWrite)
+	bool bIsSuperArmored;
 
 	UFUNCTION(BlueprintCallable)
 	const void StartRecoveryStamina()
@@ -147,6 +150,9 @@ protected:
 
 	UFUNCTION()
 	void OnRep_CurrentMaxSpeed();
+
+	UFUNCTION()
+	void OnRep_CurrentSkillCooldown();
 
 	// Sprint
 	UFUNCTION(Server, Reliable)

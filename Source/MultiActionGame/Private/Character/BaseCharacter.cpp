@@ -222,6 +222,11 @@ void ABaseCharacter::OnRep_CurrentMaxSpeed()
 	GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
 }
 
+void ABaseCharacter::OnRep_CurrentSkillCooldown()
+{
+	OnSkillCooldownChanged.Broadcast(CurrentSkillCooldown, SkillCooldown);
+}
+
 void ABaseCharacter::StartSprint() 
 {
     if (!HasAuthority())
@@ -445,6 +450,11 @@ void ABaseCharacter::OnDamageReceived_Implementation(AActor* DamagedActor, float
 		return;
 	}
 
+	if (bIsSuperArmored)
+	{
+		return;
+	}
+
 	bCanPlayerControl = false;
 
 	StopRecoveryStamina();
@@ -552,9 +562,11 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABaseCharacter, bIsInvincible);
+	DOREPLIFETIME(ABaseCharacter, bIsSuperArmored);
     DOREPLIFETIME(ABaseCharacter, bCanDoComboAttack);
 	DOREPLIFETIME(ABaseCharacter, bCanPlayerControl);
     DOREPLIFETIME(ABaseCharacter, ReplicatedRotation);
     DOREPLIFETIME(ABaseCharacter, CurrentHealCount);
     DOREPLIFETIME(ABaseCharacter, CurrentSpeed);
+    DOREPLIFETIME(ABaseCharacter, CurrentSkillCooldown);
 }

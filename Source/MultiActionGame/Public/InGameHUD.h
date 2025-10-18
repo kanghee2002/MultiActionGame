@@ -5,6 +5,8 @@
 #include "Components/TextBlock.h"
 #include "Components/Overlay.h"
 #include "Components/SizeBox.h"
+#include "Components/Image.h"
+#include "SkillData.h"
 #include "InGameHUD.generated.h"
 
 class ABaseCharacter;
@@ -39,7 +41,7 @@ public:
 
 	// Boss UI Setting
 	UFUNCTION(BlueprintCallable, Category = "UI")
-	void SetBossHUD();
+	void InitializeHUD(ECharacterType CharacterType);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -87,6 +89,9 @@ protected:
 	UTextBlock* HealCountText;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UImage* SkillImage;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UProgressBar* SkillCooldownProgressBar;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -109,4 +114,10 @@ private:
 
 	bool bIsHealthIncreased;
 	float TargetHealthPercent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SkillData", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USkillData> BossSkillData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SkillData", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USkillData> KnightSkillData;
 };
