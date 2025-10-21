@@ -20,7 +20,7 @@ void UMenuWidget::Setup()
 
 	//UE_LOG(LogTemp, Warning, TEXT("Setup"));
 
-	FInputModeUIOnly InputModeData;
+	FInputModeGameAndUI InputModeData;
 	InputModeData.SetWidgetToFocus(this->TakeWidget());
 	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 

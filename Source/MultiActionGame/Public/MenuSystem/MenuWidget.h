@@ -19,8 +19,10 @@ class MULTIACTIONGAME_API UMenuWidget : public UUserWidget
 public:
 	void SetMenuInterface(IMenuInterface* MenuInterface);
 
+	UFUNCTION(BlueprintCallable)
 	void Setup();
 
+	UFUNCTION(BlueprintCallable)
 	void Teardown();
 	//OnLevelRemovedFromWorld can also implement this
 
