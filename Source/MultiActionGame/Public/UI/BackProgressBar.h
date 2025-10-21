@@ -24,9 +24,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopUpdatePercent();
 
+	UPROPERTY(EditAnywhere, Category="BackProgressBar")
 	float DecreaseDelay = 0.75f;
+
+	UPROPERTY(EditAnywhere, Category = "BackProgressBar")
 	float UpdateInterval = 0.016f;
-	float DecreaseSpeed = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "BackProgressBar")
+	float DecreaseSpeed = 0.5f;
 
 private:
 	FTimerHandle DelayTimerHandle;    // 대기용
