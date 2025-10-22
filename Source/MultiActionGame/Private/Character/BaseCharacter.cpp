@@ -556,6 +556,12 @@ void ABaseCharacter::OnDeath_Implementation()
 	}
 }
 
+void ABaseCharacter::StartRagdoll()
+{
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetSimulatePhysics(true);
+}
+
 // Replication
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

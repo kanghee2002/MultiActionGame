@@ -263,6 +263,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlayDeathAnimation();
 
+	UFUNCTION(BlueprintCallable)
+	void StartRagdoll();
+
 private:
 	TObjectPtr<class UInputActionGroup> InputActionGroup;
 
