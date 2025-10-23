@@ -93,10 +93,10 @@ protected:
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentSkillCooldown)
 	float CurrentSkillCooldown;
 
-	UPROPERTY(BlueprintReadOnly, Replicated)
+	UPROPERTY(BlueprintReadWrite, Replicated)
 	FRotator ReplicatedRotation;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	FRotator TargetRotation;
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
