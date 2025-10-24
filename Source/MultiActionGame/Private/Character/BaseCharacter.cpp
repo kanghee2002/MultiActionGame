@@ -112,20 +112,18 @@ void ABaseCharacter::SynchronizeRotation(float DeltaTime)
 
 	float angleDifference = FMath::Abs(FMath::FindDeltaAngleDegrees(currentRotation.Yaw, ReplicatedRotation.Yaw));
 
-	float rotationSpeed = 8.0f;
-
 	if (angleDifference > 1.0f)
 	{
 		FRotator newRotation;
 		if (IsLocallyControlled())
 		{
 			// 로컬일 경우 지정된 방향으로 회전
-			newRotation = FMath::RInterpTo(currentRotation, TargetRotation, DeltaTime, rotationSpeed);
+			newRotation = FMath::RInterpTo(currentRotation, TargetRotation, DeltaTime, RotationSpeed);
 		}
 		else
 		{
 			// 로컬이 아닐 경우 복제된 방향으로 회전
-			newRotation = FMath::RInterpTo(currentRotation, ReplicatedRotation, DeltaTime, rotationSpeed);
+			newRotation = FMath::RInterpTo(currentRotation, ReplicatedRotation, DeltaTime, RotationSpeed);
 		}
 		SetActorRotation(newRotation);
 	}

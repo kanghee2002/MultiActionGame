@@ -84,6 +84,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float WalkSpeed;
 
+	UPROPERTY(EditDefaultsOnly)
+	float RotationSpeed;
+
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentHealCount)
 	int CurrentHealCount;
 
