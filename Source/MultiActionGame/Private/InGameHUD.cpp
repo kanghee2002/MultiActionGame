@@ -251,6 +251,10 @@ void UInGameHUD::InitializeHUD(ECharacterType CharacterType)
 		}
 		break;
 	case ECharacterType::Archer:
+		if (SkillImage)
+		{
+			SkillImage->SetBrushFromTexture(ArcherSkillData->SkillIcon);
+		}
 		break;
 	case ECharacterType::Healer:
 		break;
