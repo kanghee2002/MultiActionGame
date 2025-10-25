@@ -240,6 +240,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	bool BP_CanRoll() const;
 
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "Combat")
+	void Server_RollCharacter();
+
 	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
 	void Multicast_PlayRollAnimation();
 

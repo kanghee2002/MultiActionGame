@@ -482,6 +482,11 @@ void ABaseCharacter::Server_Roll_Implementation()
 
 	bCanPlayerControl = false;
 
+	Multicast_PlayRollAnimation();
+}
+
+void ABaseCharacter::Server_RollCharacter_Implementation()
+{
 	FVector directionVector;
 	if (IsLocallyControlled())
 	{
@@ -493,8 +498,6 @@ void ABaseCharacter::Server_Roll_Implementation()
 	}
 
 	LaunchCharacter(directionVector * 1000.0f + FVector(0.0f, 0.0f, 180.0f), true, true);
-
-	Multicast_PlayRollAnimation();
 }
 
 void ABaseCharacter::Multicast_PlayRollAnimation_Implementation()

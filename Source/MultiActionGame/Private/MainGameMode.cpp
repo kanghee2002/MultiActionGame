@@ -167,15 +167,19 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 	// FOR DEBUG
 	static int startCount = 0;
 	startCount++;
-	if (startCount % 2 == 0)
+	if (startCount % 3 == 0)
 	{
 		PC->SelectedCharacterType = ECharacterType::Boss;
 		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Init Boss Player"));
 	}
-	else
+	else if (startCount % 3 == 1)
 	{
 		PC->SelectedCharacterType = ECharacterType::Archer;
 		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Init Knight Player"));
+	}
+	else
+	{
+		PC->SelectedCharacterType = ECharacterType::Knight;
 	}
 #endif
 
