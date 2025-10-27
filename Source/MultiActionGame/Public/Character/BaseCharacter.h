@@ -63,7 +63,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float BasicAttackDamage;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float LightAttackStaminaCost;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -72,7 +72,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float SkillStaminaCost;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float SkillCooldown;
 
 	UPROPERTY(EditDefaultsOnly)

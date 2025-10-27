@@ -2,12 +2,14 @@
 
 
 #include "MenuSystem/MainMenu.h"
+#include "MenuSystem/MenuInterface.h"
+#include "MainPlayerController.h"
 
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/EditableTextBox.h"
-#include "MenuSystem/MenuInterface.h"
-#include "MainPlayerController.h"
+#include "Misc/DefaultValueHelper.h"
+
 #include "MultiGameInstance.h"
 
 
@@ -41,8 +43,8 @@ bool UMainMenu::Initialize()
 	if (!ensure(GraphicSettingButton != nullptr)) return false;
 	GraphicSettingButton->OnClicked.AddDynamic(this, &UMainMenu::OpenGraphicMenu);
 
-	if (!ensure(GraphicCancelButton != nullptr)) return false;
-	GraphicCancelButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
+	if (!ensure(SettingConfirmButton != nullptr)) return false;
+	SettingConfirmButton->OnClicked.AddDynamic(this, &UMainMenu::ConfirmSetting);
 
 	if (!ensure(EpicButton != nullptr)) return false;
 	EpicButton->OnClicked.AddDynamic(this, &UMainMenu::SetGraphicEpic);
@@ -171,6 +173,45 @@ void UMainMenu::SetGraphicLow()
 	{
 		multiGameInstance->SetGraphicSetting(EGraphicSetting::Low);
 	}
+}
+
+void UMainMenu::ConfirmSetting()
+{
+	UMultiGameInstance* multiGameInstace = Cast<UMultiGameInstance>(GetGameInstance());
+
+	const FString& bossHealthString = BossHealthInput->GetText().ToString();
+	float NewBossHealth;
+
+	const FString& bossAttackDamageString = BossAttackDamageInput->GetText().ToString();
+	float NewBossAttackDamage;
+
+	const FString& bossAttackCostString = BossAttackCostInput->GetText().ToString();
+	float NewBossAttackCost;
+
+	const FString& bossSkillCooldownString = BossSkillCooldownInput->GetText().ToString();
+	float NewBossSkillCooldown;
+
+	if (FDefaultValueHelper::ParseFloat(bossHealthString, NewBossHealth) && multiGameInstace)
+	{
+		multiGameInstace->BossHealth = NewBossHealth;
+	}
+
+	if (FDefaultValueHelper::ParseFloat(bossAttackDamageString, NewBossAttackDamage) && multiGameInstace)
+	{
+		multiGameInstace->BossAttackDamage = NewBossAttackDamage;
+	}
+
+	if (FDefaultValueHelper::ParseFloat(bossAttackCostString, NewBossAttackCost) && multiGameInstace)
+	{
+		multiGameInstace->BossAttackCost = NewBossAttackCost;
+	}
+
+	if (FDefaultValueHelper::ParseFloat(bossSkillCooldownString, NewBossSkillCooldown) && multiGameInstace)
+	{
+		multiGameInstace->BossSkillCooldown = NewBossSkillCooldown;
+	}
+
+	OpenMainMenu();
 }
 
 void UMainMenu::SelectCharacter(int32 Index)

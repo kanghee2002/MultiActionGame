@@ -23,6 +23,8 @@ UMultiGameInstance::UMultiGameInstance(const FObjectInitializer& ObjectInitializ
 	if (!ensure(InGameMenuBPClass.Class != nullptr)) return;
 
 	InGameMenuClass = InGameMenuBPClass.Class;
+
+	BossHealth = -1.0f;
 }
 
 void UMultiGameInstance::LoadMenu()

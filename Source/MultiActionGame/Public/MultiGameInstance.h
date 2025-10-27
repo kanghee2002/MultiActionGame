@@ -44,6 +44,18 @@ public:
 
 	void SetGraphicSetting(EGraphicSetting GraphicSetting);
 
+	UPROPERTY(BlueprintReadOnly)
+	float BossHealth;
+
+	UPROPERTY(BlueprintReadOnly)
+	float BossAttackDamage;
+
+	UPROPERTY(BlueprintReadOnly)
+	float BossAttackCost;
+
+	UPROPERTY(BlueprintReadOnly)
+	float BossSkillCooldown;
+
 private:
 	TSubclassOf<class UUserWidget> MenuClass;
 

@@ -81,7 +81,20 @@ private:
 	class UButton* LowButton;
 
 	UPROPERTY(meta = (BindWidget))
-	class UButton* GraphicCancelButton;
+	class UEditableTextBox* BossHealthInput;
+
+	UPROPERTY(meta = (BindWidget))
+	class UEditableTextBox* BossAttackDamageInput;
+
+	UPROPERTY(meta = (BindWidget))
+	class UEditableTextBox* BossAttackCostInput;
+
+	UPROPERTY(meta = (BindWidget))
+	class UEditableTextBox* BossSkillCooldownInput;
+
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* SettingConfirmButton;
 
 	UFUNCTION()
 	void HostServer();
@@ -112,6 +125,9 @@ private:
 
 	UFUNCTION()
 	void SetGraphicLow();
+
+	UFUNCTION()
+	void ConfirmSetting();
 
 	UFUNCTION()
 	void Quit();
