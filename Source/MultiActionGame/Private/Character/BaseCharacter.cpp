@@ -42,9 +42,6 @@ ABaseCharacter::ABaseCharacter()
     SpringArm->bInheritPitch = false;
     SpringArm->bInheritRoll = false;
 
-	// 충돌 X -> 카메라 당겨짐 X
-	SpringArm->bDoCollisionTest = false;
-
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     Camera->SetupAttachment(SpringArm);
     Camera->bUsePawnControlRotation = false;
