@@ -417,13 +417,16 @@ void ABaseCharacter::Multicast_PlaySkillAnimation_Implementation()
 
 void ABaseCharacter::StartSkillCooldown()
 {
-	GetWorld()->GetTimerManager().SetTimer(
-		SkillCooldownTimerHandle,
-		this,
-		&ABaseCharacter::DecreaseSkillCooldown,
-		CooldownUpdateInterval,
-		true  // 반복 실행
-	);
+	if (!GetWorld()->GetTimerManager().IsTimerActive(SkillCooldownTimerHandle))
+	{
+		GetWorld()->GetTimerManager().SetTimer(
+			SkillCooldownTimerHandle,
+			this,
+			&ABaseCharacter::DecreaseSkillCooldown,
+			CooldownUpdateInterval,
+			true  // 반복 실행
+		);
+	}
 }
 
 void ABaseCharacter::DecreaseSkillCooldown()
