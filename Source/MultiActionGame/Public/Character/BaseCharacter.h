@@ -96,11 +96,11 @@ protected:
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentSkillCooldown)
 	float CurrentSkillCooldown;
 
-	UPROPERTY(BlueprintReadWrite, Replicated)
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = OnRep_ReplicatedRotation)
 	FRotator ReplicatedRotation;
 
 	UPROPERTY(BlueprintReadWrite)
-	FRotator TargetRotation;
+	FRotator LocalRotation;
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bIsInvincible;
@@ -156,6 +156,9 @@ protected:
 
 	UFUNCTION()
 	void OnRep_CurrentSkillCooldown();
+
+	UFUNCTION()
+	void OnRep_ReplicatedRotation();
 
 	// Sprint
 	UFUNCTION(Server, Reliable)
@@ -240,9 +243,6 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	bool BP_CanRoll() const;
 
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "Combat")
-	void Server_RollCharacter();
-
 	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
 	void Multicast_PlayRollAnimation();
 
@@ -282,4 +282,6 @@ private:
 	FTimerHandle SkillCooldownTimerHandle;   // 스킬 쿨다운 업데이트
 
 	const float CooldownUpdateInterval = 0.1f;
+
+	bool bUseReplicatedRotation;
 };

@@ -60,6 +60,7 @@ ABaseCharacter::ABaseCharacter()
 	OnTakeAnyDamage.AddDynamic(this, &ABaseCharacter::OnDamageReceived);
 
 	// 변수 설정
+	bUseReplicatedRotation = false;
 	BasicAttackDamage = 3.5f;
 	LightAttackStaminaCost = 10.0f;
 	HeavyAttackStaminaCost = 20.0f;
@@ -106,22 +107,29 @@ void ABaseCharacter::Tick(float DeltaTime)
 void ABaseCharacter::SynchronizeRotation(float DeltaTime)
 {
 	FRotator currentRotation = GetActorRotation();
+	FRotator targetRotatation;
 
-	float angleDifference = FMath::Abs(FMath::FindDeltaAngleDegrees(currentRotation.Yaw, ReplicatedRotation.Yaw));
-
-	if (angleDifference > 1.0f)
+	if (IsLocallyControlled())
 	{
-		FRotator newRotation;
-		if (IsLocallyControlled())
+		if (bUseReplicatedRotation)
 		{
-			// 로컬일 경우 지정된 방향으로 회전
-			newRotation = FMath::RInterpTo(currentRotation, TargetRotation, DeltaTime, RotationSpeed);
+			targetRotatation = ReplicatedRotation;
 		}
 		else
 		{
-			// 로컬이 아닐 경우 복제된 방향으로 회전
-			newRotation = FMath::RInterpTo(currentRotation, ReplicatedRotation, DeltaTime, RotationSpeed);
+			targetRotatation = LocalRotation;
 		}
+	}
+	else
+	{
+		targetRotatation = ReplicatedRotation;
+	}
+
+	float angleDiff = FMath::Abs(FMath::FindDeltaAngleDegrees(currentRotation.Yaw, targetRotatation.Yaw));
+
+	if (angleDiff > 1.0f)
+	{
+		FRotator newRotation = FMath::RInterpTo(currentRotation, targetRotatation, DeltaTime, RotationSpeed);
 		SetActorRotation(newRotation);
 	}
 }
@@ -183,7 +191,8 @@ void ABaseCharacter::Move(const FInputActionValue& value)
             // 로컬은 바라보는 방향 지정, 서버에 바라보는 방향 알림
             if (IsLocallyControlled())
             {
-				TargetRotation = targetRotation;
+				bUseReplicatedRotation = false;
+				LocalRotation = targetRotation;
                 Server_SetRotation(targetRotation);
             }
         }
@@ -222,6 +231,14 @@ void ABaseCharacter::OnRep_CurrentSkillCooldown()
 	OnSkillCooldownChanged.Broadcast(CurrentSkillCooldown, SkillCooldown);
 }
 
+void ABaseCharacter::OnRep_ReplicatedRotation()
+{
+	if (IsLocallyControlled())
+	{
+		bUseReplicatedRotation = true;
+	}
+}
+
 void ABaseCharacter::StartSprint() 
 {
     if (!HasAuthority())
@@ -248,16 +265,12 @@ void ABaseCharacter::StopSprint()
 
 void ABaseCharacter::LightAttack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Light Attack"));
-
 	if (!HasAuthority())
 	{
-		// 클라라면 서버에 요청
 		Server_LightAttack();
 	}
 	else
 	{
-		// 서버라면 바로 실행
 		Server_LightAttack_Implementation();
 	}
 }
@@ -482,15 +495,12 @@ void ABaseCharacter::Server_Roll_Implementation()
 
 	bCanPlayerControl = false;
 
-	Multicast_PlayRollAnimation();
-}
+	bIsInvincible = true;
 
-void ABaseCharacter::Server_RollCharacter_Implementation()
-{
 	FVector directionVector;
 	if (IsLocallyControlled())
 	{
-		directionVector = TargetRotation.Vector();
+		directionVector = LocalRotation.Vector();
 	}
 	else
 	{
@@ -498,6 +508,8 @@ void ABaseCharacter::Server_RollCharacter_Implementation()
 	}
 
 	LaunchCharacter(directionVector * 1000.0f + FVector(0.0f, 0.0f, 180.0f), true, true);
+
+	Multicast_PlayRollAnimation();
 }
 
 void ABaseCharacter::Multicast_PlayRollAnimation_Implementation()
