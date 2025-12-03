@@ -53,4 +53,6 @@ protected:
 
 public:
 	void ProcessPlayerDeath(ECharacterType CharacterType);
+
+	void ProcessPlayerRevive();
 };

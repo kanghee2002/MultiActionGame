@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "HealthComponent.h"
 #include "StaminaComponent.h"
+#include "CharacterType.h"
 #include "Net/UnrealNetwork.h"
 #include "BaseCharacter.generated.h"
 
@@ -44,6 +45,11 @@ public:
 		return HealthCompRef;
 	}
 
+	ECharacterType const GetCharacterType()
+	{
+		return CharacterType;
+	}
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<class USpringArmComponent> SpringArm;
@@ -57,8 +63,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	UStaminaComponent* StaminaCompRef;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
+	TObjectPtr<class UCapsuleComponent> BodyCapsule;
+
 	UPROPERTY(BlueprintReadWrite)
 	TArray<AActor*> HitEnemies;
+
+	UPROPERTY(EditDefaultsOnly)
+	ECharacterType CharacterType;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float BasicAttackDamage;
@@ -107,6 +119,9 @@ protected:
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bIsSuperArmored;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsFaint;
 
 	UFUNCTION(BlueprintCallable)
 	const void StartRecoveryStamina()
@@ -262,15 +277,28 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlaySelfHealAnimation();
 
+	// Faint
+	UFUNCTION()
+	void OnFullHealth();
+
+	UFUNCTION()
+	void Revive();
+
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
+	void Multicast_PlayReviveAnimation();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void BP_PlayReviveAnimation();
+
 	// Death
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(Server, Reliable)
 	void OnDeath();
+
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
+	void Multicast_PlayDeathAnimation();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
 	void BP_PlayDeathAnimation();
-
-	UFUNCTION(BlueprintCallable)
-	void StartRagdoll();
 
 private:
 	TObjectPtr<class UInputActionGroup> InputActionGroup;

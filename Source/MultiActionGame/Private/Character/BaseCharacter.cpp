@@ -6,10 +6,12 @@
 #include "MainPlayerController.h"
 #include "InGameHUD.h"
 #include "Components/WidgetComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Character/HealthBarWidget.h"
 
 #include "BaseAnimInstance.h"
 #include "MainGameMode.h"
+#include "Engine/EngineTypes.h"
 
 #include <Camera/CameraComponent.h>
 #include <GameFramework/SpringArmComponent.h>
@@ -61,6 +63,10 @@ ABaseCharacter::ABaseCharacter()
 
 	// 변수 설정
 	bUseReplicatedRotation = false;
+
+	bIsInvincible = false;
+	bIsFaint = false;
+
 	BasicAttackDamage = 3.5f;
 	LightAttackStaminaCost = 10.0f;
 	HeavyAttackStaminaCost = 20.0f;
@@ -82,6 +88,8 @@ void ABaseCharacter::BeginPlay()
 
 		bCanPlayerControl = true;
 	}
+
+	HealthCompRef->OnFullHealth.AddDynamic(this, &ABaseCharacter::OnFullHealth);
 
 	HealthCompRef->OnDeath.AddDynamic(this, &ABaseCharacter::OnDeath);
 
@@ -456,7 +464,7 @@ void ABaseCharacter::DecreaseSkillCooldown()
 // Server Hit
 void ABaseCharacter::OnDamageReceived_Implementation(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	if (HealthCompRef->CurrentHealth <= 0.0f)
+	if (HealthCompRef->CurrentHealth <= 0.0f || bIsFaint)
 	{
 		return;
 	}
@@ -556,23 +564,60 @@ void ABaseCharacter::Multicast_PlaySelfHealAnimation_Implementation()
 	BP_PlaySelfHealAnimation();
 }
 
-void ABaseCharacter::OnDeath_Implementation()
+void ABaseCharacter::OnFullHealth()
 {
-	bCanPlayerControl = false;
+	if (bIsFaint)
+	{
+		Revive();
+	}
+}
 
-	BP_PlayDeathAnimation();
+void ABaseCharacter::Revive()
+{
+	bIsFaint = false;
+	bIsInvincible = true;
+
+	if (BodyCapsule)
+	{
+		BodyCapsule->SetCollisionProfileName(TEXT("Hero"));
+	}
 
 	AMainGameMode* GameMode = Cast<AMainGameMode>(GetWorld()->GetAuthGameMode());
 	if (GameMode)
 	{
-		GameMode->ProcessPlayerDeath(Cast<AMainPlayerController>(GetController())->SelectedCharacterType);
+		GameMode->ProcessPlayerRevive();
 	}
+
+	Multicast_PlayReviveAnimation();
 }
 
-void ABaseCharacter::StartRagdoll()
+void ABaseCharacter::Multicast_PlayReviveAnimation_Implementation()
 {
-	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
-	GetMesh()->SetSimulatePhysics(true);
+	BP_PlayReviveAnimation();
+}
+
+void ABaseCharacter::OnDeath_Implementation()
+{
+	bCanPlayerControl = false;
+	bIsFaint = true;
+
+	if (BodyCapsule)
+	{
+		BodyCapsule->SetCollisionProfileName(TEXT("Boss"));
+	}
+
+	AMainGameMode* GameMode = Cast<AMainGameMode>(GetWorld()->GetAuthGameMode());
+	if (GameMode)
+	{
+		GameMode->ProcessPlayerDeath(CharacterType);
+	}
+
+	Multicast_PlayDeathAnimation();
+}
+
+void ABaseCharacter::Multicast_PlayDeathAnimation_Implementation()
+{
+	BP_PlayDeathAnimation();
 }
 
 // Replication

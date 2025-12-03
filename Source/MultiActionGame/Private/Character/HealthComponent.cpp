@@ -1,5 +1,8 @@
 
 #include "Character/HealthComponent.h"
+
+#include "Character/BaseCharacter.h"
+
 UHealthComponent::UHealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -25,10 +28,17 @@ void UHealthComponent::BeginPlay()
 
 void UHealthComponent::Heal(float Amount)
 {
-	if (Amount <= 0 || CurrentHealth <= 0) return;
+	if (Amount <= 0.0f) return;
 
 	float OldHealth = CurrentHealth;
-	CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.0f, DefaultMaxHealth);
+	CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.0f, CurrentMaxHealth);
+
+	if (CurrentHealth == CurrentMaxHealth)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Full Health!"));
+
+		OnFullHealth.Broadcast();
+	}
 
 	OnHealthChanged.Broadcast(CurrentHealth, CurrentMaxHealth);
 }
@@ -51,6 +61,19 @@ void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDam
 {
 	// 이 함수가 서버에서만 실행되도록 보장
 	if (!GetOwner()->HasAuthority()) return; 
+
+	ABaseCharacter* damagedCharacter = Cast<ABaseCharacter>(DamagedActor);
+	ABaseCharacter* damageCauserCharacter = Cast<ABaseCharacter>(DamageCauser);
+
+	if (damagedCharacter && damageCauserCharacter)
+	{
+		if (damagedCharacter->GetCharacterType() != ECharacterType::Boss &&
+			damageCauserCharacter->GetCharacterType() != ECharacterType::Boss)
+		{
+			Heal(Damage * 8.0f);
+			return;
+		}
+	}
 
 	if (Damage <= 0.0f || CurrentHealth <= 0.0f) return;
 

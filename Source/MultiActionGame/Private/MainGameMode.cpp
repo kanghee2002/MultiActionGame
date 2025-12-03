@@ -166,17 +166,17 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 #if WITH_EDITOR
 	// FOR DEBUG
 	static int startCount = 0;
-	if (startCount % 2 == 0)
+	/*if (startCount % 2 == 0)
 	{
 		PC->SelectedCharacterType = ECharacterType::Boss;
 		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Init Boss Player"));
 	}
 	else if (startCount % 2 == 1)
 	{
-		PC->SelectedCharacterType = ECharacterType::Archer;
+		PC->SelectedCharacterType = ECharacterType::Knight;
 		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Init Knight Player"));
-	}
-	/*if (startCount % 3 == 0)
+	}*/
+	if (startCount % 3 == 0)
 	{
 		PC->SelectedCharacterType = ECharacterType::Boss;
 		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Init Boss Player"));
@@ -189,7 +189,7 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 	else
 	{
 		PC->SelectedCharacterType = ECharacterType::Knight;
-	}*/
+	}
 	startCount++;
 #endif
 
@@ -213,6 +213,11 @@ void AMainGameMode::ProcessPlayerDeath(ECharacterType CharacterType)
 	{
 		ProcessGameOver(true);
 	}
+}
+
+void AMainGameMode::ProcessPlayerRevive()
+{
+	HeroDeathCount--;
 }
 
 void AMainGameMode::ProcessGameOver(bool IsBossWin)
