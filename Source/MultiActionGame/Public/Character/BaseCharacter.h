@@ -70,6 +70,9 @@ protected:
 	TArray<AActor*> HitEnemies;
 
 	UPROPERTY(EditDefaultsOnly)
+	bool bUseCameraRotation;
+
+	UPROPERTY(EditDefaultsOnly)
 	ECharacterType CharacterType;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

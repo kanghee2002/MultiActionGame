@@ -63,7 +63,7 @@ bool UMainMenu::Initialize()
 
 	CharacterCheckBoxes.Add(KnightCheckBox);
 	CharacterCheckBoxes.Add(ArcherCheckBox);
-	CharacterCheckBoxes.Add(HealerCheckBox);
+	CharacterCheckBoxes.Add(WizardCheckBox);
 	
 	for (URadioCheckBox* CheckBox : CharacterCheckBoxes)
 	{

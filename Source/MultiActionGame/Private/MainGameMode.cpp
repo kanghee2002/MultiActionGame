@@ -87,10 +87,9 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 		PawnToSpawn = ArcherCharacter;
 		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Spawn Archer"));
 		break;
-	case ECharacterType::Healer:
-		PawnToSpawn = ATestCharacter1::StaticClass();
-
-		// TODO
+	case ECharacterType::Wizard:
+		PawnToSpawn = WizardCharacter;
+		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Spawn Wizard"));
 		break;
 	default:
 		PawnToSpawn = DefaultPawnClass;
@@ -183,12 +182,12 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 	}
 	else if (startCount % 3 == 1)
 	{
-		PC->SelectedCharacterType = ECharacterType::Archer;
+		PC->SelectedCharacterType = ECharacterType::Wizard;
 		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Init Knight Player"));
 	}
 	else
 	{
-		PC->SelectedCharacterType = ECharacterType::Knight;
+		PC->SelectedCharacterType = ECharacterType::Archer;
 	}
 	startCount++;
 #endif

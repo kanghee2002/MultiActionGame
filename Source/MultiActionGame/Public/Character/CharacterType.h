@@ -15,6 +15,6 @@ enum class ECharacterType : uint8
 	Boss = 0,
 	Knight = 1,
 	Archer = 2,
-	Healer = 3,
+	Wizard = 3,
 	MAX = 4		UMETA(Hidden),
 };

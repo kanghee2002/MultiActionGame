@@ -63,7 +63,7 @@ private:
 	class URadioCheckBox* ArcherCheckBox;
 
 	UPROPERTY(meta = (BindWidget))
-	class URadioCheckBox* HealerCheckBox;
+	class URadioCheckBox* WizardCheckBox;
 
 	UPROPERTY()
 	TArray<URadioCheckBox*> CharacterCheckBoxes;

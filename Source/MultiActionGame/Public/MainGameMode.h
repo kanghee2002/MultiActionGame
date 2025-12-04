@@ -34,6 +34,9 @@ protected:
 	TSubclassOf<ACharacter> ArcherCharacter;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Characters")
+	TSubclassOf<ACharacter> WizardCharacter;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Characters")
 	TSubclassOf<ACharacter> BossCharacter;
 
 	UPROPERTY()

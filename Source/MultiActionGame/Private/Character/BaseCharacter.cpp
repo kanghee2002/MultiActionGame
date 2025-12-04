@@ -192,9 +192,17 @@ void ABaseCharacter::Move(const FInputActionValue& value)
         FVector movementDirection = (forwardDirection * movementVector.X) + (rightDirection * movementVector.Y);
         movementDirection.Normalize();
 
-        // 캐릭터가 이동 방향을 바라보도록 회전
+        // 캐릭터가 지정 방향을 바라보도록 회전
         if (!movementDirection.IsZero()) {
-            FRotator targetRotation = movementDirection.Rotation();
+			FRotator targetRotation;
+			if (bUseCameraRotation)
+			{
+				targetRotation = yawRotation;
+			}
+			else
+			{
+				targetRotation = movementDirection.Rotation();
+			} 
 
             // 로컬은 바라보는 방향 지정, 서버에 바라보는 방향 알림
             if (IsLocallyControlled())
@@ -222,6 +230,17 @@ void ABaseCharacter::Look(const FInputActionValue& value)
     newRotation.Pitch = FMath::Clamp(newRotation.Pitch, -70.0f, 70.0f);
 
     SpringArm->SetWorldRotation(newRotation);
+
+	if (bUseCameraRotation)
+	{
+		if (IsLocallyControlled())
+		{
+			FRotator targetRotation(0, Camera->GetComponentRotation().Yaw, 0);
+			bUseReplicatedRotation = false;
+			LocalRotation = targetRotation;
+			Server_SetRotation(targetRotation);
+		}
+	}
 }
 
 void ABaseCharacter::OnRep_CurrentHealCount()
