@@ -85,7 +85,7 @@ void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDam
 
 
 	AActor* MyActor = GetOwner();
-	FString ActorName;
+	FString ActorName = "";
 	if (MyActor)
 	{
 		ActorName = MyActor->GetName();
