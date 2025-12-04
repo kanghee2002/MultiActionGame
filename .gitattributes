@@ -3,3 +3,4 @@ Content/ParagonGrux/** filter=lfs diff=lfs merge=lfs -text
 "Content/LavaMat/**" filter=lfs diff=lfs merge=lfs -text
 "Content/FreeSampleAnimationSet/**" filter=lfs diff=lfs merge=lfs -text
 "Content/ParagonSparrow/**" filter=lfs diff=lfs merge=lfs -text
+"Content/ParagonFey/**" filter=lfs diff=lfs merge=lfs -text
