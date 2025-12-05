@@ -90,7 +90,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float SkillCooldown;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float RollStaminaCost;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -258,7 +258,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "Combat")
 	void Server_Roll();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Combat")
 	bool BP_CanRoll() const;
 
 	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Combat")
