@@ -259,7 +259,7 @@ void UInGameHUD::InitializeHUD(ECharacterType CharacterType)
 	case ECharacterType::Wizard:
 		if (SkillImage)
 		{
-			SkillImage->SetBrushFromTexture(ArcherSkillData->SkillIcon);
+			SkillImage->SetBrushFromTexture(WizardSkillData->SkillIcon);
 		}
 		break;
 	case ECharacterType::MAX:

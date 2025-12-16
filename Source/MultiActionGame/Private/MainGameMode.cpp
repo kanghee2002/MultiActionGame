@@ -187,7 +187,7 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 	}
 	else
 	{
-		PC->SelectedCharacterType = ECharacterType::Knight;
+		PC->SelectedCharacterType = ECharacterType::Archer;
 	}
 	startCount++;
 #endif

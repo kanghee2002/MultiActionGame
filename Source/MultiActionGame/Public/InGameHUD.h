@@ -123,4 +123,7 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SkillData", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USkillData> ArcherSkillData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SkillData", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USkillData> WizardSkillData;
 };

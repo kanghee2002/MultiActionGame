@@ -40,11 +40,13 @@ public:
 		return bIsInvincible;
 	}
 
+	UFUNCTION(BlueprintCallable)
 	UHealthComponent* GetHealthComponent() const
 	{
 		return HealthCompRef;
 	}
 
+	UFUNCTION(BlueprintCallable)
 	ECharacterType const GetCharacterType()
 	{
 		return CharacterType;
