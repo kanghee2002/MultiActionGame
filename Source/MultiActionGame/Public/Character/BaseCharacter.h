@@ -8,6 +8,7 @@
 #include "HealthComponent.h"
 #include "StaminaComponent.h"
 #include "CharacterType.h"
+#include "CharacterAction.h"
 #include "Net/UnrealNetwork.h"
 #include "BaseCharacter.generated.h"
 
@@ -35,9 +36,15 @@ public:
 	bool bCanPlayerControl;
 
 	UFUNCTION(BlueprintCallable)
-	bool const IsInvincible()
+	bool IsInvincible() const
 	{
 		return bIsInvincible;
+	}
+
+	UFUNCTION(BlueprintCallable)
+	bool IsFaint() const
+	{
+		return bIsFaint;
 	}
 
 	UFUNCTION(BlueprintCallable)
@@ -51,6 +58,13 @@ public:
 	{
 		return CharacterType;
 	}
+
+	// AI
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	void PerformAction(ECharacterAction action);
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "AI")
+	void BP_SetAIStat();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -143,6 +157,19 @@ protected:
 		if (StaminaCompRef)
 		{
 			StaminaCompRef->StopRecovery();
+		}
+	}
+
+	UFUNCTION(BlueprintCallable)
+	float GetCurrentStamina()
+	{
+		if (StaminaCompRef)
+		{
+			return StaminaCompRef->CurrentStamina;
+		}
+		else
+		{
+			return 0.0f;
 		}
 	}
 

@@ -3,9 +3,11 @@
 
 #include "MainGameMode.h"
 
+#include "GameFramework/GameStateBase.h"
 #include "MainPlayerController.h"
 #include "MultiGameInstance.h"
 #include "Character/TestCharacter1.h"
+#include "AIController.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
@@ -13,6 +15,37 @@
 AMainGameMode::AMainGameMode()
 {
 	HeroDeathCount = 0;
+	tmpBoss = nullptr;
+}
+
+void AMainGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//ABaseCharacter* spawnedBoss = GetWorld()->SpawnActor<ABaseCharacter>(BossCharacter);
+	
+	//spawnedBoss->SetOwner(GetWorld()->GetGameState());
+
+	TArray<AActor*> playerStarts;
+	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), playerStarts);
+
+	for (AActor* playerStart : playerStarts)
+	{
+		if (playerStart->ActorHasTag("Boss"))
+		{
+			tmpBoss->SetActorLocation(playerStart->GetActorLocation());
+			break;
+		}
+	}
+
+	AAIController* AIController = GetWorld()->SpawnActor<AAIController>(GruxAIController);
+
+	if (AIController)
+	{
+		AIController->Possess(tmpBoss);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[GameMode] End Begin Play"));
 }
 
 AActor* AMainGameMode::ChoosePlayerStart_Implementation(AController* Player)
@@ -106,6 +139,20 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 
 	AddNewCharacter(NewPawn, PC->SelectedCharacterType);
 
+
+
+
+
+	if (tmpBoss == nullptr)
+	{
+		tmpBoss = GetWorld()->SpawnActor<ABaseCharacter>(BossCharacter);
+	}
+
+
+
+
+
+
 	return NewPawn;
 }
 
@@ -177,17 +224,17 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 	}*/
 	if (startCount % 3 == 0)
 	{
-		PC->SelectedCharacterType = ECharacterType::Boss;
+		PC->SelectedCharacterType = ECharacterType::Knight;
 		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Init Boss Player"));
 	}
 	else if (startCount % 3 == 1)
 	{
-		PC->SelectedCharacterType = ECharacterType::Wizard;
+		PC->SelectedCharacterType = ECharacterType::Archer;
 		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Init Knight Player"));
 	}
 	else
 	{
-		PC->SelectedCharacterType = ECharacterType::Archer;
+		PC->SelectedCharacterType = ECharacterType::Wizard;
 	}
 	startCount++;
 #endif

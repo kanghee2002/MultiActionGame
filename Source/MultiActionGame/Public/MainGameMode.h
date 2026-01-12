@@ -8,11 +8,15 @@
 #include "Character/BaseCharacter.h"
 #include "MainGameMode.generated.h"
 
+class AAIController;
+
 UCLASS()
 class MULTIACTIONGAME_API AMainGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 private:
+	virtual void BeginPlay() override;
+
 	void ProcessGameOver(bool IsBossWin);
 
 	void AddNewCharacter(APawn* NewPawn, ECharacterType CharacterType);
@@ -39,10 +43,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Characters")
 	TSubclassOf<ACharacter> BossCharacter;
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
+	TSubclassOf<AAIController> GruxAIController;
+
+	ACharacter* tmpBoss;
+
+	UPROPERTY(BlueprintReadOnly)
 	TArray<ABaseCharacter*> BossCharacters;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TArray<ABaseCharacter*> HeroCharacters;
 
 	int HeroDeathCount;

@@ -76,6 +76,30 @@ ABaseCharacter::ABaseCharacter()
 	WalkSpeed = 400.0f;
 }
 
+void ABaseCharacter::PerformAction(ECharacterAction action)
+{
+	switch (action)
+	{
+	case ECharacterAction::None:
+		break;
+	case ECharacterAction::LightAttack:
+		LightAttack();
+		break;
+	case ECharacterAction::HeavyAttack:
+		HeavyAttack();
+		break;
+	case ECharacterAction::Skill:
+		UseSkill();
+		break;
+	case ECharacterAction::Jump:
+		JumpAction();
+		break;
+	case ECharacterAction::SelfHeal:
+		SelfHeal();
+		break;
+	}
+}
+
 void ABaseCharacter::BeginPlay() 
 {
 	Super::BeginPlay();
@@ -114,6 +138,12 @@ void ABaseCharacter::Tick(float DeltaTime)
 
 void ABaseCharacter::SynchronizeRotation(float DeltaTime)
 {
+	// If Controlled By AI
+	if (!IsPlayerControlled())
+	{
+		return;
+	}
+
 	FRotator currentRotation = GetActorRotation();
 	FRotator targetRotatation;
 

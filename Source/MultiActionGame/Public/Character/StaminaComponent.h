@@ -36,7 +36,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentStamina)
 	float CurrentStamina;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float StaminaRecoveryRate;
 
 	UPROPERTY(EditDefaultsOnly)
