@@ -64,6 +64,11 @@ protected:
 		const FString& Options, const FString& Portal = TEXT("")) override;
 
 public:
+	TArray<ABaseCharacter*> GetHeroCharacters() const
+	{
+		return HeroCharacters;
+	}
+
 	void ProcessPlayerDeath(ECharacterType CharacterType);
 
 	void ProcessPlayerRevive();
