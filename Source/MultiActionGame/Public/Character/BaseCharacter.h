@@ -59,6 +59,12 @@ public:
 		return CharacterType;
 	}
 
+	UFUNCTION(BlueprintCallable)
+	bool const IsSkillReady()
+	{
+		return CurrentSkillCooldown <= 0.0f;
+	}
+
 	// AI
 	UFUNCTION(BlueprintCallable, Category = "AI")
 	void PerformAction(ECharacterAction action);

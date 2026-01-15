@@ -6,6 +6,7 @@
 #include "Character/BaseCharacter.h"
 #include "MainGameMode.h"
 
+#include "TimerManager.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 ABossAIController::ABossAIController()
@@ -18,8 +19,49 @@ void ABossAIController::SetNextPattern()
 	SetTarget();
 
 	SetAction(ECharacterAction::None);
+	
+	float distance = FVector::Dist(GetPawn()->GetActorLocation(), CurrentTarget->GetActorLocation());
+	
+	TArray<ECharacterAction> patterns;
+	patterns.Init(ECharacterAction::None, 0);
 
-	SetAction(static_cast<ECharacterAction>(FMath::RandRange(1, 1)));
+	if (distance <= 1000.0f)
+	{
+		patterns.Add(ECharacterAction::LightAttack);
+		patterns.Add(ECharacterAction::HeavyAttack);
+
+		if (Cast<ABaseCharacter>(GetPawn())->IsSkillReady())
+		{
+			patterns.Add(ECharacterAction::Skill);
+		}
+
+		patterns.Add(ECharacterAction::Jump);
+	}
+	else
+	{
+		patterns.Add(ECharacterAction::LightAttack);
+		patterns.Add(ECharacterAction::HeavyAttack);
+
+		if (Cast<ABaseCharacter>(GetPawn())->IsSkillReady())
+		{
+			patterns.Add(ECharacterAction::Skill);
+		}
+
+		patterns.Add(ECharacterAction::Jump);
+		patterns.Add(ECharacterAction::Jump);
+		patterns.Add(ECharacterAction::Jump);
+		patterns.Add(ECharacterAction::Jump);
+		patterns.Add(ECharacterAction::Jump);
+	}
+
+	ECharacterAction action = ECharacterAction::LightAttack;
+	if (!patterns.IsEmpty())
+	{
+		int32 index = FMath::RandRange(0, patterns.Num() - 1);
+		action = patterns[index];
+	}
+
+	SetAction(action);
 }
 
 float ABossAIController::GetCharacterTypeScore(ECharacterType characterType)
@@ -88,7 +130,7 @@ void ABossAIController::OnPossess(APawn* InPawn)
 
 	if (!BehaviorTree || !BlackboardData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BehaviorTree or BlackboardData not set"));
+		UE_LOG(LogTemp, Warning, TEXT("[Boss AI] BehaviorTree or BlackboardData not set"));
 		return;
 	}
 
@@ -100,6 +142,18 @@ void ABossAIController::OnPossess(APawn* InPawn)
 
 	RunBehaviorTree(BehaviorTree);
 
+	FTimerHandle delayTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(
+		delayTimerHandle,
+		this,
+		&ABossAIController::RunAI,
+		3.0f,
+		false   // 반복 여부
+	);
+}
+
+void ABossAIController::RunAI()
+{
 	SetTarget();
 
 	SetAction(ECharacterAction::LightAttack);
@@ -122,6 +176,15 @@ void ABossAIController::SetTarget()
 
 	if (heroCharacters.Num() == 0)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("[Boss AI] heroCharacters is empty"));
+		return;
+	}
+
+	if (heroCharacters.Num() == 1)
+	{
+		CurrentTarget = heroCharacters[0];
+		AActor* target = CurrentTarget;
+		GetBlackboardComponent()->SetValueAsObject(Target, target);
 		return;
 	}
 
@@ -142,8 +205,6 @@ void ABossAIController::SetTarget()
 		targetScores[i] += GetDistanceScore(distance);
 
 		scoreSum += targetScores[i];
-
-		UE_LOG(LogTemp, Warning, TEXT("%d is %f"), i, targetScores[i]);
 	}
 
 	// Random Selection using Cumulative Sum
@@ -160,7 +221,9 @@ void ABossAIController::SetTarget()
 		}
 	}
 
-	AActor* target = heroCharacters[selectedIndex];
+	// Set Target on Blackboard
+	CurrentTarget = heroCharacters[selectedIndex];
+	AActor* target = CurrentTarget;
 	GetBlackboardComponent()->SetValueAsObject(Target, target);
 }
 

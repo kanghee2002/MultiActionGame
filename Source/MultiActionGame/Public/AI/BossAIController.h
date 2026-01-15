@@ -35,11 +35,15 @@ protected:
 	float GetHealthScore(float health, float maxHealth);
 	float GetDistanceScore(float distance);
 
+	class ABaseCharacter* CurrentTarget;
+
 protected:
 	const FName Target = "Target";
 	const FName NextAction = "NextAction";
 
 	virtual void OnPossess(APawn* InPawn) override;
+
+	void RunAI();
 
 	void SetTarget();
 
