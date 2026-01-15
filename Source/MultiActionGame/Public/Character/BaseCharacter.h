@@ -94,6 +94,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	bool bUseCameraRotation;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool bUseReplicatedRotation;
+
 	UPROPERTY(EditDefaultsOnly)
 	ECharacterType CharacterType;
 
@@ -118,7 +121,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float SprintSpeed;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float WalkSpeed;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -348,6 +351,4 @@ private:
 	FTimerHandle SkillCooldownTimerHandle;   // 스킬 쿨다운 업데이트
 
 	const float CooldownUpdateInterval = 0.1f;
-
-	bool bUseReplicatedRotation;
 };

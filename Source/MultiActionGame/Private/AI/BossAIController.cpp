@@ -50,8 +50,6 @@ void ABossAIController::SetNextPattern()
 		patterns.Add(ECharacterAction::Jump);
 		patterns.Add(ECharacterAction::Jump);
 		patterns.Add(ECharacterAction::Jump);
-		patterns.Add(ECharacterAction::Jump);
-		patterns.Add(ECharacterAction::Jump);
 	}
 
 	ECharacterAction action = ECharacterAction::LightAttack;
