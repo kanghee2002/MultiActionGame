@@ -20,36 +20,28 @@ void ABossAIController::SetNextPattern()
 
 	SetAction(ECharacterAction::None);
 	
-	float distance = FVector::Dist(GetPawn()->GetActorLocation(), CurrentTarget->GetActorLocation());
-	
 	TArray<ECharacterAction> patterns;
 	patterns.Init(ECharacterAction::None, 0);
 
-	if (distance <= 1000.0f)
+	AddPattern(patterns, ECharacterAction::LightAttack, 2);
+	AddPattern(patterns, ECharacterAction::HeavyAttack, 2);
+	AddPattern(patterns, ECharacterAction::Jump, 1);
+
+	if (Cast<ABaseCharacter>(GetPawn())->IsSkillReady())
 	{
-		patterns.Add(ECharacterAction::LightAttack);
-		patterns.Add(ECharacterAction::HeavyAttack);
-
-		if (Cast<ABaseCharacter>(GetPawn())->IsSkillReady())
-		{
-			patterns.Add(ECharacterAction::Skill);
-		}
-
-		patterns.Add(ECharacterAction::Jump);
+		AddPattern(patterns, ECharacterAction::Skill, 2);
 	}
-	else
+
+	float distance = FVector::Dist(GetPawn()->GetActorLocation(), CurrentTarget->GetActorLocation());
+
+	if (distance >= 1000.0f)
 	{
-		patterns.Add(ECharacterAction::LightAttack);
-		patterns.Add(ECharacterAction::HeavyAttack);
+		AddPattern(patterns, ECharacterAction::Jump, 1);
+	}
 
-		if (Cast<ABaseCharacter>(GetPawn())->IsSkillReady())
-		{
-			patterns.Add(ECharacterAction::Skill);
-		}
-
-		patterns.Add(ECharacterAction::Jump);
-		patterns.Add(ECharacterAction::Jump);
-		patterns.Add(ECharacterAction::Jump);
+	if (distance >= 1500.0f)
+	{
+		AddPattern(patterns, ECharacterAction::Jump, 3);
 	}
 
 	ECharacterAction action = ECharacterAction::LightAttack;

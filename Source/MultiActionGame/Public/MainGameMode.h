@@ -46,8 +46,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	TSubclassOf<AAIController> GruxAIController;
 
-	ACharacter* tmpBoss;
-
 	UPROPERTY(BlueprintReadOnly)
 	TArray<ABaseCharacter*> BossCharacters;
 

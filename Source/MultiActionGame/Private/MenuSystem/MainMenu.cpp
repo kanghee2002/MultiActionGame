@@ -25,7 +25,7 @@ bool UMainMenu::Initialize()
 	// Initialize Buttons
 	if (!ensure(HostButton != nullptr)) return false;
 	HostButton->OnClicked.Clear();
-	HostButton->OnClicked.AddDynamic(this, &UMainMenu::HostServer);
+	HostButton->OnClicked.AddDynamic(this, &UMainMenu::OpenHostMenu);
 
 	if (!ensure(JoinButton != nullptr)) return false;
 	JoinButton->OnClicked.Clear();
@@ -33,6 +33,17 @@ bool UMainMenu::Initialize()
 
 	if (!ensure(QuitButton != nullptr)) return false;
 	QuitButton->OnClicked.AddDynamic(this, &UMainMenu::Quit);
+
+	if (!ensure(PvPButton != nullptr)) return false;
+	PvPButton->OnClicked.Clear();
+	PvPButton->OnClicked.AddDynamic(this, &UMainMenu::HostPvPServer);
+
+	if (!ensure(PvEButton != nullptr)) return false;
+	PvEButton->OnClicked.Clear();
+	PvEButton->OnClicked.AddDynamic(this, &UMainMenu::HostPvEServer);
+
+	if (!ensure(CancelHostButton != nullptr)) return false;
+	CancelHostButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
 
 	if (!ensure(CancelJoinButton != nullptr)) return false;
 	CancelJoinButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
@@ -80,8 +91,30 @@ bool UMainMenu::Initialize()
 	return true;
 }
 
-void UMainMenu::HostServer()
+void UMainMenu::HostPvPServer()
 {
+	UMultiGameInstance* multiGameInstace = Cast<UMultiGameInstance>(GetGameInstance());
+
+	if (multiGameInstace != nullptr)
+	{
+		multiGameInstace->SetIsBossAI(false);
+	}
+
+	if (MenuInterface != nullptr)
+	{
+		MenuInterface->Host();
+	}
+}
+
+void UMainMenu::HostPvEServer()
+{
+	UMultiGameInstance* multiGameInstace = Cast<UMultiGameInstance>(GetGameInstance());
+
+	if (multiGameInstace != nullptr)
+	{
+		multiGameInstace->SetIsBossAI(true);
+	}
+
 	if (MenuInterface != nullptr)
 	{
 		MenuInterface->Host();
@@ -97,6 +130,14 @@ void UMainMenu::JoinServer()
 		const FString& Address = IPAddressField->GetText().ToString();
 		MenuInterface->Join(Address, SelectedCharacterType);
 	}
+}
+
+void UMainMenu::OpenHostMenu()
+{
+	if (!ensure(MenuSwitcher != nullptr)) return;
+	if (!ensure(HostMenu != nullptr)) return;
+
+	MenuSwitcher->SetActiveWidget(HostMenu);
 }
 
 void UMainMenu::OpenJoinMenu()

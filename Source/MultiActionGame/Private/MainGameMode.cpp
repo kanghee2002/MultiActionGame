@@ -15,35 +15,40 @@
 AMainGameMode::AMainGameMode()
 {
 	HeroDeathCount = 0;
-	tmpBoss = nullptr;
 }
 
 void AMainGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UMultiGameInstance* multiGameInstance = GetGameInstance<UMultiGameInstance>();
+
+	if (multiGameInstance->GetIsBossAI())
+	{
+		ABaseCharacter* boss = GetWorld()->SpawnActor<ABaseCharacter>(BossCharacter);
+
+		TArray<AActor*> playerStarts;
+		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), playerStarts);
+
+		for (AActor* playerStart : playerStarts)
+		{
+			if (playerStart->ActorHasTag("Boss"))
+			{
+				boss->SetActorLocation(playerStart->GetActorLocation());
+				break;
+			}
+		}
+
+		AAIController* AIController = GetWorld()->SpawnActor<AAIController>(GruxAIController);
+
+		if (AIController)
+		{
+			AIController->Possess(boss);
+		}
+	}
 	//ABaseCharacter* spawnedBoss = GetWorld()->SpawnActor<ABaseCharacter>(BossCharacter);
 	
 	//spawnedBoss->SetOwner(GetWorld()->GetGameState());
-
-	TArray<AActor*> playerStarts;
-	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), playerStarts);
-
-	for (AActor* playerStart : playerStarts)
-	{
-		if (playerStart->ActorHasTag("Boss"))
-		{
-			tmpBoss->SetActorLocation(playerStart->GetActorLocation());
-			break;
-		}
-	}
-
-	AAIController* AIController = GetWorld()->SpawnActor<AAIController>(GruxAIController);
-
-	if (AIController)
-	{
-		AIController->Possess(tmpBoss);
-	}
 
 	UE_LOG(LogTemp, Warning, TEXT("[GameMode] End Begin Play"));
 }
@@ -138,20 +143,6 @@ APawn* AMainGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 	APawn* NewPawn = GetWorld()->SpawnActor<APawn>(PawnToSpawn, SpawnLocation, SpawnRotation, SpawnParams);
 
 	AddNewCharacter(NewPawn, PC->SelectedCharacterType);
-
-
-
-
-
-	if (tmpBoss == nullptr)
-	{
-		tmpBoss = GetWorld()->SpawnActor<ABaseCharacter>(BossCharacter);
-	}
-
-
-
-
-
 
 	return NewPawn;
 }

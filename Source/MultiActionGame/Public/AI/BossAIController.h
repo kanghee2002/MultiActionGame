@@ -54,4 +54,13 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	UBlackboardData* BlackboardData;
+
+private:
+	void AddPattern(TArray<ECharacterAction>& patterns, ECharacterAction pattern, int32 count)
+	{
+		for (int32 i = 0; i < count; i++)
+		{
+			patterns.Add(pattern);
+		}
+	}
 };

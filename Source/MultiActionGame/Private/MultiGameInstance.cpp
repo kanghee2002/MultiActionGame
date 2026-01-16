@@ -25,6 +25,8 @@ UMultiGameInstance::UMultiGameInstance(const FObjectInitializer& ObjectInitializ
 	InGameMenuClass = InGameMenuBPClass.Class;
 
 	BossHealth = -1.0f;
+
+	IsBossAI = false;
 }
 
 void UMultiGameInstance::LoadMenu()

@@ -44,6 +44,16 @@ public:
 
 	void SetGraphicSetting(EGraphicSetting GraphicSetting);
 
+	void SetIsBossAI(bool value)
+	{
+		IsBossAI = value;
+	}
+
+	bool GetIsBossAI() const
+	{
+		return IsBossAI;
+	}
+
 	UPROPERTY(BlueprintReadOnly)
 	float BossHealth;
 
@@ -65,4 +75,5 @@ private:
 
 	class UInGameMenu* InGameMenu;
 
+	bool IsBossAI;
 };

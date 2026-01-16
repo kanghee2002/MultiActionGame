@@ -36,6 +36,15 @@ private:
 	class UButton* QuitButton;
 
 	UPROPERTY(meta = (BindWidget))
+	class UButton* PvPButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* PvEButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* CancelHostButton;
+
+	UPROPERTY(meta = (BindWidget))
 	class UButton* CancelJoinButton;
 
 	UPROPERTY(meta = (BindWidget))
@@ -46,6 +55,9 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UWidget* MainMenu;
+
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* HostMenu;
 
 	UPROPERTY(meta = (BindWidget))
 	class UWidget* JoinMenu;
@@ -97,10 +109,16 @@ private:
 	class UButton* SettingConfirmButton;
 
 	UFUNCTION()
-	void HostServer();
+	void HostPvPServer();
+
+	UFUNCTION()
+	void HostPvEServer();
 
 	UFUNCTION()
 	void JoinServer();
+
+	UFUNCTION()
+	void OpenHostMenu();
 
 	UFUNCTION()
 	void OpenJoinMenu();
