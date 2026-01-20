@@ -35,7 +35,7 @@ public:
 	void LoadInGameMenu();
 
 	UFUNCTION(Exec)
-	virtual void Host() override;
+	virtual void Host(ECharacterType CharacterType) override;
 
 	UFUNCTION(Exec)
 	virtual void Join(const FString& Address, ECharacterType CharacterType) override;

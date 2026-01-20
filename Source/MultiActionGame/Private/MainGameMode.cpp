@@ -17,6 +17,11 @@ AMainGameMode::AMainGameMode()
 	HeroDeathCount = 0;
 }
 
+bool AMainGameMode::IsBossType(ECharacterType CharacterType) const
+{
+	return CharacterType == ECharacterType::Boss;
+}
+
 void AMainGameMode::BeginPlay()
 {
 	Super::BeginPlay();
@@ -213,9 +218,9 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 		PC->SelectedCharacterType = ECharacterType::Knight;
 		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Init Knight Player"));
 	}*/
-	if (startCount % 3 == 0)
+	/*if (startCount % 3 == 0)
 	{
-		PC->SelectedCharacterType = ECharacterType::Knight;
+		PC->SelectedCharacterType = ECharacterType::Boss;
 		UE_LOG(LogTemp, Warning, TEXT("[GameMode] Init Boss Player"));
 	}
 	else if (startCount % 3 == 1)
@@ -225,8 +230,8 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 	}
 	else
 	{
-		PC->SelectedCharacterType = ECharacterType::Wizard;
-	}
+		PC->SelectedCharacterType = ECharacterType::Knight;
+	}*/
 	startCount++;
 #endif
 

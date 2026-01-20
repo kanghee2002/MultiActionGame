@@ -26,10 +26,7 @@ private:
 protected:
 	AMainGameMode();
 
-	bool IsBossType(ECharacterType CharacterType) const
-	{
-		return CharacterType == ECharacterType::Boss;
-	}
+	bool IsBossType(ECharacterType CharacterType) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Characters")
 	TSubclassOf<ACharacter> KnightCharacter;

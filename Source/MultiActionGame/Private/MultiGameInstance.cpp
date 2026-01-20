@@ -53,7 +53,7 @@ void UMultiGameInstance::LoadInGameMenu()
 	InGameMenu->SetMenuInterface(this);
 }
 
-void UMultiGameInstance::Host()
+void UMultiGameInstance::Host(ECharacterType CharacterType)
 {
 	if (Menu != nullptr)
 	{
@@ -70,9 +70,13 @@ void UMultiGameInstance::Host()
 
 	//World->ServerTravel("/Game/ThirdPerson/Lvl_ThirdPerson?listen");
 
-	SelectedCharacterType = ECharacterType::Boss;
+	//SelectedCharacterType = ECharacterType::Boss;
 
-	World->ServerTravel("/Game/TestMap?listen?game=/Game/General/MainGameModeBP.MainGameModeBP_C");
+	FString Address = "/Game/TestMap?listen?game=/Game/General/MainGameModeBP.MainGameModeBP_C";
+
+	FString TravelURL = FString::Printf(TEXT("%s?CharacterType=%d"), *Address, static_cast<int32>(CharacterType));
+
+	World->ServerTravel(TravelURL);
 }
 
 

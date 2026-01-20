@@ -42,8 +42,14 @@ bool UMainMenu::Initialize()
 	PvEButton->OnClicked.Clear();
 	PvEButton->OnClicked.AddDynamic(this, &UMainMenu::HostPvEServer);
 
+	if (!ensure(ConfirmHostButton != nullptr)) return false;
+	ConfirmHostButton->OnClicked.AddDynamic(this, &UMainMenu::HostServer);
+
 	if (!ensure(CancelHostButton != nullptr)) return false;
 	CancelHostButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
+
+	if (!ensure(CancelSelectCharacterButton != nullptr)) return false;
+	CancelSelectCharacterButton->OnClicked.AddDynamic(this, &UMainMenu::OpenSelectModeMenu);
 
 	if (!ensure(CancelJoinButton != nullptr)) return false;
 	CancelJoinButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
@@ -69,55 +75,122 @@ bool UMainMenu::Initialize()
 	if (!ensure(LowButton != nullptr)) return false;
 	LowButton->OnClicked.AddDynamic(this, &UMainMenu::SetGraphicLow);
 
-	// Initialize Character Select CheckBoxes
-	CharacterCheckBoxes.Empty();
+	// Initialize Host Character Select CheckBoxes
+	HostCharacterCheckBoxes.Empty();
 
-	CharacterCheckBoxes.Add(KnightCheckBox);
-	CharacterCheckBoxes.Add(ArcherCheckBox);
-	CharacterCheckBoxes.Add(WizardCheckBox);
-	
-	for (URadioCheckBox* CheckBox : CharacterCheckBoxes)
+	HostCharacterCheckBoxes.Add(HostBossCheckBox);
+	HostCharacterCheckBoxes.Add(HostKnightCheckBox);
+	HostCharacterCheckBoxes.Add(HostArcherCheckBox);
+	HostCharacterCheckBoxes.Add(HostWizardCheckBox);
+
+	for (URadioCheckBox* CheckBox : HostCharacterCheckBoxes)
 	{
 		if (CheckBox)
 		{
-			CheckBox->Initialize(CharacterCheckBoxes);
+			CheckBox->Initialize(HostCharacterCheckBoxes);
 			CheckBox->OnSelected.AddDynamic(this, &UMainMenu::SelectCharacter);
 		}
 	}
 
-	KnightCheckBox->SetCheckedState(ECheckBoxState::Checked);
-	SelectedCharacterType = ECharacterType::Knight;
+	if (HostKnightCheckBox)
+	{
+		HostKnightCheckBox->SetCheckedState(ECheckBoxState::Checked);
+		SelectedCharacterType = ECharacterType::Knight;
+	}
+
+	// Initialize Guest Character Select CheckBoxes
+	GuestCharacterCheckBoxes.Empty();
+
+	GuestCharacterCheckBoxes.Add(GuestBossCheckBox);
+	GuestCharacterCheckBoxes.Add(GuestKnightCheckBox);
+	GuestCharacterCheckBoxes.Add(GuestArcherCheckBox);
+	GuestCharacterCheckBoxes.Add(GuestWizardCheckBox);
+	
+	for (URadioCheckBox* CheckBox : GuestCharacterCheckBoxes)
+	{
+		if (CheckBox)
+		{
+			CheckBox->Initialize(GuestCharacterCheckBoxes);
+			CheckBox->OnSelected.AddDynamic(this, &UMainMenu::SelectCharacter);
+		}
+	}
+
+	if (GuestKnightCheckBox)
+	{
+		GuestKnightCheckBox->SetCheckedState(ECheckBoxState::Checked);
+		SelectedCharacterType = ECharacterType::Knight;
+	}
 
 	return true;
 }
 
 void UMainMenu::HostPvPServer()
 {
-	UMultiGameInstance* multiGameInstace = Cast<UMultiGameInstance>(GetGameInstance());
+	SelectedModeType = EModeType::PvP;
 
-	if (multiGameInstace != nullptr)
+	OffsetSizeBox->SetVisibility(ESlateVisibility::Visible);
+	HostBossCheckBox->SetVisibility(ESlateVisibility::Visible);
+
+	for (URadioCheckBox* CheckBox : HostCharacterCheckBoxes)
 	{
-		multiGameInstace->SetIsBossAI(false);
+		if (CheckBox)
+		{
+			CheckBox->SetCheckedState(ECheckBoxState::Unchecked);
+		}
 	}
 
-	if (MenuInterface != nullptr)
+	if (HostBossCheckBox)
 	{
-		MenuInterface->Host();
+		HostBossCheckBox->SetCheckedState(ECheckBoxState::Checked);
+		SelectedCharacterType = ECharacterType::Boss;
 	}
+
+	HostMenuSwitcher->SetActiveWidget(SelectCharacterMenu);
 }
 
 void UMainMenu::HostPvEServer()
+{
+	SelectedModeType = EModeType::PvE;
+
+	OffsetSizeBox->SetVisibility(ESlateVisibility::Collapsed);
+	HostBossCheckBox->SetVisibility(ESlateVisibility::Collapsed);
+
+	for (URadioCheckBox* CheckBox : HostCharacterCheckBoxes)
+	{
+		if (CheckBox)
+		{
+			CheckBox->SetCheckedState(ECheckBoxState::Unchecked);
+		}
+	}
+
+	if (HostKnightCheckBox)
+	{
+		HostKnightCheckBox->SetCheckedState(ECheckBoxState::Checked);
+		SelectedCharacterType = ECharacterType::Knight;
+	}
+
+	HostMenuSwitcher->SetActiveWidget(SelectCharacterMenu);
+}
+
+void UMainMenu::HostServer()
 {
 	UMultiGameInstance* multiGameInstace = Cast<UMultiGameInstance>(GetGameInstance());
 
 	if (multiGameInstace != nullptr)
 	{
-		multiGameInstace->SetIsBossAI(true);
+		if (SelectedModeType == EModeType::PvE)
+		{
+			multiGameInstace->SetIsBossAI(true);
+		}
+		else
+		{
+			multiGameInstace->SetIsBossAI(false);
+		}
 	}
 
 	if (MenuInterface != nullptr)
 	{
-		MenuInterface->Host();
+		MenuInterface->Host(SelectedCharacterType);
 	}
 }
 
@@ -142,6 +215,20 @@ void UMainMenu::OpenHostMenu()
 
 void UMainMenu::OpenJoinMenu()
 {
+	for (URadioCheckBox* CheckBox : GuestCharacterCheckBoxes)
+	{
+		if (CheckBox)
+		{
+			CheckBox->SetCheckedState(ECheckBoxState::Unchecked);
+		}
+	}
+
+	if (GuestKnightCheckBox)
+	{
+		GuestKnightCheckBox->SetCheckedState(ECheckBoxState::Checked);
+		SelectedCharacterType = ECharacterType::Knight;
+	}
+
 	if (!ensure(MenuSwitcher != nullptr)) return;
 	if (!ensure(JoinMenu != nullptr)) return;
 
@@ -154,6 +241,14 @@ void UMainMenu::OpenMainMenu()
 	if (!ensure(MainMenu != nullptr)) return;
 
 	MenuSwitcher->SetActiveWidget(MainMenu);
+}
+
+void UMainMenu::OpenSelectModeMenu()
+{
+	if (!ensure(HostMenuSwitcher != nullptr)) return;
+	if (!ensure(SelectModeMenu != nullptr)) return;
+
+	HostMenuSwitcher->SetActiveWidget(SelectModeMenu);
 }
 
 
@@ -170,10 +265,10 @@ void UMainMenu::Quit()
 
 void UMainMenu::UncheckAll(bool bIsChecked)
 {
-	for (UCheckBox* CheckBox : CharacterCheckBoxes)
+	/*for (UCheckBox* CheckBox : CharacterCheckBoxes)
 	{
 		CheckBox->SetCheckedState(ECheckBoxState::Unchecked);
-	}
+	}*/
 }
 
 void UMainMenu::OpenGraphicMenu()

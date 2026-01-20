@@ -9,6 +9,13 @@
 #include "Character/CharacterType.h"
 #include "MainMenu.generated.h"
 
+UENUM(BlueprintType)
+enum class EModeType : uint8
+{
+	PvP = 0		UMETA(DisplayName = "PvP"),
+	PvE = 1		UMETA(DisplayName = "PvE")
+};
+
 /**
  * 
  */
@@ -21,6 +28,8 @@ protected:
 	virtual bool Initialize() override;
 
 private:
+	EModeType SelectedModeType;
+
 	ECharacterType SelectedCharacterType;
 
 	UPROPERTY(meta = (BindWidget))
@@ -42,7 +51,13 @@ private:
 	class UButton* PvEButton;
 
 	UPROPERTY(meta = (BindWidget))
+	class UButton* ConfirmHostButton;
+
+	UPROPERTY(meta = (BindWidget))
 	class UButton* CancelHostButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* CancelSelectCharacterButton;
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* CancelJoinButton;
@@ -60,6 +75,18 @@ private:
 	class UWidget* HostMenu;
 
 	UPROPERTY(meta = (BindWidget))
+	class UWidgetSwitcher* HostMenuSwitcher;
+
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* SelectModeMenu;
+
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* SelectCharacterMenu;
+
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* OffsetSizeBox;
+
+	UPROPERTY(meta = (BindWidget))
 	class UWidget* JoinMenu;
 
 	UPROPERTY(meta = (BindWidget))
@@ -69,16 +96,34 @@ private:
 	class UEditableTextBox* IPAddressField;
 
 	UPROPERTY(meta = (BindWidget))
-	class URadioCheckBox* KnightCheckBox;
+	class URadioCheckBox* GuestBossCheckBox;
 
 	UPROPERTY(meta = (BindWidget))
-	class URadioCheckBox* ArcherCheckBox;
+	class URadioCheckBox* GuestKnightCheckBox;
 
 	UPROPERTY(meta = (BindWidget))
-	class URadioCheckBox* WizardCheckBox;
+	class URadioCheckBox* GuestArcherCheckBox;
+
+	UPROPERTY(meta = (BindWidget))
+	class URadioCheckBox* GuestWizardCheckBox;
+
+	UPROPERTY(meta = (BindWidget))
+	class URadioCheckBox* HostBossCheckBox;
+
+	UPROPERTY(meta = (BindWidget))
+	class URadioCheckBox* HostKnightCheckBox;
+
+	UPROPERTY(meta = (BindWidget))
+	class URadioCheckBox* HostArcherCheckBox;
+
+	UPROPERTY(meta = (BindWidget))
+	class URadioCheckBox* HostWizardCheckBox;
 
 	UPROPERTY()
-	TArray<URadioCheckBox*> CharacterCheckBoxes;
+	TArray<URadioCheckBox*> GuestCharacterCheckBoxes;
+
+	UPROPERTY()
+	TArray<URadioCheckBox*> HostCharacterCheckBoxes;
 	
 	UPROPERTY(meta = (BindWidget))
 	class UButton* EpicButton;
@@ -115,10 +160,16 @@ private:
 	void HostPvEServer();
 
 	UFUNCTION()
+	void HostServer();
+
+	UFUNCTION()
 	void JoinServer();
 
 	UFUNCTION()
 	void OpenHostMenu();
+
+	UFUNCTION()
+	void OpenSelectModeMenu();
 
 	UFUNCTION()
 	void OpenJoinMenu();
