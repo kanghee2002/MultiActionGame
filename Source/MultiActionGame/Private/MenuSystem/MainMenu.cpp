@@ -129,6 +129,7 @@ void UMainMenu::HostPvPServer()
 	SelectedModeType = EModeType::PvP;
 
 	OffsetSizeBox->SetVisibility(ESlateVisibility::Visible);
+	SelectBossBox->SetVisibility(ESlateVisibility::Visible);
 	HostBossCheckBox->SetVisibility(ESlateVisibility::Visible);
 
 	for (URadioCheckBox* CheckBox : HostCharacterCheckBoxes)
@@ -153,6 +154,7 @@ void UMainMenu::HostPvEServer()
 	SelectedModeType = EModeType::PvE;
 
 	OffsetSizeBox->SetVisibility(ESlateVisibility::Collapsed);
+	SelectBossBox->SetVisibility(ESlateVisibility::Collapsed);
 	HostBossCheckBox->SetVisibility(ESlateVisibility::Collapsed);
 
 	for (URadioCheckBox* CheckBox : HostCharacterCheckBoxes)

@@ -87,6 +87,9 @@ private:
 	class UWidget* OffsetSizeBox;
 
 	UPROPERTY(meta = (BindWidget))
+	class UWidget* SelectBossBox;
+
+	UPROPERTY(meta = (BindWidget))
 	class UWidget* JoinMenu;
 
 	UPROPERTY(meta = (BindWidget))
