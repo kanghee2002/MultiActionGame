@@ -55,7 +55,7 @@ public:
 	void CreateInGameHUD();
 
 	UFUNCTION(Client, Reliable)
-	void Client_CreateGameOverWidget(bool IsWin);
+	void Client_CreateGameOverWidget(bool IsBossWin);
 
 	UPROPERTY()
 	UInGameHUD* InGameHUDWidget;

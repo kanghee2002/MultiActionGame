@@ -6,6 +6,7 @@
 #include "Character/BaseCharacter.h"
 #include "MainGameMode.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -123,6 +124,10 @@ void ABossAIController::OnPossess(APawn* InPawn)
 		UE_LOG(LogTemp, Warning, TEXT("[Boss AI] BehaviorTree or BlackboardData not set"));
 		return;
 	}
+
+	AGameModeBase* GM = UGameplayStatics::GetGameMode(GetWorld());
+	AMainGameMode* myGM = Cast<AMainGameMode>(GM);
+	myGM->AddAIBoss(Cast<ABaseCharacter>(InPawn));
 
 	ABaseCharacter* baseCharacter = Cast<ABaseCharacter>(InPawn);
 	baseCharacter->BP_SetAIStat();

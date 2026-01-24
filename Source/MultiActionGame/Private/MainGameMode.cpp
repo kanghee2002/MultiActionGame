@@ -230,7 +230,7 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 	}
 	else
 	{
-		PC->SelectedCharacterType = ECharacterType::Knight;
+		PC->SelectedCharacterType = ECharacterType::Wizard;
 	}*/
 	startCount++;
 #endif
@@ -238,6 +238,11 @@ FString AMainGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 	FString OutError = Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
 
 	return OutError;
+}
+
+void AMainGameMode::AddAIBoss(ABaseCharacter* boss)
+{
+	BossCharacters.Add(boss);
 }
 
 void AMainGameMode::ProcessPlayerDeath(ECharacterType CharacterType)
@@ -268,14 +273,6 @@ void AMainGameMode::ProcessGameOver(bool IsBossWin)
 	for (FConstPlayerControllerIterator iterator = GetWorld()->GetPlayerControllerIterator(); iterator; ++iterator)
 	{
 		AMainPlayerController* controller = Cast<AMainPlayerController>(iterator->Get());
-
-		if (controller->SelectedCharacterType == ECharacterType::Boss)
-		{
-			controller->Client_CreateGameOverWidget(IsBossWin);
-		}
-		else
-		{
-			controller->Client_CreateGameOverWidget(!IsBossWin);
-		}
+		controller->Client_CreateGameOverWidget(IsBossWin);
 	}
 }

@@ -64,6 +64,8 @@ public:
 		return HeroCharacters;
 	}
 
+	void AddAIBoss(ABaseCharacter* boss);
+
 	void ProcessPlayerDeath(ECharacterType CharacterType);
 
 	void ProcessPlayerRevive();

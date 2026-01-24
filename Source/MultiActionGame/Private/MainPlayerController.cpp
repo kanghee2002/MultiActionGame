@@ -133,9 +133,9 @@ void AMainPlayerController::SetupInputComponent()
     }
 }
 
-void AMainPlayerController::Client_CreateGameOverWidget_Implementation(bool IsWin)
+void AMainPlayerController::Client_CreateGameOverWidget_Implementation(bool IsBossWin)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ClientShowGameOver called with IsWin: %s"), IsWin ? TEXT("true") : TEXT("false"));
+	UE_LOG(LogTemp, Warning, TEXT("ClientShowGameOver called with IsBossWin: %s"), IsBossWin ? TEXT("true") : TEXT("false"));
 
 	if (GameOverWidget)
 	{
@@ -146,7 +146,17 @@ void AMainPlayerController::Client_CreateGameOverWidget_Implementation(bool IsWi
 			{
 				GameOverWidgetRef->AddToViewport();
 				GameOverWidgetRef->PlayAnimation(GameOverWidgetRef->FadeIn);
-				GameOverWidgetRef->InitializeResult(IsWin);
+				
+				ECharacterType characterType = Cast<ABaseCharacter>(GetPawn())->GetCharacterType();
+
+				if (characterType == ECharacterType::Boss)
+				{
+					GameOverWidgetRef->InitializeResult(IsBossWin);
+				}
+				else
+				{
+					GameOverWidgetRef->InitializeResult(!IsBossWin);
+				}
 
 				GameOverWidgetRef->Setup();
 				

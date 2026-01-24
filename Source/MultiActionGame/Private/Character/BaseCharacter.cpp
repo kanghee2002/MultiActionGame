@@ -412,6 +412,15 @@ void ABaseCharacter::Server_LightAttack_Implementation()
 		return;
 	}
 
+	if (HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Im server"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Im client"));
+	}
+
 	StopRecoveryStamina();
 
 	BP_ExecuteLightAttack();
