@@ -351,4 +351,7 @@ private:
 	FTimerHandle SkillCooldownTimerHandle;   // 스킬 쿨다운 업데이트
 
 	const float CooldownUpdateInterval = 0.1f;
+
+	float RotationStartTime;
+	bool RotationTimeChecked;
 };

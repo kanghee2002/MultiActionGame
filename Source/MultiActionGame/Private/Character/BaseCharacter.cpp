@@ -162,11 +162,30 @@ void ABaseCharacter::SynchronizeRotation(float DeltaTime)
 	{
 		targetRotatation = ReplicatedRotation;
 	}
+	//if (IsLocallyControlled() && bUseReplicatedRotation)
+	//{
+	//	targetRotatation = ReplicatedRotation;
+	//}
+	//else
+	//{
+	//	//targetRotatation = GetActorRotation();
+	//}
 
 	float angleDiff = FMath::Abs(FMath::FindDeltaAngleDegrees(currentRotation.Yaw, targetRotatation.Yaw));
 
 	if (angleDiff > 1.0f)
 	{
+		if (!RotationTimeChecked)
+		{
+			RotationTimeChecked = true;
+			float EndTime = GetWorld()->GetTimeSeconds();
+			float ReactionTime = (EndTime - RotationStartTime) * 1000.0f;
+
+			UE_LOG(LogTemp, Log,
+				TEXT("[BaseCharacter] Rotation Reaction Time: %.4f ms"),
+				ReactionTime
+			);
+		}
 		FRotator newRotation = FMath::RInterpTo(currentRotation, targetRotatation, DeltaTime, RotationSpeed);
 		SetActorRotation(newRotation);
 	}
@@ -240,6 +259,9 @@ void ABaseCharacter::Move(const FInputActionValue& value)
 				bUseReplicatedRotation = false;
 				LocalRotation = targetRotation;
                 Server_SetRotation(targetRotation);
+
+				RotationStartTime = GetWorld()->GetTimeSeconds();
+				RotationTimeChecked = false;
             }
         }
     }
