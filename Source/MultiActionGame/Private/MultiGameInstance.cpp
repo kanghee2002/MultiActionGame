@@ -25,6 +25,9 @@ UMultiGameInstance::UMultiGameInstance(const FObjectInitializer& ObjectInitializ
 	InGameMenuClass = InGameMenuBPClass.Class;
 
 	BossHealth = -1.0f;
+	BossAttackDamage = -1.0f;
+	BossAttackCost = -1.0f;
+	BossSkillCooldown = -1.0f;
 
 	IsBossAI = false;
 }

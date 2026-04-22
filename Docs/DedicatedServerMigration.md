@@ -84,16 +84,22 @@ Play 버튼 클릭 → 서버 창 1개(헤드리스, 로그 위주) + 클라 창
 
 **Phase 1-B 진입 전 추가 확인 항목** (Phase 1-A 결과를 토대로 한 2차 조사):
 
-Boss BP BeginPlay 패턴이 확인된 지금, 같은 구조의 숨은 참조가 다른 곳에 있는지를 먼저 훑어야 Phase 3 범위가 확정된다. 우선순위 순으로:
+- [x] **(우선순위 1) Hero 캐릭터 BP(Knight/Archer/Wizard)도 같은 GameInstance 직독 패턴을 가지는가**
+  - **결과: 없음.** 세 BP 모두 `Find in Blueprints`로 `GameInstance` 검색 시 0 hit. **재배선 대상은 Boss BP 단일로 확정.**
+- [x] **(우선순위 2) 재배선 대상 Boss BP 에셋 특정**
+  - **결과: `GruxPlayerCharacter`** (Parent Class: C++ `ABaseCharacter`). Event BeginPlay는 이 BP의 Event Graph에 직접 놓여 있음(`(Override)` 마킹 없음은 정상 — BP Event는 리스너 앵커이기 때문). 상속 체인이 단순(BP → C++)이라 중간 레이어 없음.
+- [x] **(우선순위 3) `UMultiGameInstance` 전체 필드 훑어 누락 확인**
+  - **결과: 5개(`IsBossAI` + `BossHealth`/`BossAttackDamage`/`BossAttackCost`/`BossSkillCooldown`)로 확정, 누락 없음.** `SelectedCharacterType`은 이미 URL 옵션(`CharacterType=N`)으로 `InitNewPlayer` 경로 타고 있음 — 이관 대상 아님. `EGraphicSetting`, `MenuClass`/`InGameMenuClass`/`Menu`/`InGameMenu`는 클라 개인 설정/UI 상태 — 이관 대상 아님.
+  - **부가 수정**: 생성자([MultiGameInstance.cpp:27-31](../Source/MultiActionGame/Private/MultiGameInstance.cpp#L27-L31))에서 `BossAttackDamage`/`BossAttackCost`/`BossSkillCooldown` 3개가 초기화 누락 상태였음(UObject 메모리 0-fill 덕분에 `0.0f`로 시작 → Boss BP `> 0` Branch가 False → 우연히 동작 중). 전부 `-1.0f`로 명시 초기화하도록 수정 완료. 이제 4개 필드가 일관되게 `-1.0f` 센티넬을 사용.
+- [ ] **(우선순위 4) PIE에서 URL 옵션 전달 가능 여부** — Phase 3-B 구현 후 PIE 데디 모드 Advanced Settings의 `Server Map URL` 필드(또는 유사 필드)로 검증. 없으면 1-C(헤드리스 exe) 단계에서 검증.
+- [ ] **(우선순위 5) ServerTravel URL 체인 인코딩 동작 확인** — Phase 3-B/3-F 구현 후 `UE_LOG`로 `InitGame` Options 문자열과 `HasOption`/`ParseOption` 결과를 찍어 검증.
 
-- [ ] **(우선순위 1) Hero 캐릭터 BP(Knight/Archer/Wizard)도 같은 GameInstance 직독 패턴을 가지는가** — Boss와 동일하게 Event BeginPlay나 Functions 탭에 `Cast to MultiGameInstance` 블록이 있을 가능성. 있으면 Phase 3-D 재배선 대상이 히어로 BP들까지 확장된다. 놓치면 마이그레이션 후 히어로 쪽 회귀 발생.
-  - 확인 방법: 각 Hero BP 열어 Event Graph + Functions 탭 훑기. 또는 Content Browser에서 `MultiGameInstance` C++ 클래스 우클릭 → **Reference Viewer**로 이 클래스를 참조하는 BP를 한눈에 확인
-- [ ] **(우선순위 2) `AMainGameMode::BossCharacter` / `KnightCharacter` / `ArcherCharacter` / `WizardCharacter`에 할당된 정확한 BP 에셋 특정** — Phase 3-D 재배선 대상을 좁히기 위해. `Content/General/MainGameModeBP` Default 값에서 확인. BP 상속 체인이 여러 레이어라면(예: `BP_BaseCharacter` → `BP_BossBase` → `BP_Grux`) Event BeginPlay 오버라이드가 어느 레이어에 있는지도 같이 확정.
-- [ ] **(우선순위 3) `UMultiGameInstance` 전체 필드 훑어 누락 확인** — 현재 5개(`IsBossAI` + Boss* 4개)만 고려 중. [MultiGameInstance.h](../Source/MultiActionGame/Public/MultiGameInstance.h)를 다시 훑어 "사실상 서버 전역"으로 취급해야 할 다른 필드가 있는지 검토. `EGraphicSetting`은 클라 개인 설정이라 무관하지만, 명시적으로 "이관 대상 아님"으로 분류해두면 혼란 방지.
-- [ ] **(우선순위 4) PIE에서 URL 옵션 전달 가능 여부** — Phase 1-A의 PIE 데디 모드 검증에서 서버에 `?BossAI?BossHealth=500` 같은 옵션을 전달할 수 있는지. Play 버튼 Advanced Settings에 `Server Map URL` 같은 필드가 있는지 확인. 없으면 옵션 파싱 검증은 PIE 단계에서 못 하고 1-C(헤드리스 exe 실행) 단계로 넘어간다.
-- [ ] **(우선순위 5) ServerTravel URL 체인 인코딩 동작 확인** — `ServerTravel("/Game/TestMap?listen?game=...?BossAI?BossHealth=1000")` 처럼 옵션을 `?`로 계속 붙이는 형식을 `UGameplayStatics::HasOption` / `ParseOption`이 정상 파싱하는지 검증. 3-B 구현 후 `UE_LOG`로 파싱 결과를 찍어 확인.
+**메뉴 → Host 흐름 확인 결과** (우선순위 3의 연장선):
+- `WBP_MainMenu` Event Graph는 비어 있고, 로직은 전부 C++ `UMainMenu`에 있음.
+- `UMainMenu::ConfirmSetting()` ([MainMenu.cpp:316-353](../Source/MultiActionGame/Private/MenuSystem/MainMenu.cpp#L316-L353))이 TextBox 4개(`BossHealthInput` / `BossAttackDamageInput` / `BossAttackCostInput` / `BossSkillCooldownInput`)를 `FDefaultValueHelper::ParseFloat`로 파싱해 `UMultiGameInstance` 필드에 직접 저장. **파싱 실패(빈 문자열 포함) 시 필드를 건드리지 않음** → 생성자 초기값 `-1.0f` 유지. 이 동작이 Phase 3-F의 `Host` URL 조립 시 `> 0` 가드와 맞물려 "센티넬 규약"이 리슨 경로에서도 일관되게 유지된다.
+- `UMainMenu::HostServer()` ([MainMenu.cpp:177-197](../Source/MultiActionGame/Private/MenuSystem/MainMenu.cpp#L177-L197))은 PvE 여부에 따라 `SetIsBossAI(true/false)`만 세팅한 뒤 `MenuInterface->Host(CharacterType)` 호출.
 
-우선순위 1이 설계 범위 자체를 바꿀 수 있어 반드시 먼저. 나머지는 실제 구현 단계에서 자연스럽게 드러나는 문제들이라 차례대로 훑으면 된다. 체크리스트 완료 후 Phase 1-B로 넘어간다.
+우선순위 1~3 완료로 **사전 조사 종결**. 4, 5는 구현 중 로그로 자연스럽게 검증되므로 별도 선행 작업 필요 없음. Phase 1-A의 PIE 데디 실행은 "깨지는 지점 확인"이 목적인데 조사 결과로 이미 밝혀진 상태이므로 **생략하고 Phase 1-B로 직행 가능**(시간 여유가 있으면 기준선 확보용으로 돌려봐도 무방).
 
 #### 1-B. Server Target 추가
 
@@ -236,6 +242,7 @@ void AMainGameMode::InitGame(const FString& MapName, const FString& Options, FSt
 - Boss BP Event BeginPlay의 `> 0` Branch 가드가 이미 폴백 로직을 구현하고 있다. 값이 `0` 이하(-1 기본값 포함)이면 SET이 스킵되어 캐릭터 BP CDO의 기본값이 그대로 살아남는다
 - `InitGame`의 Options 파싱이 키가 없을 때 `-1`을 유지하므로 이 규약이 `AMainGameMode` → BP 방향으로도 자연스럽게 이어진다
 - Phase 3-D의 BP 재배선에서 `> 0` Branch를 건드리지 않고 Cast 타깃만 바꾸는 이유가 이것이다 — 폴백 규약 자체를 옮길 필요가 없다
+- 전제 조건: `UMultiGameInstance` 생성자에서 4개 Boss* 필드가 전부 `-1.0f`로 초기화돼 있어야 리슨 경로에서도 규약이 성립한다. 사전 조사 단계에서 누락됐던 3개 필드는 이미 초기화 완료. `AMainGameMode`의 `-1.0f` 기본값도 이 규약의 연속이다.
 
 서버 실행 예:
 ```bash
@@ -298,6 +305,10 @@ float GetBossSkillCooldownSetting() const { return BossSkillCooldown; }
 #### 3-F. UMultiGameInstance의 서버 전역 필드 의미 재정의
 
 [MultiGameInstance.h](../Source/MultiActionGame/Public/MultiGameInstance.h)의 `BossHealth`, `BossAttackDamage`, `BossAttackCost`, `BossSkillCooldown`, `IsBossAI`는 **더 이상 서버 상태가 아님**. 이제는 `UMainMenu`의 입력 버퍼(사용자가 호스트 모드에서 설정한 값을 잠시 보관)로만 쓰인다.
+
+**기존 메뉴 흐름은 보존**:
+- `UMainMenu::ConfirmSetting()`의 TextBox 파싱 → GameInstance 필드 세팅 로직 **수정 불필요**. 파싱 실패 시 필드를 건드리지 않아 `-1.0f`가 유지되는 동작이 `Host()`의 `> 0` 가드와 맞물려 "키 생략 = 센티넬 유지" 규약을 자연스럽게 만든다.
+- `UMainMenu::HostServer()`의 `SetIsBossAI` + `MenuInterface->Host()` 호출도 그대로. `Host()` 내부의 URL 조립 부분만 확장하면 된다.
 
 용도별 정리:
 - **리슨 호스트 모드 (기존 유지)**: 메뉴 입력 값 → `GameInstance::Host()`가 `ServerTravel` URL에 붙여서 `AMainGameMode::InitGame`에 전달
