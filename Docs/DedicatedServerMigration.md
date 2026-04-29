@@ -101,55 +101,130 @@ Play 버튼 클릭 → 서버 창 1개(헤드리스, 로그 위주) + 클라 창
 
 우선순위 1~3 완료로 **사전 조사 종결**. 4, 5는 구현 중 로그로 자연스럽게 검증되므로 별도 선행 작업 필요 없음. Phase 1-A의 PIE 데디 실행은 "깨지는 지점 확인"이 목적인데 조사 결과로 이미 밝혀진 상태이므로 **생략하고 Phase 1-B로 직행 가능**(시간 여유가 있으면 기준선 확보용으로 돌려봐도 무방).
 
-#### 1-B. Server Target 추가
+#### 1-B. Server Target 추가 + Source Build 엔진 전환
 
-`Source/MultiActionGameServer.Target.cs` 생성:
+`Source/MultiActionGameServer.Target.cs` 생성 (`MultiActionGame.Target.cs`와 동일 스타일에 `Type = TargetType.Server`만 다름).
 
-```csharp
-using UnrealBuildTool;
-using System.Collections.Generic;
+**Launcher 엔진은 Server 타깃을 빌드할 수 없다.** UE 5.3+ Epic Games Launcher 배포판은 Server 타깃용 precompiled 바이너리(`BuildSettings.precompiled` 등)를 포함하지 않는다. `BaseEngine.ini`의 `[InstalledPlatforms]` 추가나 엔진의 `UnrealServer.Target.cs` 신규 작성으로 일부 단계는 통과할 수 있어도 결국 monolithic 링크 시점에 막힌다 (이 프로젝트도 그 경로로 시도했다 실패). **Source Build 엔진이 사실상 유일한 정공법** — Epic 공식 포럼·문서·커뮤니티 튜토리얼이 일관되게 같은 결론.
 
-public class MultiActionGameServerTarget : TargetRules
-{
-    public MultiActionGameServerTarget(TargetInfo Target) : base(Target)
-    {
-        Type = TargetType.Server;
-        DefaultBuildSettings = BuildSettingsVersion.V5;
-        IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
-        ExtraModuleNames.Add("MultiActionGame");
-    }
-}
+**Source Build 엔진 준비** (한 컴퓨터에서 1회, 시간 3~6시간 + 디스크 200GB+):
+
+1. **GitHub ↔ Epic 계정 연결**: https://www.unrealengine.com/account/connections → GitHub 연결 → `@EpicGames` 조직 초대 수락 → `https://github.com/EpicGames/UnrealEngine` 접근 확인
+2. **소스 clone** (공백 없는 짧은 경로 권장):
+   ```bash
+   git clone --depth=1 --branch 5.6 https://github.com/EpicGames/UnrealEngine.git C:/UE5Source
+   ```
+3. **의존성 다운로드** (~100GB, 1~3시간):
+   ```bash
+   (cd /c/UE5Source && ./Setup.bat)
+   ```
+4. **VS 프로젝트 파일 생성** (수십 초):
+   ```bash
+   (cd /c/UE5Source && ./GenerateProjectFiles.bat)
+   ```
+5. **Visual Studio에서 엔진 빌드** (3~6시간):
+   - `C:/UE5Source/UE5.sln` 열기 (VS 2022)
+   - Configuration `Development Editor` / Platform `Win64`
+   - Solution Explorer → Engine → `UE5` 프로젝트 우클릭 → Build
+   - 산출물: `C:/UE5Source/Engine/Binaries/Win64/UnrealEditor.exe`
+
+**프로젝트를 Source Build 엔진에 연결**:
+
+```powershell
+# 1. 레지스트리에 Source Build 엔진을 'UE5Source' 이름으로 등록 (HKCU 영역)
+New-Item -Path 'HKCU:\SOFTWARE\Epic Games\Unreal Engine\Builds' -Force | Out-Null
+New-ItemProperty -Path 'HKCU:\SOFTWARE\Epic Games\Unreal Engine\Builds' -Name 'UE5Source' -Value 'C:/UE5Source' -PropertyType String -Force
 ```
 
-이후:
-- UBT 프로젝트 재생성: `UnrealBuildTool.exe -projectfiles -project=".../MultiActionGame.uproject" -game -rocket -progress`
-- 빌드: `Build.bat MultiActionGameServer Win64 Development -Project=".../MultiActionGame.uproject" -WaitMutex`
-- 산출물: `Binaries/Win64/MultiActionGameServer.exe`
+2. `.uproject`의 `"EngineAssociation": "5.6"` → `"UE5Source"`로 수정
+3. **다른 컴퓨터 동기화 보호** (중요 — 동기화 흐름 §"동기화 / 작업 흐름" 참조):
+   ```bash
+   git update-index --skip-worktree MultiActionGame.uproject
+   ```
+   이 컴퓨터에서만 빌드한다는 전제로, EngineAssociation 변경이 `.patch`에 섞여 다른 컴퓨터로 전파되지 않게 한다. `git status`에 `S` 플래그가 붙어 표시되며 커밋 대상에서도 제외된다.
+
+**프로젝트 빌드** — Git Bash에서 `Build.bat`은 공백 경로(`c:/Program Files/...`) 처리 이슈로 깨지므로 **`UnrealBuildTool.exe`를 직접 호출**한다:
+
+```bash
+PROJECT="c:/Users/admin/Documents/Unreal Projects/MultiActionGame/MultiActionGame.uproject"
+UBT="C:/UE5Source/Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.exe"
+
+# 0. (Launcher 엔진으로 빌드한 잔재 있으면) 정리
+rm -rf "$(dirname "$PROJECT")/Binaries" "$(dirname "$PROJECT")/Intermediate"
+
+# 1. VS 프로젝트 파일 재생성 (~30초)
+"$UBT" -projectfiles -project="$PROJECT" -game -rocket -progress
+
+# 2. Server 타깃 빌드 (첫 빌드 ~25분)
+"$UBT" MultiActionGameServer Win64 Development -Project="$PROJECT" -WaitMutex
+
+# 3. Editor 타깃 빌드 (첫 빌드 ~1분 — 엔진 모듈은 이미 빌드됨)
+"$UBT" MultiActionGameEditor Win64 Development -Project="$PROJECT" -WaitMutex
+```
+
+산출물:
+- `Binaries/Win64/MultiActionGameServer.exe` (~300MB monolithic 데디 서버)
+- `Binaries/Win64/UnrealEditor-MultiActionGame.dll` (Editor용 모듈 — Cook commandlet과 외부 `-game` 클라 모두 이 모듈을 로드)
 
 빌드 실패 시 대부분 `PublicDependencyModuleNames` 또는 `AdditionalDependencies`에 서버에 없는 모듈 참조가 있는 경우. 현재 [MultiActionGame.Build.cs](../Source/MultiActionGame/MultiActionGame.Build.cs)의 의존성(`Core`, `CoreUObject`, `Engine`, `InputCore`, `EnhancedInput`, `AIModule`)은 전부 서버에서도 링크되므로 그대로 통과해야 정상.
 
-#### 1-C. 헤드리스 실행
+#### 1-C. Cook + 헤드리스 실행
+
+**Cook이 먼저 필요하다.** monolithic Server 타깃은 cooked content를 요구한다. cook 없이 실행하면 `Failed to load premade asset registry` + `BufferReader assertion`으로 즉시 크래시한다.
+
+**UAT 우회**: UE 5.6의 `BuildCookRun`은 `Magick.NET-Q16-HDRI-AnyCPU` NuGet 패키지의 보안 경고가 dotnet build의 오류로 승격되어 빌드 자체가 실패한다. **`UnrealEditor-Cmd.exe`의 `cook` commandlet을 직접 호출**해서 UAT/Gauntlet 빌드 단계를 건너뛴다:
 
 ```bash
-"Binaries/Win64/MultiActionGameServer.exe" "/Game/TestMap" -server -log -port=7777
+"C:/UE5Source/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" "$PROJECT" -run=Cook -targetplatform=WindowsServer -unattended -log
 ```
 
-- `-log`: 별도 콘솔 창으로 로그 출력
-- `-port`: 기본값은 7777. 방화벽 예외 필요 시 사용자 설정
-- `/Game/TestMap` 자리에 맵 경로
+소요 시간: 첫 cook ~10초~수 분 (셰이더 캐시 활용). 결과물은 `Saved/Cooked/WindowsServer/`. 사전에 UnrealEditor가 한 번 떠서 셰이더 캐시(DDC)를 채워 둔 상태가 가장 빠르다.
+
+**서버 실행** — **반드시 cmd 창에서 직접 실행한다.** Git Bash에서 호출하면 MSYS의 자동 경로 변환으로 `/Game/TestMap`이 `C:/Program Files/Git/Game/TestMap`으로 둔갑하여 `FilenameToLongPackageName failed to convert ... contains illegal characters ':'` 크래시. PowerShell의 background도 콘솔 분리(`-NoNewWindow` 또는 stdin EOF) 시 process가 즉시 종료되는 케이스가 잦으니 보수적으로 cmd 창에서 직접 띄운다:
+
+```cmd
+"<프로젝트>\Binaries\Win64\MultiActionGameServer.exe" /Game/TestMap?listen?Port=7777 -log
+```
+
+URL 옵션 주의:
+- **`?listen` 필수**: monolithic Server 타깃이라도 NetDriver listening 트리거에 `?listen`이 필요하다. 빠지면 서버 process가 살아있어도 NetDriver가 socket bind/listen을 시작하지 않는다. `?listen`이 NetMode를 리슨 서버로 바꾸는 게 아니다 — `IsDedicatedServer = 1` 그대로이고 단지 NetDriver 활성화 스위치 역할.
+- **`?Port=N` 권장**: 명령줄 `-port=N` 형식은 인식이 일관되지 않을 수 있어 default 7777로 fallback되는 경우가 있음. URL 옵션 형태가 안정적.
 
 로그 확인 포인트:
-- `LogNet: GameNetDriver IpNetDriver_X listening on port 7777`
-- `AMainGameMode::BeginPlay` 호출
-- 경고 없이 대기 상태 유지
+- `LogNet: Created socket for bind address: 0.0.0.0:7777`
+- `LogNet: ... IpNetDriver listening on port 7777`
+- `LogWorldPartition: ... NetMode = Dedicated Server, IsDedicatedServer = 1`
+- `LogTemp: Warning: [GameMode] End Begin Play` (Boss 스폰까지 정상)
 
 #### 1-D. 클라에서 Join
 
-- 에디터에서 Play As Client (single window) 실행 후 콘솔(`)에 `open 127.0.0.1:7777?CharacterType=1` 입력
-- 또는 메뉴에서 JoinMenu의 IP 필드에 `127.0.0.1:7777` 입력 (현재 메뉴 코드가 포트 지정 지원하는지 확인; 현재 [MultiGameInstance.cpp:83-103](../Source/MultiActionGame/Private/MultiGameInstance.cpp#L83-L103)의 `Join` 구현을 보면 Address 문자열을 그대로 `ClientTravel`에 넘기므로 `127.0.0.1:7777` 입력도 통과)
-- 클라 창에 `UInGameHUD`가 뜨고 캐릭터가 스폰되면 성공
+**PIE 클라는 데디 서버 join에 부적합하다.** PIE는 어떤 모드(Selected Viewport / New Editor Window / Standalone Game)로 띄우든 내부적으로 PIE world conversion을 거쳐 `/Game/UEDPIE_0_TestMap` 같은 메모리 패키지를 만든다. 클라가 그 메모리 패키지의 visibility를 서버에 동기화하려 하면 진짜 데디 서버는 이 패키지를 모르므로 `MissingLevelPackage`로 연결을 끊는다 (이 프로젝트 첫 시도에서 직접 확인된 함정).
 
-이 지점에서 게임 루프가 끝까지 돌지 않아도 괜찮다. Phase 1 목표는 **접속이 되고 기본 프레임이 돌아간다**의 확인까지.
+**해결**: 에디터 외부에서 `UnrealEditor.exe`를 `-game` 모드로 실행해 진짜 게임 클라이언트로 띄운다. 새 cmd 창에서:
+
+```cmd
+"C:\UE5Source\Engine\Binaries\Win64\UnrealEditor.exe" "<프로젝트>\MultiActionGame.uproject" 127.0.0.1:7777?CharacterType=1 -game -log -ResX=1280 -ResY=720
+```
+
+- URL 인자(`127.0.0.1:7777?CharacterType=1`)가 실행 직후 자동 join 트리거
+- 메뉴 흐름을 검증하려면 URL 빼고 실행 후 메뉴에서 IP 입력
+- `UnrealEditor-MultiActionGame.dll`이 빌드되어 있어야 한다 (Phase 1-B의 Editor 타깃 빌드)
+
+성공 시 **서버 콘솔**에 다음 흐름이 보이고 끊기지 않는다:
+
+```
+LogNet: NotifyAcceptingConnection accepted from: 127.0.0.1:XXXXX
+LogNet: Login request: ?Name=...?CharacterType=N
+LogTemp: [GameMode] Choose Player Start -> Knight
+LogTemp: [GameMode] Spawn Knight
+LogTemp: [GameMode] Add Hero to Array
+LogTemp: OnPossess: ...
+LogNet: Join succeeded
+```
+
+클라 화면에 캐릭터가 스폰되어 입력으로 움직이면 Phase 1 완료.
+
+**WP + 데디 함정 (간단 메모)**: TestMap이 World Partition을 사용하면 데디 서버에서 셀 visibility 동기화 이슈로 `MissingLevelPackage`가 다시 발생할 수 있다. 본 프로젝트는 단일 arena 게임이라 WP가 의미 없으므로 `World Settings → World Partition → Enable Streaming`을 끄는 것으로 회피했다 (자세한 배경은 §4 "흔한 함정" 참조).
 
 ### Phase 2 — 클라이언트 전용 경로 가드
 
@@ -244,9 +319,9 @@ void AMainGameMode::InitGame(const FString& MapName, const FString& Options, FSt
 - Phase 3-D의 BP 재배선에서 `> 0` Branch를 건드리지 않고 Cast 타깃만 바꾸는 이유가 이것이다 — 폴백 규약 자체를 옮길 필요가 없다
 - 전제 조건: `UMultiGameInstance` 생성자에서 4개 Boss* 필드가 전부 `-1.0f`로 초기화돼 있어야 리슨 경로에서도 규약이 성립한다. 사전 조사 단계에서 누락됐던 3개 필드는 이미 초기화 완료. `AMainGameMode`의 `-1.0f` 기본값도 이 규약의 연속이다.
 
-서버 실행 예:
-```bash
-MultiActionGameServer.exe "/Game/TestMap?BossAI?BossHealth=1000?BossAttackDamage=15" -server -log -port=7777
+서버 실행 예 (cmd 창에서):
+```cmd
+MultiActionGameServer.exe /Game/TestMap?listen?Port=7777?BossAI?BossHealth=1000?BossAttackDamage=15 -log
 ```
 
 CLI 플래그(`FCommandLine::Get()` + `FParse`) 병행은 **이 단계에선 추가하지 않는다**. URL 옵션 하나로 충분하며, 둘 다 지원하면 우선순위 규칙 문서화/테스트 부담이 생긴다. 운영 단계에서 서버 관리 스크립트가 필요해지면 그때 CLI 지원을 덧붙이되, 그 시점에 URL 우선인지 CLI 우선인지 명시적으로 결정해 이 문서에 추가한다.
@@ -368,18 +443,36 @@ World->ServerTravel(TravelURL);
 
 ### 빌드/실행 커맨드 한 줄 정리
 
+전제: Source Build 엔진(`C:/UE5Source`) 사용. 경로는 컴퓨터별로 조정. Git Bash 기준.
+
 ```bash
-# 프로젝트 파일 재생성 (Target.cs 추가 후)
-"c:/Program Files/Epic Games/UE_5.6/Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.exe" -projectfiles -project="c:/Projects/MultiActionGame_portable/MultiActionGame.uproject" -game -rocket -progress
+# 환경 변수
+PROJECT="c:/Users/admin/Documents/Unreal Projects/MultiActionGame/MultiActionGame.uproject"
+PROJDIR="$(dirname "$PROJECT")"
+UBT="C:/UE5Source/Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.exe"
+EDITOR_CMD="C:/UE5Source/Engine/Binaries/Win64/UnrealEditor-Cmd.exe"
 
-# 서버 빌드
-"c:/Program Files/Epic Games/UE_5.6/Engine/Build/BatchFiles/Build.bat" MultiActionGameServer Win64 Development -Project="c:/Projects/MultiActionGame_portable/MultiActionGame.uproject" -WaitMutex
+# 1. 프로젝트 파일 재생성 (Target.cs 추가 / 엔진 전환 후)
+"$UBT" -projectfiles -project="$PROJECT" -game -rocket -progress
 
-# 서버 실행 (예: BossAI 모드 + 커스텀 보스 체력)
-"c:/Projects/MultiActionGame_portable/Binaries/Win64/MultiActionGameServer.exe" "/Game/TestMap?BossAI?BossHealth=1200" -server -log -port=7777
+# 2. Server 타깃 빌드
+"$UBT" MultiActionGameServer Win64 Development -Project="$PROJECT" -WaitMutex
 
-# 클라 접속 (에디터 콘솔 또는 패키지 클라)
-open 127.0.0.1:7777?CharacterType=1
+# 3. Editor 타깃 빌드 (Cook commandlet과 -game 모드 클라가 의존)
+"$UBT" MultiActionGameEditor Win64 Development -Project="$PROJECT" -WaitMutex
+
+# 4. Cook (Server target용 cooked content 생성, UAT 우회)
+"$EDITOR_CMD" "$PROJECT" -run=Cook -targetplatform=WindowsServer -unattended -log
+```
+
+서버/클라 실행은 **cmd 창에서 직접** (Git Bash의 MSYS 경로 변환 함정 회피):
+
+```cmd
+:: 서버 실행 (예: BossAI 모드 + 커스텀 보스 체력)
+"<프로젝트>\Binaries\Win64\MultiActionGameServer.exe" /Game/TestMap?listen?Port=7777?BossAI?BossHealth=1200 -log
+
+:: 클라 자동 join (외부 -game 모드, PIE 회피)
+"C:\UE5Source\Engine\Binaries\Win64\UnrealEditor.exe" "<프로젝트>\MultiActionGame.uproject" 127.0.0.1:7777?CharacterType=1 -game -log -ResX=1280 -ResY=720
 ```
 
 ### 런타임 판별 패턴
@@ -403,6 +496,8 @@ open 127.0.0.1:7777?CharacterType=1
 ### 흔한 함정
 
 - `UMultiGameInstance`의 매치 설정 필드를 성급히 삭제하지 말 것. 클라 입력 버퍼 역할은 여전히 필요하다 (§3-E)
-- 서버 실행 시 URL 인코딩 주의: Windows cmd는 `?`를 그대로 받지만 PowerShell은 따옴표로 감싸야 함 (`"?BossAI?BossHealth=1000"`)
+- 서버 실행 시 URL 인코딩 주의: Windows cmd는 `?`를 그대로 받지만 PowerShell은 따옴표로 감싸야 함 (`"?BossAI?BossHealth=1000"`). Git Bash는 `/Game/...`을 자동 경로 변환해 깨지므로 데디 서버/클라 실행은 cmd 창에서 직접
 - `ServerTravel` 호출 시점에 서버가 아직 `InitGame`에 도달하지 않아 클라가 붙으면 연결 실패. 기동 직후 몇 초는 대기하는 게 안전
+- **World Partition + 데디**: UE5 신규 map은 World Partition이 기본 적용된다. 데디 서버에서 클라가 셀 visibility를 보고하는 시점에 서버가 그 셀을 스트림 인하지 못한 상태면 `MissingLevelPackage`로 끊긴다 (서버 streaming 옵션 / 타이밍 / streaming source 위치 문제). 단일 arena 게임이라 WP가 의미 없으면 `World Settings → Enable Streaming` 해제 후 재 cook으로 회피한다 (이 프로젝트가 채택한 길). WP를 의도적으로 쓰는 경우엔 `bIsServerStreamingEnabled` 등 데디 운영 설정을 별도로 정복해야 한다
+- **PIE 클라로 데디 join 금지**: PIE는 메모리 패키지(`/Memory/UEDPIE_0_*`)를 만들어 진짜 데디와 호환되지 않는다. 클라 검증은 외부 `-game` 모드(§1-D)로
 - `InitGame`과 `BeginPlay`의 실행 순서: `InitGame` → `PreInitializeComponents` → `BeginPlay`. 옵션 파싱은 `InitGame`에서 하고 `BeginPlay`는 이미 세팅된 멤버를 읽기만 하게 구성
