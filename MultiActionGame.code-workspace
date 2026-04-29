@@ -460,6 +460,276 @@
 				"options": {
 					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
 				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 Debug Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"Debug",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 Debug Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"Debug",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"MultiActionGameServer Win64 Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 Debug Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"Debug",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 DebugGame Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"DebugGame",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"DebugGame",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"MultiActionGameServer Win64 DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 DebugGame Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"DebugGame",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 Development Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"Development",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 Development Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"Development",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"MultiActionGameServer Win64 Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 Development Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"Development",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 Test Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"Test",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 Test Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"Test",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"MultiActionGameServer Win64 Test Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 Test Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"Test",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 Shipping Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"Shipping",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 Shipping Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"Shipping",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"MultiActionGameServer Win64 Shipping Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"label": "MultiActionGameServer Win64 Shipping Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"MultiActionGameServer",
+					"Win64",
+					"Shipping",
+					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
 			}
 		]
 	},
@@ -601,6 +871,96 @@
 				"preLaunchTask": "MultiActionGameEditor Win64 Development Build",
 				"args": [
 					"C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\MultiActionGame.uproject"
+				],
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.6",
+				"stopAtEntry": false,
+				"console": "integratedTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "C:\\Program Files\\Epic Games\\UE_5.6",
+					"Z:\\UEVFS\\MultiActionGame": "C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame",
+					"Z:\\UEVFS\\Root": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"name": "Launch MultiActionGameServer (Debug)",
+				"request": "launch",
+				"program": "C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\Binaries\\Win64\\UnrealServer-Win64-Debug.exe",
+				"preLaunchTask": "MultiActionGameServer Win64 Debug Build",
+				"args": [
+				],
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.6",
+				"stopAtEntry": false,
+				"console": "integratedTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "C:\\Program Files\\Epic Games\\UE_5.6",
+					"Z:\\UEVFS\\MultiActionGame": "C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame",
+					"Z:\\UEVFS\\Root": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"name": "Launch MultiActionGameServer (DebugGame)",
+				"request": "launch",
+				"program": "C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\Binaries\\Win64\\UnrealServer-Win64-DebugGame.exe",
+				"preLaunchTask": "MultiActionGameServer Win64 DebugGame Build",
+				"args": [
+				],
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.6",
+				"stopAtEntry": false,
+				"console": "integratedTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "C:\\Program Files\\Epic Games\\UE_5.6",
+					"Z:\\UEVFS\\MultiActionGame": "C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame",
+					"Z:\\UEVFS\\Root": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"name": "Launch MultiActionGameServer (Development)",
+				"request": "launch",
+				"program": "C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\Binaries\\Win64\\UnrealServer.exe",
+				"preLaunchTask": "MultiActionGameServer Win64 Development Build",
+				"args": [
+				],
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.6",
+				"stopAtEntry": false,
+				"console": "integratedTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "C:\\Program Files\\Epic Games\\UE_5.6",
+					"Z:\\UEVFS\\MultiActionGame": "C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame",
+					"Z:\\UEVFS\\Root": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"name": "Launch MultiActionGameServer (Test)",
+				"request": "launch",
+				"program": "C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\Binaries\\Win64\\UnrealServer-Win64-Test.exe",
+				"preLaunchTask": "MultiActionGameServer Win64 Test Build",
+				"args": [
+				],
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.6",
+				"stopAtEntry": false,
+				"console": "integratedTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "C:\\Program Files\\Epic Games\\UE_5.6",
+					"Z:\\UEVFS\\MultiActionGame": "C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame",
+					"Z:\\UEVFS\\Root": "C:\\Program Files\\Epic Games\\UE_5.6"
+				}
+			},
+			{
+				"name": "Launch MultiActionGameServer (Shipping)",
+				"request": "launch",
+				"program": "C:\\Users\\admin\\Documents\\Unreal Projects\\MultiActionGame\\Binaries\\Win64\\UnrealServer-Win64-Shipping.exe",
+				"preLaunchTask": "MultiActionGameServer Win64 Shipping Build",
+				"args": [
 				],
 				"cwd": "C:\\Program Files\\Epic Games\\UE_5.6",
 				"stopAtEntry": false,
