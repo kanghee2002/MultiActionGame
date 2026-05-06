@@ -173,6 +173,10 @@ void AMainPlayerController::ServerSetCharacterType_Implementation(ECharacterType
 
 void AMainPlayerController::InitializeBossHealth(UHealthComponent* HealthComp)
 {
+	// 데디 server-side PC 인스턴스는 HUD가 없음 (CreateInGameHUD가 IsLocalController 가드 뒤에서만 실행).
+	// 리슨 호스트는 local controller라 항상 non-null이므로 영향 없음.
+	if (!InGameHUDWidget) return;
+
 	InGameHUDWidget->InitializeBossHealthComponent(HealthComp);
 }
 
