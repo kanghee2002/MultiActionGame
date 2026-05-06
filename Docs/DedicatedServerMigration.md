@@ -91,8 +91,8 @@ Play 버튼 클릭 → 서버 창 1개(헤드리스, 로그 위주) + 클라 창
 - [x] **(우선순위 3) `UMultiGameInstance` 전체 필드 훑어 누락 확인**
   - **결과: 5개(`IsBossAI` + `BossHealth`/`BossAttackDamage`/`BossAttackCost`/`BossSkillCooldown`)로 확정, 누락 없음.** `SelectedCharacterType`은 이미 URL 옵션(`CharacterType=N`)으로 `InitNewPlayer` 경로 타고 있음 — 이관 대상 아님. `EGraphicSetting`, `MenuClass`/`InGameMenuClass`/`Menu`/`InGameMenu`는 클라 개인 설정/UI 상태 — 이관 대상 아님.
   - **부가 수정**: 생성자([MultiGameInstance.cpp:27-31](../Source/MultiActionGame/Private/MultiGameInstance.cpp#L27-L31))에서 `BossAttackDamage`/`BossAttackCost`/`BossSkillCooldown` 3개가 초기화 누락 상태였음(UObject 메모리 0-fill 덕분에 `0.0f`로 시작 → Boss BP `> 0` Branch가 False → 우연히 동작 중). 전부 `-1.0f`로 명시 초기화하도록 수정 완료. 이제 4개 필드가 일관되게 `-1.0f` 센티넬을 사용.
-- [ ] **(우선순위 4) PIE에서 URL 옵션 전달 가능 여부** — Phase 3-B 구현 후 PIE 데디 모드 Advanced Settings의 `Server Map URL` 필드(또는 유사 필드)로 검증. 없으면 1-C(헤드리스 exe) 단계에서 검증.
-- [ ] **(우선순위 5) ServerTravel URL 체인 인코딩 동작 확인** — Phase 3-B/3-F 구현 후 `UE_LOG`로 `InitGame` Options 문자열과 `HasOption`/`ParseOption` 결과를 찍어 검증.
+- [x] **(우선순위 4) PIE에서 URL 옵션 전달 가능 여부** — 1-C 헤드리스 exe 단계에서 검증 완료. `MultiActionGameServer.exe /Game/TestMap?listen?Port=7777?BossAI?BossHealth=1500 -log` 형태로 cmd 직접 호출 시 `InitGame`이 옵션 정상 수신.
+- [x] **(우선순위 5) ServerTravel URL 체인 인코딩 동작 확인** — Phase 3-B의 `[GameMode] Match init: BossAI=1 Health=1500.0 ...` 로그로 server측 파싱 확정. Phase 3-F의 `[Host] ServerTravel URL: ...` 로그로 host측 조립도 확정. `?Key` (값 없는 플래그) + `?Key=Value` (값 있음) 혼용 정상 동작.
 
 **메뉴 → Host 흐름 확인 결과** (우선순위 3의 연장선):
 - `WBP_MainMenu` Event Graph는 비어 있고, 로직은 전부 C++ `UMainMenu`에 있음.
@@ -369,6 +369,16 @@ float GetBossSkillCooldownSetting() const { return BossSkillCooldown; }
 4. Compile → Save
 5. PIE로 리슨/데디 양쪽 동작 확인 (옵션을 넣은 경우 값 적용, 옵션 없는 경우 BP CDO 기본값 유지)
 
+**데디 함정 — SET 노드의 Target이 PlayerController 경로 변수에 의존하면 깨짐**:
+
+이 프로젝트의 `GruxPlayerCharacter` BP는 BeginPlay 초입에서 `Get Player Controller(0) → Cast to MainPlayerController → Initialize Boss Health` 흐름으로 `Health Comp Ref` 변수를 채운 뒤, 하단 SET 체인(`SET DefaultMaxHealth` 등)의 Target에 그 ref를 연결해 사용한다. 리슨 서버에서는 호스트 본인이 local PC라 `GetPlayerController(0)`가 valid → `Initialize Boss Health` 정상 호출 → `Health Comp Ref` 설정 → SET 동작.
+
+데디 서버에서는 보스가 `MainGameMode::BeginPlay`에서 스폰되는 시점에 클라이언트가 아직 join 안 한 상태 → **`GetPlayerController(0) = null`** → `Cast to MainPlayerController` Cast Failed → `Initialize Boss Health` 미호출 → `Health Comp Ref`가 null인 채로 남음. HasAuthority 가드는 통과하므로 SET 체인이 실행되지만 **Target=null이라 사일런트하게 무효화**, 보스 체력은 BP CDO 기본값(이 프로젝트에선 100)으로 유지된다. 옵션 파싱과 BP 재배선이 모두 정상이라도 발현된다.
+
+해결: **SET 노드(`DefaultMaxHealth` / `CurrentMaxHealth` / `Reset Health`)의 Target을 PlayerController 경로 ref가 아니라 self의 `Get Health Component` 출력에 직접 연결**. self는 보스 본인이므로 항상 valid하고 데디/리슨/PIE 모든 환경에서 동일하게 동작한다. 일반화하자면 **server-only 코드 경로에서 사용하는 컴포넌트 ref를 client-only 트리거에 의존시키지 말 것** — 데디로 가는 순간 첫 클라 join 이전의 server-only 작업이 모두 깨진다.
+
+이 함정은 다른 캐릭터 BP에도 잠재할 수 있다. Hero BP는 항상 클라가 PlayerController를 가진 상태로 스폰되므로 같은 패턴이 있어도 안전하지만, server에서 미리 스폰되는 actor(보스, 환경 트리거 등)는 동일 경로 점검이 필요하다.
+
 #### 3-E. 플레이어별 설정은 기존 경로 유지
 
 [MainGameMode.cpp:192-241](../Source/MultiActionGame/Private/MainGameMode.cpp#L192-L241)의 `InitNewPlayer`에서 `CharacterType`을 URL 옵션으로 파싱하는 로직은 **데디에서도 그대로 동작**한다. 각 클라가 `ClientTravel` 시 자기 `CharacterType=N`을 URL에 붙이고, 서버가 그 클라 전용 PlayerController에 세팅하는 구조는 이미 올바름. 수정 불필요.
@@ -501,3 +511,5 @@ EDITOR_CMD="C:/UE5Source/Engine/Binaries/Win64/UnrealEditor-Cmd.exe"
 - **World Partition + 데디**: UE5 신규 map은 World Partition이 기본 적용된다. 데디 서버에서 클라가 셀 visibility를 보고하는 시점에 서버가 그 셀을 스트림 인하지 못한 상태면 `MissingLevelPackage`로 끊긴다 (서버 streaming 옵션 / 타이밍 / streaming source 위치 문제). 단일 arena 게임이라 WP가 의미 없으면 `World Settings → Enable Streaming` 해제 후 재 cook으로 회피한다 (이 프로젝트가 채택한 길). WP를 의도적으로 쓰는 경우엔 `bIsServerStreamingEnabled` 등 데디 운영 설정을 별도로 정복해야 한다
 - **PIE 클라로 데디 join 금지**: PIE는 메모리 패키지(`/Memory/UEDPIE_0_*`)를 만들어 진짜 데디와 호환되지 않는다. 클라 검증은 외부 `-game` 모드(§1-D)로
 - `InitGame`과 `BeginPlay`의 실행 순서: `InitGame` → `PreInitializeComponents` → `BeginPlay`. 옵션 파싱은 `InitGame`에서 하고 `BeginPlay`는 이미 세팅된 멤버를 읽기만 하게 구성
+- **데디로 옮기면서 새로 노출되는 server-only path 잠재 버그**: 리슨 서버는 호스트 자신이 hero/local PC로 즉시 in-world 상태라 server-only 코드의 일부 경로(예: `HeroCharacters` 비어있는 상태, `GetPlayerController(0)=null` 상태 등)가 한 번도 안 밟혔을 가능성이 있다. 데디는 첫 클라 join 전 수 초간 그 상태에 머무르므로 잠재 null deref / 무효 SET이 발현된다. 이 프로젝트에서도 두 건 노출됐다 — `BossAIController::SetNextPattern`의 `CurrentTarget` deref(hero 0명 상태에서 호출), 위 §3-D의 SET Target=null 사일런트 실패. 마이그레이션 작업 도중 크래시/이상 동작이 보이면 "server-only인데 클라 의존 상태에서 만들어진 가정"이 원인인지 먼저 의심
+- **AI BT 가드의 부작용**: `SetNextPattern` 같이 BT 태스크가 호출하는 함수에서 early return으로 액션 SET 없이 끝내면 BT가 결정 불가 상태로 정지할 수 있다. 원본이 항상 non-None 액션을 SET하는 패턴이면 그 계약을 유지해야 한다. null 가드는 액션 선택 자체가 아니라 **null 의존 계산(예: distance, target rotation)만 우회**하도록 좁게 잡는다

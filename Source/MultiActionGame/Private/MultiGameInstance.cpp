@@ -34,6 +34,8 @@ UMultiGameInstance::UMultiGameInstance(const FObjectInitializer& ObjectInitializ
 
 void UMultiGameInstance::LoadMenu()
 {
+	if (IsRunningDedicatedServer()) return;
+
 	if (!ensure(MenuClass != nullptr)) return;
 
 	Menu = CreateWidget<UMainMenu>(this, MenuClass);
@@ -46,6 +48,8 @@ void UMultiGameInstance::LoadMenu()
 
 void UMultiGameInstance::LoadInGameMenu()
 {
+	if (IsRunningDedicatedServer()) return;
+
 	if (!ensure(InGameMenuClass != nullptr)) return;
 
 	InGameMenu = CreateWidget<UInGameMenu>(this, InGameMenuClass);
@@ -79,6 +83,14 @@ void UMultiGameInstance::Host(ECharacterType CharacterType)
 
 	FString TravelURL = FString::Printf(TEXT("%s?CharacterType=%d"), *Address, static_cast<int32>(CharacterType));
 
+	if (IsBossAI)              TravelURL += TEXT("?BossAI");
+	if (BossHealth > 0)        TravelURL += FString::Printf(TEXT("?BossHealth=%.1f"), BossHealth);
+	if (BossAttackDamage > 0)  TravelURL += FString::Printf(TEXT("?BossAttackDamage=%.1f"), BossAttackDamage);
+	if (BossAttackCost > 0)    TravelURL += FString::Printf(TEXT("?BossAttackCost=%.1f"), BossAttackCost);
+	if (BossSkillCooldown > 0) TravelURL += FString::Printf(TEXT("?BossSkillCooldown=%.1f"), BossSkillCooldown);
+
+	UE_LOG(LogTemp, Warning, TEXT("[Host] ServerTravel URL: %s"), *TravelURL);
+
 	World->ServerTravel(TravelURL);
 }
 
@@ -107,6 +119,8 @@ void UMultiGameInstance::Join(const FString& Address, ECharacterType CharacterTy
 
 void UMultiGameInstance::LoadMainMenu()
 {
+	if (IsRunningDedicatedServer()) return;
+
 	APlayerController* PlayerController = GetFirstLocalPlayerController();
 	if (!ensure(PlayerController != nullptr)) return;
 

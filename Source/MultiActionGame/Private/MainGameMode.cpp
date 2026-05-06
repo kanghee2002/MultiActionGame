@@ -5,7 +5,6 @@
 
 #include "GameFramework/GameStateBase.h"
 #include "MainPlayerController.h"
-#include "MultiGameInstance.h"
 #include "Character/TestCharacter1.h"
 #include "AIController.h"
 
@@ -17,6 +16,29 @@ AMainGameMode::AMainGameMode()
 	HeroDeathCount = 0;
 }
 
+void AMainGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	Super::InitGame(MapName, Options, ErrorMessage);
+
+	bBossAI = UGameplayStatics::HasOption(Options, TEXT("BossAI"));
+
+	auto ReadFloat = [&](const TCHAR* Key, float& Out)
+	{
+		if (UGameplayStatics::HasOption(Options, Key))
+		{
+			Out = FCString::Atof(*UGameplayStatics::ParseOption(Options, Key));
+		}
+	};
+	ReadFloat(TEXT("BossHealth"),        BossHealth);
+	ReadFloat(TEXT("BossAttackDamage"),  BossAttackDamage);
+	ReadFloat(TEXT("BossAttackCost"),    BossAttackCost);
+	ReadFloat(TEXT("BossSkillCooldown"), BossSkillCooldown);
+
+	UE_LOG(LogTemp, Warning,
+		TEXT("[GameMode] Match init: BossAI=%d Health=%.1f AttackDmg=%.1f AttackCost=%.1f SkillCD=%.1f"),
+		bBossAI ? 1 : 0, BossHealth, BossAttackDamage, BossAttackCost, BossSkillCooldown);
+}
+
 bool AMainGameMode::IsBossType(ECharacterType CharacterType) const
 {
 	return CharacterType == ECharacterType::Boss;
@@ -26,9 +48,7 @@ void AMainGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UMultiGameInstance* multiGameInstance = GetGameInstance<UMultiGameInstance>();
-
-	if (multiGameInstance->GetIsBossAI())
+	if (bBossAI)
 	{
 		ABaseCharacter* boss = GetWorld()->SpawnActor<ABaseCharacter>(BossCharacter);
 

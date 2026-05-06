@@ -28,6 +28,23 @@ protected:
 
 	bool IsBossType(ECharacterType CharacterType) const;
 
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Match")
+	bool bBossAI = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Match")
+	float BossHealth = -1.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Match")
+	float BossAttackDamage = -1.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Match")
+	float BossAttackCost = -1.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Match")
+	float BossSkillCooldown = -1.0f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Characters")
 	TSubclassOf<ACharacter> KnightCharacter;
 
@@ -63,6 +80,18 @@ public:
 	{
 		return HeroCharacters;
 	}
+
+	UFUNCTION(BlueprintPure, Category = "Match")
+	float GetBossHealthSetting() const { return BossHealth; }
+
+	UFUNCTION(BlueprintPure, Category = "Match")
+	float GetBossAttackDamageSetting() const { return BossAttackDamage; }
+
+	UFUNCTION(BlueprintPure, Category = "Match")
+	float GetBossAttackCostSetting() const { return BossAttackCost; }
+
+	UFUNCTION(BlueprintPure, Category = "Match")
+	float GetBossSkillCooldownSetting() const { return BossSkillCooldown; }
 
 	void AddAIBoss(ABaseCharacter* boss);
 

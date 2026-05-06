@@ -20,7 +20,7 @@ void ABossAIController::SetNextPattern()
 	SetTarget();
 
 	SetAction(ECharacterAction::None);
-	
+
 	TArray<ECharacterAction> patterns;
 	patterns.Init(ECharacterAction::None, 0);
 
@@ -33,16 +33,19 @@ void ABossAIController::SetNextPattern()
 		AddPattern(patterns, ECharacterAction::Skill, 2);
 	}
 
-	float distance = FVector::Dist(GetPawn()->GetActorLocation(), CurrentTarget->GetActorLocation());
-
-	if (distance >= 1000.0f)
+	if (CurrentTarget)
 	{
-		AddPattern(patterns, ECharacterAction::Jump, 1);
-	}
+		float distance = FVector::Dist(GetPawn()->GetActorLocation(), CurrentTarget->GetActorLocation());
 
-	if (distance >= 1500.0f)
-	{
-		AddPattern(patterns, ECharacterAction::Jump, 3);
+		if (distance >= 1000.0f)
+		{
+			AddPattern(patterns, ECharacterAction::Jump, 1);
+		}
+
+		if (distance >= 1500.0f)
+		{
+			AddPattern(patterns, ECharacterAction::Jump, 3);
+		}
 	}
 
 	ECharacterAction action = ECharacterAction::LightAttack;
