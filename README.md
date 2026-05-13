@@ -5,6 +5,7 @@
 - Unreal Engine 5, C++, Blueprint
 - **루키상** (2025 **UNICON**)
 - Dedicated Server, RPC / Replication, Network Emulation, Behavior Tree, Blackboard, AIController
+- **플레이 영상**: https://youtu.be/B_vU_-hq0HA
 
 > 보스 1명 vs 영웅 3명의 비대칭 PvP 액션 게임
 
