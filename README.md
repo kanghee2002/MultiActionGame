@@ -98,9 +98,5 @@
 - 개별 캐릭터의 RPC 내부 함수를 **Blueprint Implementable Event**로 노출
 - **StatData (Data Asset)** 기반 수치 관리 — 코드 수정 없이 밸런스 조정
 
-## 의미
-### 멀티플레이 네트워크 구조 이해 및 적용
-Unreal Engine 5 기반 Listen / Dedicated Server 환경에서 RPC와 Replication을 직접 적용하며, 클라이언트–서버 구조와 클라이언트 간 상태 동기화 흐름을 구현했습니다. 서버 권한 기반 구조에서 데이터가 어떤 경로로 전파되고 각 클라이언트에 반영되는지에 대해 이해할 수 있었습니다.
-
 ### 서버/클라이언트 권한 분리 리팩토링 및 엔진 기능 활용
 권한에 종속된 캐릭터 구조를 리팩토링하여 실행 주체에 따라 책임이 명확히 분리되도록 개선했습니다. 또한 Network Emulation으로 고지연·패킷 손실 환경을 재현해 회전 반응성 개선을 정량적으로 검증했고, Behavior Tree·Blackboard·AIController를 활용해 언리얼 엔진의 AI 시스템을 실제 프로젝트에 적용하는 경험을 쌓았습니다.
